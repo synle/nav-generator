@@ -1,0 +1,27 @@
+{
+  "name": "syle-github-io",
+  "version": "1.0.3",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "http-server": "^0.12.3"
+  },
+  "devDependencies": {
+    "less": "^2.7.1",
+    "prettier": "2.0.2"
+  },
+  "scripts": {
+    "build": "npm run build:css; npm run package",
+    "build:css": "lessc ./index.less ./index.css",
+    "format": "./node_modules/.bin/prettier --write index.html index.less",
+    "package": "echo \"no package task yet\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx http-server ."
+  },
+  "keywords": [
+    "Sy",
+    "Le"
+  ],
+  "author": "",
+  "license": "ISC"
+}
