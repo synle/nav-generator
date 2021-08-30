@@ -1,0 +1,24 @@
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #000;
+  }
+}
+
+load {
+  box-sizing: border-box;
+  border-top: 10px solid #58a6ff;
+  animation: 2s ease-out loadingBar;
+  display: block;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+}
+
+@keyframes loadingBar {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
