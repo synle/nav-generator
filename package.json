@@ -1,27 +1,23 @@
 {
   "name": "syle-github-io",
   "version": "1.0.3",
-  "description": "",
+  "private": true,
+  "description": "Sy's resume along with some mini apps",
   "main": "index.js",
-  "dependencies": {
-    "http-server": "^0.12.3"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "less": "^2.7.1",
-    "prettier": "2.0.2"
+    "less": "^4.1.1"
   },
   "scripts": {
-    "build": "npm run build:css; npm run package",
-    "build:css": "lessc ./index.less ./index.css",
-    "format": "./node_modules/.bin/prettier --write index.html index.less",
-    "package": "echo \"no package task yet\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx http-server ."
+    "build": "sh build.sh",
+    "format": "sh format.sh",
+    "test": "echo \"TBD\"",
+    "start": "npx http-server --cors ."
   },
   "keywords": [
     "Sy",
     "Le"
   ],
-  "author": "",
+  "author": "Sy Le",
   "license": "ISC"
 }
