@@ -251,22 +251,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   function _addScript(src) {
     return new Promise(async (resolve) => {
       const script = document.createElement('script');
-
-      try {
-        let scriptContent = _getLocalValue(src);
-        if (!scriptContent) {
-          scriptContent = await fetch(src).then((r) => r.text());
-          _setLocalValue(src, scriptContent);
-        }
-
-        script.innerText = scriptContent;
-        resolve();
-      } catch (err) {
-        // fall back using src
-        script.src = src;
-        script.onload = resolve;
-      }
-
+      script.src = src;
+      script.onload = resolve;
       document.head.appendChild(script);
     });
   }

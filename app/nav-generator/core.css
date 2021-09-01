@@ -6,12 +6,12 @@
 
 load {
   box-sizing: border-box;
-  border-top: 10px solid #58a6ff;
+  border-top: 5px solid #58a6ff;
   animation: 2s ease-out loadingBar;
   display: block;
   position: fixed;
   left: 0;
-  bottom: 0;
+  top: 0;
 }
 
 @keyframes loadingBar {

@@ -1,2 +1,9 @@
-echo '>> format'
-npx prettier --write index.html index.less **/**/**/*.js **/**/**/*.less **/**/**/*.css **/**/*.html package.json *.md
+echo '>> format formatting'
+npx prettier --write \
+  package.json \
+  *.md \
+  **/**/**/*.js \
+  **/**/**/*.less \
+  **/**/**/*.css \
+  **/**/**/*.html \
+&& echo '>> done formatting...'
