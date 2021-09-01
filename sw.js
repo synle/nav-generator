@@ -1,4 +1,4 @@
-const version = '7';
+const version = 13;
 const CACHE_NAME = `synle-github-io-caches`;
 
 function _shouldCacheThisUrl(url) {
@@ -34,6 +34,11 @@ const staticUrlsToCache = _formatUrl([
   '/fav/index.html',
   '/fav/manifest.json',
   '/app/nav-generator/core.css',
+  '/app/fix-link.html',
+  '/app/port-forwarding.html',
+  '/app/setup-bash-profile.html',
+  '/app/stock-calculator.html',
+  '/app/time-converter.html',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
   'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js',

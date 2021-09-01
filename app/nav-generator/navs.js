@@ -27,7 +27,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       document.body.insertAdjacentHTML(
         'beforeend',
         `
-        <div id='promptModal'>
+        <div id='promptModal' class='modal'>
           <div>${promptText}</div>
           <textarea id='promptInput' rows='3'></textarea>
         </div>
@@ -79,7 +79,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       document.body.insertAdjacentHTML(
         'beforeend',
         `
-        <div id='alertModal'>
+        <div id='alertModal' class='modal'>
           <div id='alertBody' tabindex='0'>${alertText}</div>
         </div>
       `,
@@ -166,7 +166,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(decodeURIComponent(base64URL.replace('data:text/html,', '')), 'text/html');
-      const schema = doc.querySelector('#schema').innerText.trim();
+      const schema = doc.querySelector('[type=schema]').innerText.trim();
       const childWindow = window.open('https://synle.github.io/app/nav-generator?loadNav');
 
       // post message to redirect the data url accordingly
@@ -191,7 +191,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     <meta charset='utf-8' />
     <title>Loading...</title>
   </head>
-  <c id='schema' hidden>${input}</c>
+  <js_script type='schema'>${input}</js_script>
   <js_script src='https://unpkg.com/@babel/standalone/babel.min.js'></js_script>
   <js_script src='https://synle.github.io/app/nav-generator/navs.js' type='text/babel' data-presets='react' data-type='module'></js_script>
 </html>
@@ -200,6 +200,30 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       .replace(/js_script/g, 'script');
 
     return 'data:text/html,' + encodeURIComponent(rawOutput);
+  }
+
+  function _dispatchEvent(target, evName, evExtra = {}) {
+    // trigger first tab selection
+    const evType = 'MouseEvents';
+    var evObj = document.createEvent(evType);
+    evObj.initEvent(evName, true, false);
+
+    for (const extraKey of Object.keys(evExtra)) {
+      evObj[extraKey] = evExtra[extraKey];
+    }
+
+    target.dispatchEvent(evObj);
+  }
+
+  function _dispatchCustomEvent(target, evName, evExtra = {}) {
+    // trigger first tab selection
+    var evObj = new Event(evName);
+
+    for (const extraKey of Object.keys(evExtra)) {
+      evObj[extraKey] = evExtra[extraKey];
+    }
+
+    target.dispatchEvent(evObj);
   }
 
   function _getUrlDownloadSchema(schema) {
@@ -243,9 +267,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function _onCopyToClipboard(text) {
-    const eventAppCopyTextToClipboard = new Event('AppCopyTextToClipboard');
-    eventAppCopyTextToClipboard.text = text;
-    document.dispatchEvent(eventAppCopyTextToClipboard);
+    _dispatchCustomEvent(document, 'AppCopyTextToClipboard', { text });
   }
 
   function _addScript(src) {
@@ -653,9 +675,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           const tabChildren = [...tabs.querySelectorAll('tab')];
 
           // trigger first tab selection
-          var evObj = document.createEvent('MouseEvents');
-          evObj.initEvent('click', true, false);
-          tabChildren[0].dispatchEvent(evObj);
+          _dispatchEvent(tabChildren[0], 'click');
         }
       }
     }, [doms, refContainer.current]);
@@ -666,23 +686,25 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     }
 
     return (
-      <>
-        <div id="fav" ref={refContainer}>
-          {doms}
-          <form id="searchForm" onSubmit={(e) => onSubmitNavigationSearch(e)}>
-            <SearchBox onSearch={onSearch} />
-          </form>
-          <datalist id="autocompleteSearches">
-            {autocompleteSearches.map((search) => (
-              <option key={search}>{search}</option>
-            ))}
-          </datalist>
-          <div className="commands">
-            <button onClick={onEdit}>Edit</button>
-            <button onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>Copy To Clipboard</button>
-          </div>
+      <div id="fav" ref={refContainer}>
+        {doms}
+        <form id="searchForm" onSubmit={(e) => onSubmitNavigationSearch(e)}>
+          <SearchBox onSearch={onSearch} />
+        </form>
+        <datalist id="autocompleteSearches">
+          {autocompleteSearches.map((search) => (
+            <option key={search}>{search}</option>
+          ))}
+        </datalist>
+        <div className="commands">
+          <button id="edit" onClick={onEdit}>
+            Edit
+          </button>
+          <button id="copyBookmarkToClipboard" onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+            Copy To Clipboard
+          </button>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -755,14 +777,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     // generate the view
     return (
       <div id="command">
-        <div>
-          <h1 className="title">Edit Navigation</h1>
-        </div>
+        <div className="title">Edit Navigation</div>
         <div className="commands">
-          <button type="button" onClick={() => onApply()}>
+          <button id="applyEdit" type="button" onClick={() => onApply()}>
             Apply
           </button>
-          <button type="button" onClick={() => onCancel()}>
+          <button id="cancelEdit" type="button" onClick={() => onCancel()}>
             Cancel
           </button>
           <div className="dropdown">
@@ -857,6 +877,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       // handling enter and spacebar on focusable div
       const { key } = e;
       const target = e.target;
+      const focusedElement = document.activeElement;
 
       if (key === 'Enter' || key === ' ') {
         if (
@@ -865,9 +886,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           target.tagName !== 'INPUT' &&
           target.tagName !== 'SELECT'
         ) {
-          var evObj = document.createEvent('MouseEvents');
-          evObj.initEvent('click', true, false);
-          target.dispatchEvent(evObj);
+          _dispatchEvent(target, 'click');
+
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -880,20 +900,41 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         try {
           document.querySelector('#alertModal #alertBody').onblur();
         } catch (err) {}
-      } else if (document.querySelector('#search') && document.querySelector('#search') !== document.activeElement) {
+      } else if (
+        document.querySelector('#search') &&
+        document.querySelector('#search') !== focusedElement &&
+        document.querySelectorAll('.modal').length === 0
+      ) {
         // special handling to focus on searchbox
         const searchBox = document.querySelector('#search');
-        if (searchBox) {
-          switch (key) {
-            case 'f':
-            case '?':
-            case '/':
-              if (!e.ctrlKey && !e.altKey && !e.metaKey) {
-                searchBox.focus();
-                e.preventDefault();
-              }
-              break;
-          }
+        switch (key) {
+          case 'f':
+          case '?':
+          case '/':
+            if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+              searchBox.focus();
+              e.preventDefault();
+            }
+            break;
+          case 'e':
+            _dispatchEvent(document.querySelector('#edit'), 'click');
+            e.preventDefault();
+            break;
+          case 'c':
+            _dispatchEvent(document.querySelector('#copyBookmarkToClipboard'), 'click');
+            e.preventDefault();
+            break;
+        }
+      } else if (
+        document.querySelector('#input') &&
+        document.querySelector('#input') !== focusedElement &&
+        document.querySelector('#output') !== focusedElement
+      ) {
+        switch (key) {
+          case 'Escape':
+            _dispatchEvent(document.querySelector('#cancelEdit'), 'click');
+            e.preventDefault();
+            break;
         }
       }
     },
@@ -931,12 +972,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         // middle click on button to trigger click
         const target = e.target;
         if (target.tagName === 'BUTTON') {
+          _dispatchEvent(target, 'click');
           e.preventDefault();
-
-          // trigger first tab selection
-          var evObj = document.createEvent('MouseEvents');
-          evObj.initEvent('click', true, false);
-          target.dispatchEvent(evObj);
         }
       }
     },
@@ -988,23 +1025,23 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     viewMode = 'edit';
 
     _render(); // rerender the dom
-  } else if (document.querySelector('#schema')) {
+  } else if (document.querySelector('[type=schema]')) {
     // use the schema script instead here...
     try {
-      inputSchema = document.querySelector('#schema').innerText.trim();
+      inputSchema = document.querySelector('[type=schema]').innerText.trim();
     } catch (err) {}
 
     _render(); // rerender the dom
   } else {
     // else if no schema script or anything other way then we need
     // to listen to the app
-    const eventAppFullyLoaded = new Event('AppFullyLoaded');
-    eventAppFullyLoaded.renderSchema = (newSchema) => {
-      inputSchema = newSchema;
+    _dispatchCustomEvent(document, 'AppFullyLoaded', {
+      renderSchema: (newSchema) => {
+        inputSchema = newSchema;
 
-      _render(); // rerender the dom
-    };
-    document.dispatchEvent(eventAppFullyLoaded);
+        _render(); // rerender the dom
+      },
+    });
   }
 
   function _render() {
