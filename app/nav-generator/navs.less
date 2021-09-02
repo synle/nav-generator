@@ -29,6 +29,12 @@ html {
   --maxBodyWidth: 900px;
 }
 
+// BEGIN Color
+
+:root {
+  .dark-theme();
+}
+
 .light-theme {
   --colorBgMain: #fff;
   --colorBgSecondary: #f2f2f2;
@@ -51,10 +57,6 @@ html {
   --colorShadow: #333;
 }
 
-:root {
-  .dark-theme();
-}
-
 @media (prefers-color-scheme: light) {
   :root {
     .light-theme();
@@ -66,6 +68,8 @@ html {
     .dark-theme();
   }
 }
+
+// END Color
 
 *,
 ::placeholder {
@@ -91,6 +95,7 @@ body {
   font-family: var(--fontFamilyMain);
   font-weight: var(--fontWeightLight);
   overflow-y: auto !important;
+  font-size: var(--fontSize1);
 }
 
 form,
@@ -105,6 +110,10 @@ h6 {
   padding: 0;
 }
 
+h1, .h1{
+  font-size: var(--fontSize2);
+}
+
 button,
 a {
   transition: all 0.15s ease-out;
@@ -117,7 +126,6 @@ a {
   text-decoration: none;
   user-select: none;
   padding: var(--spaceSize2);
-  font-size: var(--fontSize1);
   outline: none;
   background: var(--colorBgMain);
 
@@ -157,7 +165,7 @@ textarea {
   }
 
   .title {
-    font-size: var(--fontSize2);
+    .h1();
     padding: var(--spaceSize2);
     text-transform: uppercase;
     text-align: center;
@@ -167,7 +175,6 @@ textarea {
   }
 
   .header {
-    font-size: var(--fontSize1);
     text-transform: uppercase;
     background: var(--colorBgSecondary);
     border-left: var(--borderSize4) solid var(--colorBorderMain);
@@ -249,7 +256,6 @@ textarea {
         user-select: none;
         cursor: pointer;
         text-transform: uppercase;
-        font-size: var(--fontSize1);
         transition: border 0.2s ease-out;
 
         &:hover,
@@ -274,7 +280,6 @@ textarea {
         border: var(--borderSize1) solid var(--colorBorderSecondary);
         padding: var(--spaceSize1) var(--spaceSize2);
         width: 100%;
-        font-size: var(--fontSize1);
       }
     }
   }
@@ -289,7 +294,6 @@ textarea {
     #input,
     #output {
       height: 80px;
-      font-size: var(--fontSize1);
       background: var(--colorBgMain);
       border: var(--borderSize1) solid var(--colorBorderSecondary);
       padding: var(--spaceSize1) var(--spaceSize2);
@@ -400,7 +404,7 @@ textarea {
 @media only screen and (max-width: 500px) {
   html {
     --fontSize1: 16px;
-    --fontSize1: 16px;
+    --fontSize2: 16px;
 
     --gridGapHeight: 0.2rem;
     --gridGapWidth: 0.25rem;
