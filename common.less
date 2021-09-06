@@ -1,0 +1,95 @@
+// BEGIN Color
+
+:root {
+  .dark-theme();
+}
+
+.light-theme {
+  --colorBgMain: #fff;
+  --colorBgSecondary: #f2f2f2;
+  --colorBgHover: #f2f2f2;
+  --colorTextMain: #000;
+  --colorTextLink: #005594;
+  --colorBorderMain: #58a6ff;
+  --colorBorderSecondary: #c9d1d9;
+  --colorShadow: #aaa;
+}
+
+.dark-theme {
+  --colorBgMain: #0d1117;
+  --colorBgSecondary: #161b22;
+  --colorBgHover: #102138;
+  --colorTextMain: #c9d1d9;
+  --colorTextLink: #58a6ff;
+  --colorBorderMain: #58a6ff;
+  --colorBorderSecondary: #30363d;
+  --colorShadow: #333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    .dark-theme();
+  }
+}
+
+@media print, (prefers-color-scheme: light) {
+  :root {
+    .light-theme();
+  }
+}
+
+:root {
+  --colorWhite: #fff;
+  --colorBlack: #000;
+  --colorBlacklight: #333;
+}
+
+// END Color
+
+:root {
+  --fontFamilyMain: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji;
+  --fontFamilySecondary: Helvetica, Tahoma, Geneva, sans-serif;
+  --fontFamilyMonospace: monospace;
+
+  --fontWeightBold: 800;
+  --fontWeightSemiBold: 500;
+  --fontWeightLight: 300;
+
+  --fontSize1: 1.5rem;
+  --fontSize2: 1.2rem;
+  --fontSize3: 1.1rem;
+  --fontSize4: 1rem;
+
+  --spaceSizeAuto: auto;
+  --spaceSize0: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+form,
+pre,
+p,
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+.h1,
+h1 {
+  font-size: var(--fontSize1);
+}
+
+.h2,
+h2 {
+  font-size: var(--fontSize2);
+}
+
+.h3,
+h3 {
+  font-size: var(--fontSize3);
+}

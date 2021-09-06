@@ -1,4 +1,4 @@
-const version = 15;
+const version = 18;
 const CACHE_NAME = `synle-github-io-caches`;
 
 function _shouldCacheThisUrl(url) {
@@ -32,6 +32,8 @@ function _formatUrl(urlList) {
 
 const staticUrlsToCache = _formatUrl([
   '/index.css',
+  '/common.less',
+  '/fav/',
   '/fav/index.html',
   '/fav/manifest.json',
   '/app/nav-generator/core.css',
@@ -48,7 +50,6 @@ const staticUrlsToCache = _formatUrl([
 ]);
 
 const dynamicUrlsToCache = _formatUrl([
-  '/',
   '/fav/index.js',
   'https://raw.githubusercontent.com/synle/bashrc/master/software/metadata/ip-address.config',
 ]);
@@ -83,7 +84,8 @@ self.addEventListener('activate', (event) => {
       )
       .catch((err) => {
         console.log('New sw is now ready to handle fetches!', err);
-      }),
+      })
+      .finally(() => clients.claim()), // https://stackoverflow.com/questions/39567642/service-worker-fetch-event-on-first-load
   );
 });
 

@@ -700,7 +700,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           <button id="edit" onClick={onEdit}>
             Edit
           </button>
-          <button id="copyBookmarkToClipboard" onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+          <button
+            className="copyBookmarkToClipboard"
+            onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
             Copy To Clipboard
           </button>
         </div>
@@ -791,6 +793,11 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               <a target="_blank" href="/app/nav-generator?newNav">
                 New
               </a>
+              <button
+                className="copyBookmarkToClipboard"
+                onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+                Copy To Clipboard
+              </button>
               <a target="_blank" href="https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.js">
                 JS Code
               </a>
@@ -863,6 +870,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     'beforeend',
     `
       <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+      <meta name="format-detection" content="telephone=no" />
       <meta http-equiv="Cache-Control" content="no-cache" />
       <meta http-equiv="Pragma" content="no-cache" />
       <meta http-equiv="page-enter" content="revealtrans(duration=seconds,transition=num)" />
@@ -921,15 +929,11 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             e.preventDefault();
             break;
           case 'c':
-            _dispatchEvent(document.querySelector('#copyBookmarkToClipboard'), 'click');
+            _dispatchEvent(document.querySelectorAll('.copyBookmarkToClipboard')[0], 'click');
             e.preventDefault();
             break;
         }
-      } else if (
-        document.querySelector('#input') &&
-        document.querySelector('#input') !== focusedElement &&
-        document.querySelector('#output') !== focusedElement
-      ) {
+      } else if (document.querySelector('#input')) {
         switch (key) {
           case 'Escape':
             _dispatchEvent(document.querySelector('#cancelEdit'), 'click');
