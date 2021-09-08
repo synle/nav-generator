@@ -231,18 +231,14 @@ textarea {
     min-height: 100%;
     height: 100%;
 
-    #input,
-    #output {
-      height: 80px;
+    #input {
       background: var(--colorBgMain);
       border: var(--borderSize1) solid var(--colorBorderSecondary);
       padding: var(--spaceSize1) var(--spaceSize2);
       width: 100%;
       font-family: var(--fontFamilyMonospace);
-
-      &#input {
-        white-space: nowrap;
-      }
+      flex-grow: 1;
+      white-space: nowrap;
     }
   }
 }

@@ -747,11 +747,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setHasPendingChanges(true);
     };
 
-    const onZoomInput = (target) => {
-      [...document.querySelectorAll('#input,#output')].forEach((elem) => (elem.style.flexGrow = ''));
-      target.style.flexGrow = '1';
-    };
-
     // effects
     useEffect(() => {
       // store it into cache
@@ -824,16 +819,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           spellcheck="false"
           autoFocus
           value={bufferSchema}
-          onFocus={(e) => onZoomInput(e.target)}
           onInput={(e) => onSetBufferSchema(e.target.value)}
           onDoubleClick={() => _onCopyToClipboard(bufferSchema)}></textarea>
-        <textarea
-          id="output"
-          wrap="soft"
-          spellcheck="false"
-          value={bookmark}
-          onFocus={(e) => onZoomInput(e.target)}
-          onDoubleClick={() => _onCopyToClipboard(bookmark)}></textarea>
       </div>
     );
   }
