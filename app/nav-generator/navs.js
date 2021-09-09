@@ -784,7 +784,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             Cancel
           </button>
           <div className='dropdown'>
-            <a className='dropdown-trigger'>Actions</a>
+            <a className='dropdown-trigger' tabIndex='0'>
+              Actions
+            </a>
             <div className='dropdown-content'>
               <a target='_blank' href='/app/nav-generator?newNav'>
                 New
