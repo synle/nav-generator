@@ -295,12 +295,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
     return (
       <input
-        id="search"
-        list="autocompleteSearches"
+        id='search'
+        list='autocompleteSearches'
         onInput={(e) => onSearch(e.target.value)}
-        placeholder="🔍 Search for bookmark"
-        autocomplete="off"
-        spellcheck="false"
+        placeholder='🔍 Search for bookmark'
+        autocomplete='off'
+        spellcheck='false'
         autoFocus
         required
       />
@@ -396,7 +396,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             newDoms.push(
               <pre
                 key={newCacheId}
-                className="block codeBlock"
+                className='block codeBlock'
                 id={_upsertBlockId(blockId)}
                 onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>
                 {blockBuffer.trim()}
@@ -412,7 +412,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             newDoms.push(
               <div
                 key={newCacheId}
-                className="block htmlBlock"
+                className='block htmlBlock'
                 id={_upsertBlockId(blockId)}
                 dangerouslySetInnerHTML={{ __html: blockBuffer }}></div>,
             );
@@ -435,7 +435,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           const headerText = link.replace(TITLE_SPLIT, '').trim();
           pageTitle = headerText;
           newDoms.push(
-            <div key={newCacheId} className="title">
+            <div key={newCacheId} className='title'>
               {headerText}
             </div>,
           );
@@ -443,7 +443,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           // section header
           const headerText = link.replace(HEADER_SPLIT, '').trim();
           newDoms.push(
-            <div key={newCacheId} className="header">
+            <div key={newCacheId} className='header'>
               {headerText}
             </div>,
           );
@@ -477,7 +477,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               const [tabName, tabId] = t.split(TAB_TITLE_SPLIT);
               if (tabName && tabId) {
                 tabContent.push(
-                  <tab className="tab" tabIndex="0" data-tab-id={_upsertBlockId(tabId)}>
+                  <tab className='tab' tabIndex='0' data-tab-id={_upsertBlockId(tabId)}>
                     {tabName.trim()}
                   </tab>,
                 );
@@ -485,7 +485,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             });
 
           newDoms.push(
-            <tabs key={newCacheId} className="tabs">
+            <tabs key={newCacheId} className='tabs'>
               {tabContent}
             </tabs>,
           );
@@ -541,8 +541,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               newDoms.push(
                 <button
                   key={newCacheId}
-                  className="link jsLink"
-                  type="button"
+                  className='link jsLink'
+                  type='button'
                   onClick={() => eval(schemaCacheMap[newCacheId])}
                   data-section={currentHeaderName}>
                   {linkText}
@@ -554,8 +554,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               newDoms.push(
                 <button
                   key={newCacheId}
-                  className="link dataLink"
-                  type="button"
+                  className='link dataLink'
+                  type='button'
                   onClick={() => _navigateToDataUrl(schemaCacheMap[newCacheId])}
                   data-section={currentHeaderName}>
                   {linkText}
@@ -567,7 +567,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               newDoms.push(
                 <a
                   key={newCacheId}
-                  className="link sameTabLink"
+                  className='link sameTabLink'
                   href={schemaCacheMap[newCacheId]}
                   data-section={currentHeaderName}>
                   {linkText}
@@ -579,8 +579,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               newDoms.push(
                 <a
                   key={newCacheId}
-                  className="link newTabLink"
-                  target="_blank"
+                  className='link newTabLink'
+                  target='_blank'
                   href={schemaCacheMap[newCacheId]}
                   data-section={currentHeaderName}>
                   {linkText}
@@ -686,22 +686,22 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     }
 
     return (
-      <div id="fav" ref={refContainer}>
+      <div id='fav' ref={refContainer}>
         {doms}
-        <form id="searchForm" onSubmit={(e) => onSubmitNavigationSearch(e)}>
+        <form id='searchForm' onSubmit={(e) => onSubmitNavigationSearch(e)}>
           <SearchBox onSearch={onSearch} />
         </form>
-        <datalist id="autocompleteSearches">
+        <datalist id='autocompleteSearches'>
           {autocompleteSearches.map((search) => (
             <option key={search}>{search}</option>
           ))}
         </datalist>
-        <div className="commands">
-          <button id="edit" onClick={onEdit}>
+        <div className='commands'>
+          <button id='edit' onClick={onEdit}>
             Edit
           </button>
           <button
-            className="copyBookmarkToClipboard"
+            className='copyBookmarkToClipboard'
             onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
             Copy To Clipboard
           </button>
@@ -752,6 +752,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       // store it into cache
       _persistBufferSchema(schema);
 
+      // hook up the tab and shift tab to do modification
       return () => {
         window.onbeforeunload = undefined;
       };
@@ -773,35 +774,36 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
     // generate the view
     return (
-      <div id="command">
-        <div className="title">Edit Navigation</div>
-        <div className="commands">
-          <button id="applyEdit" type="button" onClick={() => onApply()}>
+      <div id='command'>
+        <div className='title'>Edit Navigation</div>
+        <div className='commands'>
+          <button id='applyEdit' type='button' onClick={() => onApply()}>
             Apply
           </button>
-          <button id="cancelEdit" type="button" onClick={() => onCancel()}>
+          <button id='cancelEdit' type='button' onClick={() => onCancel()}>
             Cancel
           </button>
-          <div className="dropdown">
-            <a className="dropdown-trigger">Actions</a>
-            <div className="dropdown-content">
-              <a target="_blank" href="/app/nav-generator?newNav">
+          <div className='dropdown'>
+            <a className='dropdown-trigger'>Actions</a>
+            <div className='dropdown-content'>
+              <a target='_blank' href='/app/nav-generator?newNav'>
                 New
               </a>
               <button
-                className="copyBookmarkToClipboard"
+                className='copyBookmarkToClipboard'
                 onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
-                Copy To Clipboard
+                Copy Bookmark
               </button>
-              <a target="_blank" href="https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.js">
+              <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
+              <a target='_blank' href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.js'>
                 JS Code
               </a>
               <a
-                target="_blank"
-                href="https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.less">
+                target='_blank'
+                href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.less'>
                 CSS Code
               </a>
-              <button type="button" onClick={onTest}>
+              <button type='button' onClick={onTest}>
                 Test
               </button>
               <a href={urlDownloadSchema} download={`schema.${new Date().getTime()}.txt`}>
@@ -813,16 +815,159 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             </div>
           </div>
         </div>
-        <textarea
-          id="input"
-          wrap="soft"
-          spellcheck="false"
+        <SchemaEditor
+          id='input'
+          wrap='soft'
+          spellcheck='false'
           autoFocus
           value={bufferSchema}
           onInput={(e) => onSetBufferSchema(e.target.value)}
-          onDoubleClick={() => _onCopyToClipboard(bufferSchema)}></textarea>
+          onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>
       </div>
     );
+  }
+
+  function SchemaEditor(props) {
+    const onInputKeyDown = (e) => {
+      const TAB_INDENT = '  ';
+      switch (e.key) {
+        case 'Tab':
+          e.preventDefault();
+          if (e.shiftKey === true) {
+            _deleteIndentAtCursor(e.target, TAB_INDENT.length);
+          } else {
+            _insertIndentAtCursor(e.target, TAB_INDENT);
+          }
+          break;
+        case 'Enter':
+          // attempted to persist the last row indentation
+          e.preventDefault();
+          _persistTabIndent(e.target);
+          break;
+        case 'Pause':
+          e.preventDefault();
+          _trimTrailingWhitespaces(e.target);
+          break;
+      }
+
+      function _insertIndentAtCursor(myField, myValue) {
+        let startPos = myField.selectionStart;
+        let endPos = myField.selectionEnd;
+
+        if (startPos === endPos) {
+          // single line indentation
+          myField.value = myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
+          myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
+        } else {
+          // multiple line indentation
+          let lineStart = 0,
+            lineEnd = 0;
+          try {
+            lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
+          } catch (err) {}
+
+          try {
+            lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
+          } catch (err) {}
+
+          // calculate where we should put the cursor
+          const [res, newStartPos, newEndPos] = _iterateOverRows(
+            myField.value.split('\n'),
+            lineStart,
+            lineEnd,
+            (row) => myValue + row,
+          );
+          myField.value = res;
+          myField.setSelectionRange(newStartPos, newEndPos);
+        }
+      }
+
+      function _deleteIndentAtCursor(myField, length) {
+        let startPos = myField.selectionStart;
+        let endPos = myField.selectionEnd;
+
+        if (startPos === endPos) {
+          myField.value = myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
+          myField.setSelectionRange(startPos - length, endPos - length);
+        } else {
+          let lineStart = 0,
+            lineEnd = 0;
+          try {
+            lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
+          } catch (err) {}
+
+          try {
+            lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
+          } catch (err) {}
+
+          const [res, newStartPos, newEndPos] = _iterateOverRows(
+            myField.value.split('\n'),
+            lineStart,
+            lineEnd,
+            (row) => {
+              for (let i = 0; i < row.length; i++) {
+                if (row[i] !== ' ' || i === length) {
+                  return row.substr(i);
+                }
+              }
+              return row;
+            },
+          );
+
+          myField.value = res;
+          myField.setSelectionRange(newStartPos, newEndPos);
+        }
+      }
+
+      function _persistTabIndent(myField) {
+        try {
+          const rows = myField.value.substr(0, myField.selectionStart).split('\n');
+          const lastRow = rows[rows.length - 1];
+          const lastRowIndent = lastRow.match(/^[ ]+/)[0];
+
+          _insertIndentAtCursor(e.target, '\n' + lastRowIndent);
+        } catch (err) {
+          _insertIndentAtCursor(e.target, '\n');
+        }
+      }
+
+      function _trimTrailingWhitespaces(myField) {
+        const rows = myField.value.split('\n').map((r) => r.trimEnd());
+        myField.value = rows.join('\n');
+        myField.setSelectionRange(0, 0);
+      }
+
+      function _iterateOverRows(rows, lineStart, lineEnd, func) {
+        let newStartPos;
+        let newEndPos;
+        let curCharCount = 0;
+
+        const res = [];
+        for (let i = 0; i < rows.length; i++) {
+          let row = rows[i];
+
+          if (i >= lineStart && i <= lineEnd) {
+            row = func(row);
+          }
+
+          if (i === lineStart) {
+            newStartPos = curCharCount;
+          }
+
+          if (i === lineEnd) {
+            newEndPos = curCharCount + row.length;
+          }
+
+          curCharCount += row.length + 1;
+
+          res.push(row);
+        }
+
+        return [res.join('\n'), newStartPos, newEndPos];
+      }
+    };
+
+    return <textarea onKeyDown={(e) => onInputKeyDown(e)} {...props}></textarea>;
   }
 
   function NavCreateContainer(props) {
@@ -887,14 +1032,27 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           e.stopPropagation();
           return;
         }
-      } else if (key === 'Escape' && document.querySelector('#promptModal')) {
-        try {
-          document.querySelector('#promptModal #promptInput').onblur();
-        } catch (err) {}
-      } else if (key === 'Escape' && document.querySelector('#alertModal #alertBody')) {
-        try {
-          document.querySelector('#alertModal #alertBody').onblur();
-        } catch (err) {}
+      } else if (key === 'Escape') {
+        if (document.querySelector('#input')) {
+          if (document.querySelector('#input') === document.activeElement) {
+            document.querySelector('#input').blur();
+          }
+        }
+        if (document.querySelector('#search')) {
+          if (document.querySelector('#search') === document.activeElement) {
+            document.querySelector('#search').blur();
+          }
+        }
+        if (document.querySelector('#promptModal')) {
+          try {
+            document.querySelector('#promptModal #promptInput').onblur();
+          } catch (err) {}
+        }
+        if (document.querySelector('#alertModal #alertBody')) {
+          try {
+            document.querySelector('#alertModal #alertBody').onblur();
+          } catch (err) {}
+        }
       } else if (
         document.querySelector('#search') &&
         document.querySelector('#search') !== focusedElement &&
@@ -917,13 +1075,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             break;
           case 'c':
             _dispatchEvent(document.querySelectorAll('.copyBookmarkToClipboard')[0], 'click');
-            e.preventDefault();
-            break;
-        }
-      } else if (document.querySelector('#input')) {
-        switch (key) {
-          case 'Escape':
-            _dispatchEvent(document.querySelector('#cancelEdit'), 'click');
             e.preventDefault();
             break;
         }
