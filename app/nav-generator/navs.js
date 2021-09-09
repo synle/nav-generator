@@ -783,39 +783,37 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           <button id='cancelEdit' type='button' onClick={() => onCancel()}>
             Cancel
           </button>
-          <div className='dropdown'>
+          <DropdownButtons>
+            {/*dropdown trigger*/}
             <a className='dropdown-trigger' tabIndex='0'>
               Actions
             </a>
-            <div className='dropdown-content'>
-              <a target='_blank' href='/app/nav-generator?newNav'>
-                New
-              </a>
-              <button
-                className='copyBookmarkToClipboard'
-                onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
-                Copy Bookmark
-              </button>
-              <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
-              <a target='_blank' href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.js'>
-                JS Code
-              </a>
-              <a
-                target='_blank'
-                href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.less'>
-                CSS Code
-              </a>
-              <button type='button' onClick={onTest}>
-                Test
-              </button>
-              <a href={urlDownloadSchema} download={`schema.${new Date().getTime()}.txt`}>
-                Download Schema
-              </a>
-              <a href={bookmark} download={`bookmark.${new Date().getTime()}.html`}>
-                Download Bookmark
-              </a>
-            </div>
-          </div>
+            {/*dropdown buttons*/}
+            <a target='_blank' href='/app/nav-generator?newNav'>
+              New
+            </a>
+            <button
+              className='copyBookmarkToClipboard'
+              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+              Copy Bookmark
+            </button>
+            <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
+            <a target='_blank' href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.js'>
+              JS Code
+            </a>
+            <a target='_blank' href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.less'>
+              CSS Code
+            </a>
+            <button type='button' onClick={onTest}>
+              Test
+            </button>
+            <a href={urlDownloadSchema} download={`schema.${new Date().getTime()}.txt`}>
+              Download Schema
+            </a>
+            <a href={bookmark} download={`bookmark.${new Date().getTime()}.html`}>
+              Download Bookmark
+            </a>
+          </DropdownButtons>
         </div>
         <SchemaEditor
           id='input'
@@ -970,6 +968,16 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     };
 
     return <textarea onKeyDown={(e) => onInputKeyDown(e)} {...props}></textarea>;
+  }
+
+  function DropdownButtons(props) {
+    const [triggerButton, ...buttonsElems] = props.children;
+    return (
+      <div className='dropdown'>
+        {triggerButton}
+        <div className='dropdown-content'>{buttonsElems}</div>
+      </div>
+    );
   }
 
   function NavCreateContainer(props) {
