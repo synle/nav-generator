@@ -50,7 +50,7 @@ body {
 
 button,
 a {
-  transition: all 0.15s ease-out;
+  transition: all 0.5s ease-out;
   cursor: pointer;
   text-transform: uppercase;
   font-weight: var(--fontWeightSemiBold);
@@ -72,6 +72,10 @@ a {
 
   &:focus {
     background: var(--colorBgHover) !important;
+  }
+
+  &:active{
+    transform: translate(0, 5px);
   }
 }
 
@@ -253,7 +257,7 @@ textarea {
     width: 100%;
     background: var(--colorBgMain);
     z-index: 1;
-    transition: all 0.2s ease-out;
+    transition: all 0.5s ease-out;
 
     button,
     a {
@@ -274,6 +278,10 @@ textarea {
     .dropdown-content {
       display: block;
       animation: fadeInFromNone 0.2s ease-out;
+
+      &.pullUp {
+        bottom: 40px;
+      }
     }
   }
 }

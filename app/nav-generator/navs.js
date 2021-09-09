@@ -128,6 +128,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
   const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
+  const newNavUrl = '/app/nav-generator?newNav';
+
   let cacheId = parseInt(Date.now());
 
   const DEFAULT_SCHEMA_TO_RENDER = `
@@ -700,11 +702,22 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           <button id='edit' onClick={onEdit}>
             Edit
           </button>
-          <button
-            className='copyBookmarkToClipboard'
-            onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
-            Copy To Clipboard
-          </button>
+          <DropdownButtons type='pullUp'>
+            {/*dropdown trigger*/}
+            <a className='dropdown-trigger' tabIndex='0'>
+              Actions
+            </a>
+            {/*dropdown buttons*/}
+            <a target='_blank' href={newNavUrl}>
+              New Nav
+            </a>
+            <button
+              className='copyBookmarkToClipboard'
+              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+              Copy Bookmark
+            </button>
+            <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
+          </DropdownButtons>
         </div>
       </div>
     );
@@ -789,8 +802,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               Actions
             </a>
             {/*dropdown buttons*/}
-            <a target='_blank' href='/app/nav-generator?newNav'>
-              New
+            <a target='_blank' href={newNavUrl}>
+              New Nav
             </a>
             <button
               className='copyBookmarkToClipboard'
@@ -971,11 +984,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function DropdownButtons(props) {
+    const type = props.type;
     const [triggerButton, ...buttonsElems] = props.children;
     return (
       <div className='dropdown'>
         {triggerButton}
-        <div className='dropdown-content'>{buttonsElems}</div>
+        <div className={`dropdown-content ${type}`}>{buttonsElems}</div>
       </div>
     );
   }
