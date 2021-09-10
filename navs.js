@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from 'https://cdn.skypack.dev/react';
 import ReactDOM from 'https://cdn.skypack.dev/react-dom';
 
+const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
+
+const APP_BASE_URL = isRenderedInDataUrl
+  ? 'https://synle.github.io/nav-generator'
+  : location.href.substr(0, location.href.lastIndexOf('/')); // this is the base url
+const APP_INDEX_URL = `${APP_BASE_URL}/index.html`;
+const NEW_NAV_URL = `${APP_INDEX_URL}?newNav`;
+
 // custom events
 window.copyToClipboard = async (text) => {
   text = text || '';
@@ -126,10 +134,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   const TAB_TITLE_SPLIT = '|';
   const FAV_ICON_SPLIT = '@';
 
-  const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
-
-  const newNavUrl = '/app/nav-generator?newNav';
-
   let cacheId = parseInt(Date.now());
 
   const DEFAULT_SCHEMA_TO_RENDER = `
@@ -169,7 +173,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       const parser = new DOMParser();
       const doc = parser.parseFromString(decodeURIComponent(base64URL.replace('data:text/html,', '')), 'text/html');
       const schema = doc.querySelector('[type=schema]').innerText.trim();
-      const childWindow = window.open('https://synle.github.io/app/nav-generator?loadNav');
+      const childWindow = window.open(`${APP_INDEX_URL}?loadNav`);
 
       // post message to redirect the data url accordingly
       const intervalTryPostingMessage = setInterval(_doPostMessage, 100);
@@ -195,7 +199,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   </head>
   <js_script type='schema'>${input}</js_script>
   <js_script src='https://unpkg.com/@babel/standalone/babel.min.js'></js_script>
-  <js_script src='https://synle.github.io/app/nav-generator/navs.js' type='text/babel' data-presets='react' data-type='module'></js_script>
+  <js_script src='${APP_BASE_URL}/navs.js' type='text/babel' data-presets='react' data-type='module'></js_script>
 </html>
     `
       .trim()
@@ -708,7 +712,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               Actions
             </a>
             {/*dropdown buttons*/}
-            <a target='_blank' href={newNavUrl}>
+            <a target='_blank' href={NEW_NAV_URL}>
               New Nav
             </a>
             <button
@@ -802,7 +806,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               Actions
             </a>
             {/*dropdown buttons*/}
-            <a target='_blank' href={newNavUrl}>
+            <a target='_blank' href={NEW_NAV_URL}>
               New Nav
             </a>
             <button
@@ -1094,6 +1098,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             }
             break;
           case 'e':
+          case 'i':
             _dispatchEvent(document.querySelector('#edit'), 'click');
             e.preventDefault();
             break;
@@ -1148,9 +1153,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
   // add extra scripts if it's not there already
   await Promise.all([
-    _addStyle(
-      isRenderedInDataUrl ? 'https://synle.github.io/app/nav-generator/navs.less' : '/app/nav-generator/navs.less',
-    ),
+    _addStyle(isRenderedInDataUrl ? `${APP_BASE_URL}/navs.less` : 'navs.less'),
     _addScript('https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js'),
   ]);
 
@@ -1160,7 +1163,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
   document.innerHTML = `<div style="text-align: center; margin: 20px; font-size: 20px;">Loading...</div>`;
 
-  if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes('/app/nav-generator')) {
+  if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
     // if this flag is set, then continue
     // will proceed with loading from session storage
     _render(); // rerender the dom

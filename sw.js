@@ -1,5 +1,5 @@
-const version = 21;
-const CACHE_NAME = `synle-github-io-caches`;
+const version = 1;
+const CACHE_NAME = `synle-github-io-nav-generator`;
 
 function _shouldCacheThisUrl(url) {
   if (url.includes('cdn.skypack.dev') || url.includes('cloudflare.com') || url.includes('unpkg.com')) {
@@ -31,17 +31,10 @@ function _formatUrl(urlList) {
 }
 
 const staticUrlsToCache = _formatUrl([
-  '/index.css',
-  '/common.less',
-  '/fav/',
-  '/fav/index.html',
-  '/fav/manifest.json',
-  '/app/nav-generator/core.css',
-  '/app/fix-link.html',
-  '/app/port-forwarding.html',
-  '/app/setup-bash-profile.html',
-  '/app/stock-calculator.html',
-  '/app/time-converter.html',
+  '/index.html',
+  '/core.css',
+  '/navs.less',
+  '/navs.js',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
   'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js',
@@ -49,10 +42,7 @@ const staticUrlsToCache = _formatUrl([
   'https://cdn.skypack.dev/react-dom',
 ]);
 
-const dynamicUrlsToCache = _formatUrl([
-  '/fav/index.js',
-  'https://raw.githubusercontent.com/synle/bashrc/master/software/metadata/ip-address.config',
-]);
+const dynamicUrlsToCache = _formatUrl([]);
 
 const cacheKeys = [...staticUrlsToCache, ...dynamicUrlsToCache];
 
@@ -71,21 +61,22 @@ self.addEventListener('activate', (event) => {
   // delete any caches that aren't in cacheKeys
   console.log('sw.activate', version, event);
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys.map((key) => {
-            if (!cacheKeys.includes(key)) {
+    Promise.allSettled([
+      caches
+        .keys()
+        .then((keys) =>
+          Promise.all(
+            keys.map((key) => {
+              // now deletes all the caches
               return caches.delete(key);
-            }
-          }),
-        ),
-      )
-      .catch((err) => {
-        console.log('New sw is now ready to handle fetches!', err);
-      })
-      .finally(() => clients.claim()), // https://stackoverflow.com/questions/39567642/service-worker-fetch-event-on-first-load
+            }),
+          ),
+        )
+        .catch((err) => {
+          console.log('New sw is now ready to handle fetches!', err);
+        }),
+      clients.claim(), // https://stackoverflow.com/questions/39567642/service-worker-fetch-event-on-first-load
+    ]),
   );
 });
 
