@@ -1,6 +1,5 @@
 echo '>> format formatting'
 npx prettier --write \
-  package.json \
-  *.md \
+  *.{md,json} \
   **/**/**/**/*.{js,jsx,less} \
 && echo '>> done formatting...'

@@ -32,19 +32,21 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     clearTimeout(timeoutRemovePromptDiv);
 
     return new Promise((resolve) => {
+      promptInput = promptInput || '';
+
       document.body.insertAdjacentHTML(
         'beforeend',
         `
         <div id='promptModal' class='modal'>
-          <div>${promptText}</div>
-          <textarea id='promptInput' rows='3'></textarea>
+          <div class='modalBody'>${promptText}</div>
+          <textarea id='promptInput'></textarea>
         </div>
       `,
       );
 
-      setupPrompt();
+      _setupPrompt();
 
-      function setupPrompt() {
+      function _setupPrompt() {
         const rowCount = promptInput
           .trim()
           .split('\n')
@@ -57,7 +59,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         promtInputElem.value = promptInput;
         promtInputElem.focus();
         promtInputElem.setSelectionRange(0, promptInput.length);
-        promtInputElem.rows = Math.min(rowCount, 15);
+        promtInputElem.rows = Math.min(Math.max(rowCount, 5), 15);
         promtInputElem.onblur = _removePrompt;
 
         if (autoDismiss) {
@@ -87,8 +89,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     clearTimeout(timeoutRemoveAlertDiv);
 
     return new Promise((resolve, reject) => {
-      let confirmButtons = '';
-
       if (isConfirm) {
         document.body.insertAdjacentHTML(
           'beforeend',
@@ -105,22 +105,39 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       `,
         );
       } else {
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          `
+        if (manualDismiss !== false) {
+          document.body.insertAdjacentHTML(
+            'beforeend',
+            `
           <div id='alertModal' class='modal'>
-            <div class='modalBody' tabindex='0'>${alertText}</div>
-            ${confirmButtons}
+            <div class='modalBody'>
+              ${alertText}
+            </div>
           </div>
         `,
-        );
+          );
+        } else {
+          document.body.insertAdjacentHTML(
+            'beforeend',
+            `
+          <div id='alertModal' class='modal'>
+            <div class='modalBody'>
+              ${alertText}
+              <footer>
+                <button type='button' class='no'>OK</button>
+              </footer>
+            </div>
+          </div>
+        `,
+          );
+        }
       }
 
       const alertModalElem = document.querySelector('#alertModal,#confirmModal');
 
-      setupAlert();
+      _setupAlert();
 
-      function setupAlert() {
+      function _setupAlert() {
         if (isConfirm) {
           alertModalElem.querySelector('.yes').addEventListener('click', () => {
             resolve();
@@ -132,11 +149,15 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           });
           alertModalElem.querySelector('.yes').focus();
         } else {
-          alertModalElem.querySelector('.modalBody').focus();
-          alertModalElem.querySelector('.modalBody').onblur = _removeAlert;
-
           if (manualDismiss !== false) {
             timeoutRemoveAlertDiv = setTimeout(_removeAlert, 1300);
+          } else {
+            alertModalElem.querySelector('.no').addEventListener('click', () => {
+              resolve();
+              _removeAlert();
+            });
+
+            alertModalElem.querySelector('.no').focus();
           }
         }
       }
@@ -179,7 +200,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
     # Secondary Section
     sample alert js | javascript://alert('hello')
-    sample data url | data:text/html,%3Chtml%3E%0A%20%20%20%20%20%20%20%20%3Chead%3E%0A%20%20%20%20%20%20%20%20%20%20%3Clink%20rel%3D%22stylesheet%22%20type%3D%22text%2Fcss%22%20href%3D%22https%3A%2F%2Fsynle.github.io%2Flink%2Fassets%2Fnavs.css%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cmeta%20charset%3D'utf-8'%3E%0A%20%20%20%20%20%20%20%20%3C%2Fhead%3E%0A%20%20%20%20%20%20%20%20%3Cbody%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cscript%20src%3D%22https%3A%2F%2Fsynle.github.io%2Flink%2Fassets%2Fnavs.js%22%3E%3C%2Fscript%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cscript%20id%3D'schema'%20type%3D'schema'%3E!%20Data%20Test%20Navigation%0A%0A%23%20Main%20Section%0Agoogle%7Cgoogle.com%0A%3C%2Fscript%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cscript%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20window.onViewLinks(window.getLinkDom(document.querySelector('%23schema').innerText.trim()))%3B%0A%20%20%20%20%20%20%20%20%20%20%3C%2Fscript%3E%0A%20%20%20%20%20%20%20%20%3C%2Fbody%3E%0A%20%20%20%20%20%20%3C%2Fhtml%3E
+    sample data url | data:text/html,%3Chtml%3E%0A%20%20%3Chead%3E%0A%20%20%20%20%3Cmeta%20charset%3D'utf-8'%20%2F%3E%0A%20%20%20%20%3Ctitle%3ELoading...%3C%2Ftitle%3E%0A%20%20%20%20%3Clink%20rel%3D%22stylesheet%22%20href%3D%22http%3A%2F%2Flocalhost%3A8080%2Findex.css%22%20%2F%3E%0A%20%20%3C%2Fhead%3E%0A%20%20%3Cload%20%2F%3E%0A%20%20%3Cscript%20type%3D'schema'%3E!%20Data%20Test%20Navigation%0A%0A%23%20Main%20Section%0Agoogle%7Cgoogle.com%3C%2Fscript%3E%0A%20%20%3Cscript%20src%3D'https%3A%2F%2Funpkg.com%2F%40babel%2Fstandalone%2Fbabel.min.js'%3E%3C%2Fscript%3E%0A%20%20%3Cscript%20src%3D'http%3A%2F%2Flocalhost%3A8080%2Findex.jsx'%20type%3D'text%2Fbabel'%20data-presets%3D'react'%20data-type%3D'module'%3E%3C%2Fscript%3E%0A%3C%2Fhtml%3E
 
     # Notes
     \`\`\`
@@ -1121,9 +1142,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             document.querySelector('#alertModal .modalBody').onblur();
           } catch (err) {}
         }
-        if (document.querySelector('#confirmModal .no')) {
+        if (document.querySelector('.modalBody .no')) {
           try {
-            _dispatchEvent(document.querySelector('#confirmModal .no'), 'click');
+            _dispatchEvent(document.querySelector('.modalBody .no'), 'click');
           } catch (err) {}
         }
       } else if (
@@ -1226,7 +1247,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       }
     };
     window.addEventListener('message', _onHandlePostMessageEvent);
-  } else if (location.search.includes('newNav') || (!isRenderedInDataUrl && !location.href.includes('index.html'))) {
+  } else if (
+    location.search.includes('newNav') ||
+    (!isRenderedInDataUrl && !window.skipNewNav && !location.href.includes('index.html'))
+  ) {
     // render as edit mode for newNav
     window.history.replaceState('', '', APP_INDEX_URL);
     _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
