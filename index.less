@@ -163,6 +163,7 @@ a {
   font-size: 1rem;
   font-family: var(--fontFamilyMain);
   word-break: break-all;
+  border-radius: 5px;
 
   &:hover {
     background: var(--colorBgSecondary) !important;
@@ -183,7 +184,7 @@ textarea {
   font-weight: var(--fontWeightLight);
   background: var(--colorBgMain);
   outline: none;
-  font-size: var(--fontSize5);
+  font-size: var(--fontSize4);
   font-family: var(--fontFamilyMain);
 
   &:hover {
@@ -221,7 +222,7 @@ textarea {
     background: var(--colorBgSecondary);
     border-left: var(--borderSize4) solid var(--colorBorderMain);
     font-weight: var(--fontWeightBold);
-    box-shadow: 0 4px 4px -2px var(--colorShadow);
+    box-shadow: 0 2px 2px -1px var(--colorShadow), 0 4px 4px -2px var(--colorShadow);
   }
 
   .title,
@@ -349,6 +350,17 @@ textarea {
   position: relative;
   display: inline-block;
 
+  button,
+  a {
+    text-align: center;
+    width: 100%;
+
+    &:active,
+    &:active {
+      transform: translate(5px, 0);
+    }
+  }
+
   .dropdown-content {
     display: none;
     position: absolute;
@@ -356,12 +368,6 @@ textarea {
     background: var(--colorBgMain);
     z-index: 1;
     transition: all 0.5s ease-out;
-
-    button,
-    a {
-      text-align: center;
-      width: 100%;
-    }
   }
 
   .dropdown .dropdown-trigger {
@@ -378,7 +384,7 @@ textarea {
       animation: fadeInFromNone 0.2s ease-out;
 
       &.pullUp {
-        bottom: 40px;
+        bottom: 48px;
       }
     }
   }
@@ -416,6 +422,11 @@ load {
     padding: var(--spaceSize3);
   }
 
+  > textarea {
+    max-width: var(--maxBodyWidth);
+    width: 100%;
+  }
+
   footer {
     display: flex;
     justify-content: flex-end;
@@ -430,9 +441,8 @@ load {
   .modalBody {
     font-weight: var(--fontWeightBold);
     background: var(--colorBgSecondary);
-    padding: var(--spaceSize4) var(--spaceSize3);
     text-align: center;
-    box-shadow: 0 4px 4px -2px var(--colorShadow);
+    box-shadow: 0 2px 2px -1px var(--colorShadow), 0 4px 4px -2px var(--colorShadow);
   }
 
   &#alertModal {
@@ -442,12 +452,6 @@ load {
   }
 
   &#promptModal {
-    > div {
-      font-weight: var(--fontWeightBold);
-      background: var(--colorBgSecondary);
-      text-align: center;
-    }
-
     > textarea#promptInput {
       max-height: 650px;
       font-family: var(--fontFamilyMonospace);
@@ -482,8 +486,8 @@ load {
     --gridColumnLayout: calc(100% - var(--gridGapWidth));
   }
 
-  a,
   button,
+  a,
   #fav .title,
   #fav .header,
   #fav .block,
