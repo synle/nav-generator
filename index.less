@@ -134,6 +134,10 @@ body {
 }
 
 body {
+  background: #000;
+}
+
+body {
   margin: auto !important;
   min-width: calc(100% - 30px);
   max-width: var(--maxBodyWidth);
@@ -380,6 +384,16 @@ textarea {
   }
 }
 
+load {
+  box-sizing: border-box;
+  border-top: 5px solid #58a6ff;
+  animation: 2s ease-out loadingBar;
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
 .modal {
   display: flex;
   flex-direction: column;
@@ -467,5 +481,32 @@ textarea {
   body {
     width: 800px;
     min-width: 800px;
+  }
+}
+
+/* animation */
+@keyframes loadingBar {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes fadeInFromNone {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+
+  1% {
+    display: block;
+    opacity: 0;
+  }
+
+  100% {
+    display: block;
+    opacity: 1;
   }
 }
