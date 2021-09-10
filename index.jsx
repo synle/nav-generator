@@ -196,10 +196,11 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   <head>
     <meta charset='utf-8' />
     <title>Loading...</title>
+    <link rel="stylesheet" href="${APP_BASE_URL}/index.css" />
   </head>
   <js_script type='schema'>${input}</js_script>
   <js_script src='https://unpkg.com/@babel/standalone/babel.min.js'></js_script>
-  <js_script src='${APP_BASE_URL}/navs.js' type='text/babel' data-presets='react' data-type='module'></js_script>
+  <js_script src='${APP_BASE_URL}/index.jsx' type='text/babel' data-presets='react' data-type='module'></js_script>
 </html>
     `
       .trim()
@@ -815,10 +816,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               Copy Bookmark
             </button>
             <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
-            <a target='_blank' href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.js'>
+            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.jsx'>
               JS Code
             </a>
-            <a target='_blank' href='https://github.com/synle/synle.github.io/blob/master/app/nav-generator/navs.less'>
+            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.less'>
               CSS Code
             </a>
             <button type='button' onClick={onTest}>
@@ -1153,8 +1154,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
   // add extra scripts if it's not there already
   await Promise.all([
-    _addStyle(isRenderedInDataUrl ? `${APP_BASE_URL}/navs.less` : 'navs.less'),
-    _addScript('https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js'),
+    // debug
+    // _addStyle(isRenderedInDataUrl ? `${APP_BASE_URL}/index.less` : 'index.less'),
+    // _addScript('https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js'),
   ]);
 
   // find and parse the schema from script
@@ -1163,13 +1165,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
   document.innerHTML = `<div style="text-align: center; margin: 20px; font-size: 20px;">Loading...</div>`;
 
-  if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
-    // if this flag is set, then continue
-    // will proceed with loading from session storage
-    _render(); // rerender the dom
-  } else if (location.search.includes('loadNav')) {
+  if (location.search.includes('loadNav')) {
     // will wait for postmessage to populate this
-    window.history.pushState('', '', '?');
+    window.history.pushState('', '', APP_INDEX_URL);
     _setSessionValue('loadNavFromSessionStorage', '1');
 
     const _onHandlePostMessageEvent = (event) => {
@@ -1186,13 +1184,17 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     window.addEventListener('message', _onHandlePostMessageEvent);
   } else if (location.search.includes('newNav')) {
     // render as edit mode for newNav
-    window.history.pushState('', '', '?');
+    window.history.pushState('', '', APP_INDEX_URL);
     _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
     _setSessionValue('loadNavFromSessionStorage', '1');
 
     inputSchema = DEFAULT_SCHEMA_TO_RENDER;
     viewMode = 'edit';
 
+    _render(); // rerender the dom
+  }else if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
+    // if this flag is set, then continue
+    // will proceed with loading from session storage
     _render(); // rerender the dom
   } else if (document.querySelector('[type=schema]')) {
     // use the schema script instead here...
