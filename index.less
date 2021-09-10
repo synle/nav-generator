@@ -60,7 +60,7 @@
   --fontSize2: 1.2rem;
   --fontSize3: 1.1rem;
   --fontSize4: 1rem;
-  --fontSize5: 0.8rem;
+  --fontSize5: 0.9rem;
 
   --spaceSizeAuto: auto;
   --spaceSize0: 0;
@@ -410,20 +410,35 @@ load {
   background: rgba(80, 80, 80, 0.6);
   color: var(--colorTextMain);
 
-  > * {
+  > div {
     max-width: var(--maxBodyWidth);
     width: 100%;
     padding: var(--spaceSize3);
   }
 
-  &#alertModal {
-    #alertBody {
-      font-weight: var(--fontWeightBold);
-      background: var(--colorBgSecondary);
-      padding: var(--spaceSize4) var(--spaceSize3);
-      text-align: center;
-      box-shadow: 0 4px 4px -2px var(--colorShadow);
+  footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--spaceSize4);
+
+    button {
+      margin-left: 40px;
+      min-width: 120px;
     }
+  }
+
+  .modalBody {
+    font-weight: var(--fontWeightBold);
+    background: var(--colorBgSecondary);
+    padding: var(--spaceSize4) var(--spaceSize3);
+    text-align: center;
+    box-shadow: 0 4px 4px -2px var(--colorShadow);
+  }
+
+  &#alertModal {
+  }
+
+  &#confirmModal {
   }
 
   &#promptModal {

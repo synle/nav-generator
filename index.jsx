@@ -80,29 +80,64 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     });
   };
 
-  window.alert = (alertText, manualDismiss) => {
+  window.alert = (alertText, manualDismiss) => _showAlertPopup(alertText, false, manualDismiss);
+  window.confirm = (alertText, manualDismiss) => _showAlertPopup(alertText, true, true);
+
+  function _showAlertPopup(alertText, isConfirm, manualDismiss) {
     clearTimeout(timeoutRemoveAlertDiv);
 
-    return new Promise((resolve) => {
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        `
-        <div id='alertModal' class='modal'>
-          <div id='alertBody' tabindex='0'>${alertText}</div>
+    return new Promise((resolve, reject) => {
+      let confirmButtons = '';
+
+      if (isConfirm) {
+        document.body.insertAdjacentHTML(
+          'beforeend',
+          `
+        <div id='confirmModal' class='modal'>
+          <div class='modalBody'>
+            ${alertText}
+            <footer>
+              <button type='button' class='yes'>Yes</button>
+              <button type='button' class='no'>No</button>
+            </footer>
+          </div>
         </div>
       `,
-      );
+        );
+      } else {
+        document.body.insertAdjacentHTML(
+          'beforeend',
+          `
+          <div id='alertModal' class='modal'>
+            <div class='modalBody' tabindex='0'>${alertText}</div>
+            ${confirmButtons}
+          </div>
+        `,
+        );
+      }
 
-      const alertModalElem = document.querySelector('#alertModal');
+      const alertModalElem = document.querySelector('#alertModal,#confirmModal');
 
       setupAlert();
 
       function setupAlert() {
-        alertModalElem.querySelector('#alertBody').focus();
-        alertModalElem.querySelector('#alertBody').onblur = _removeAlert;
+        if (isConfirm) {
+          alertModalElem.querySelector('.yes').addEventListener('click', () => {
+            resolve();
+            _removeAlert();
+          });
+          alertModalElem.querySelector('.no').addEventListener('click', () => {
+            reject();
+            _removeAlert();
+          });
+          alertModalElem.querySelector('.yes').focus();
+        } else {
+          alertModalElem.querySelector('.modalBody').focus();
+          alertModalElem.querySelector('.modalBody').onblur = _removeAlert;
 
-        if (manualDismiss !== false) {
-          timeoutRemoveAlertDiv = setTimeout(_removeAlert, 1300);
+          if (manualDismiss !== false) {
+            timeoutRemoveAlertDiv = setTimeout(_removeAlert, 1300);
+          }
         }
       }
 
@@ -119,7 +154,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         resolve();
       }
     });
-  };
+  }
 })();
 
 // component rendering code starts here
@@ -198,6 +233,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     <title>Loading...</title>
     <link rel="stylesheet" href="${APP_BASE_URL}/index.css" />
   </head>
+  <load />
   <js_script type='schema'>${input}</js_script>
   <js_script src='https://unpkg.com/@babel/standalone/babel.min.js'></js_script>
   <js_script src='${APP_BASE_URL}/index.jsx' type='text/babel' data-presets='react' data-type='module'></js_script>
@@ -745,9 +781,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       _persistBufferSchema(bufferSchema); // commit the changes
     };
 
-    const onCancel = () => {
+    const onCancel = async () => {
       if (hasPendingChanges) {
-        if (!confirm('Cancel?')) {
+        try {
+          await confirm('You have unsaved changes. Discard unsaved changes?');
+        } catch (err) {
+          // user cancel, then stop...
           return;
         }
       }
@@ -1077,9 +1116,14 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             document.querySelector('#promptModal #promptInput').onblur();
           } catch (err) {}
         }
-        if (document.querySelector('#alertModal #alertBody')) {
+        if (document.querySelector('#alertModal .modalBody')) {
           try {
-            document.querySelector('#alertModal #alertBody').onblur();
+            document.querySelector('#alertModal .modalBody').onblur();
+          } catch (err) {}
+        }
+        if (document.querySelector('#confirmModal .no')) {
+          try {
+            _dispatchEvent(document.querySelector('#confirmModal .no'), 'click');
           } catch (err) {}
         }
       } else if (
@@ -1182,9 +1226,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       }
     };
     window.addEventListener('message', _onHandlePostMessageEvent);
-  } else if (location.search.includes('newNav')) {
+  } else if (location.search.includes('newNav') || (!isRenderedInDataUrl && !location.href.includes('index.html'))) {
     // render as edit mode for newNav
-    window.history.pushState('', '', APP_INDEX_URL);
+    window.history.replaceState('', '', APP_INDEX_URL);
     _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
     _setSessionValue('loadNavFromSessionStorage', '1');
 
@@ -1192,7 +1236,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     viewMode = 'edit';
 
     _render(); // rerender the dom
-  }else if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
+  } else if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
     // if this flag is set, then continue
     // will proceed with loading from session storage
     _render(); // rerender the dom
