@@ -98,6 +98,14 @@ h2 {
 h3 {
   font-size: var(--fontSize3);
 }
+.h4,
+h4 {
+  font-size: var(--fontSize4);
+}
+.h5,
+h5 {
+  font-size: var(--fontSize5);
+}
 :root {
   --borderSize1: 2px;
   --borderSize2: 4px;

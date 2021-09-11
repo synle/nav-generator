@@ -1295,7 +1295,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     });
   }
 
-          function _render() {
-            ReactDOM.render(<App schema={inputSchema} viewMode={viewMode} />, document.body);
-          }
+  function _render() {
+    ReactDOM.render(<App schema={inputSchema} viewMode={viewMode} />, document.body);
+  }
 })();
