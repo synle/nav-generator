@@ -7,14 +7,14 @@
   <body>
     <load />
   </body>
-  <script>
-    // hooking up service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw-nav.js', {
-        scope: '.',
-      });
-    }
-  </script>
-  <script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="index.jsx" type="text/babel" data-presets="react" data-type="module"></script>
+    <script>
+      // hooking up service worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw-nav.js', {
+          scope: '.',
+        });
+      }
+    </script>
+    <script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="index.jsx" type="text/babel" data-presets="react" data-type="module"></script>
 </html>
