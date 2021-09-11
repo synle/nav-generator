@@ -1073,6 +1073,18 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     const onSetViewMode = (newView) => setViewMode(newView);
     const onSetSchema = (newSchema) => setSchema(newSchema);
 
+    // effect
+    useEffect(() => {
+      switch (viewMode) {
+        case 'edit':
+          document.title = 'Edit Navigation';
+          break;
+        case 'create':
+          document.title = 'New Navigation';
+          break;
+      }
+    }, [viewMode]);
+
     // render the proper views
     const allProps = { schema, onSetSchema, onSetViewMode };
     switch (viewMode) {
