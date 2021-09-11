@@ -1049,12 +1049,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function DropdownButtons(props) {
-    const type = props.type;
+    const type = props.type || '';
     const [triggerButton, ...buttonsElems] = props.children;
     return (
       <div className='dropdown'>
         {triggerButton}
-        <div className={`dropdown-content ${type}`}>{buttonsElems}</div>
+        <div className={`dropdown-content ${type}`.trim()}>{buttonsElems}</div>
       </div>
     );
   }
@@ -1242,51 +1242,50 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
   document.innerHTML = `<div style="text-align: center; margin: 20px; font-size: 20px;">Loading...</div>`;
 
-  if (location.search.includes('loadNav')) {
-    // will wait for postmessage to populate this
-    window.history.pushState('', '', APP_INDEX_URL);
-    _setSessionValue('loadNavFromSessionStorage', '1');
+  if (!window.hasCustomNavBeforeLoad) {
+    if (location.search.includes('loadNav')) {
+      // will wait for postmessage to populate this
+      window.history.pushState('', '', APP_INDEX_URL);
+      _setSessionValue('loadNavFromSessionStorage', '1');
 
-    const _onHandlePostMessageEvent = (event) => {
-      const { type } = event.data;
-      const newSchema = event.data.schema;
-      if (type === 'onViewLinks') {
-        try {
-          _persistBufferSchema(newSchema);
-          inputSchema = newSchema;
-          _render(); // rerender the dom
-        } catch (err) {}
-      }
-    };
-    window.addEventListener('message', _onHandlePostMessageEvent);
-  } else if (
-    location.search.includes('newNav') ||
-    (!isRenderedInDataUrl && !window.skipNewNav && !location.href.includes('index.html'))
-  ) {
-    // render as edit mode for newNav
-    window.history.replaceState('', '', APP_INDEX_URL);
-    _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
-    _setSessionValue('loadNavFromSessionStorage', '1');
+      const _onHandlePostMessageEvent = (event) => {
+        const { type } = event.data;
+        const newSchema = event.data.schema;
+        if (type === 'onViewLinks') {
+          try {
+            _persistBufferSchema(newSchema);
+            inputSchema = newSchema;
+            _render(); // rerender the dom
+          } catch (err) {}
+        }
+      };
+      window.addEventListener('message', _onHandlePostMessageEvent);
+    } else if (location.search.includes('newNav') || (!isRenderedInDataUrl && !location.href.includes('index.html'))) {
+      // render as edit mode for newNav
+      window.history.replaceState('', '', APP_INDEX_URL);
+      _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
+      _setSessionValue('loadNavFromSessionStorage', '1');
 
-    inputSchema = DEFAULT_SCHEMA_TO_RENDER;
-    viewMode = 'edit';
+      inputSchema = DEFAULT_SCHEMA_TO_RENDER;
+      viewMode = 'edit';
 
-    _render(); // rerender the dom
-  } else if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
-    // if this flag is set, then continue
-    // will proceed with loading from session storage
-    _render(); // rerender the dom
-  } else if (document.querySelector('[type=schema]')) {
-    // use the schema script instead here...
-    try {
-      inputSchema = document.querySelector('[type=schema]').innerText.trim();
-    } catch (err) {}
+      _render(); // rerender the dom
+    } else if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
+      // if this flag is set, then continue
+      // will proceed with loading from session storage
+      _render(); // rerender the dom
+    } else if (document.querySelector('[type=schema]')) {
+      // use the schema script instead here...
+      try {
+        inputSchema = document.querySelector('[type=schema]').innerText.trim();
+      } catch (err) {}
 
-    _render(); // rerender the dom
+      _render(); // rerender the dom
+    }
   } else {
     // else if no schema script or anything other way then we need
     // to listen to the app
-    _dispatchCustomEvent(document, 'AppFullyLoaded', {
+    _dispatchCustomEvent(document, 'NavBeforeLoad', {
       renderSchema: (newSchema) => {
         inputSchema = newSchema;
 
