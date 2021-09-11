@@ -371,9 +371,11 @@ textarea:focus {
   display: none;
   position: absolute;
   width: 100%;
+  min-width: 225px;
   background: var(--colorBgMain);
   z-index: 1;
   transition: all 0.5s ease-out;
+  right: 0;
 }
 .dropdown .dropdown .dropdown-trigger {
   width: 100%;
@@ -388,7 +390,7 @@ textarea:focus {
 }
 .dropdown:hover .dropdown-content.pullUp,
 .dropdown:focus-within .dropdown-content.pullUp {
-  bottom: 48px;
+  bottom: 41px;
 }
 load {
   box-sizing: border-box;

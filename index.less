@@ -373,9 +373,11 @@ textarea {
     display: none;
     position: absolute;
     width: 100%;
+    min-width: 225px;
     background: var(--colorBgMain);
     z-index: 1;
     transition: all 0.5s ease-out;
+    right: 0;
   }
 
   .dropdown .dropdown-trigger {
@@ -392,7 +394,7 @@ textarea {
       animation: fadeInFromNone 0.2s ease-out;
 
       &.pullUp {
-        bottom: 48px;
+        bottom: 41px;
       }
     }
   }
