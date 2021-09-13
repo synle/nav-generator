@@ -767,18 +767,15 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           <DropdownButtons type='pullUp'>
             {/*dropdown trigger*/}
             <a className='dropdown-trigger' tabIndex='0'>
-              Actions
+              Copy
             </a>
             {/*dropdown buttons*/}
-            <a target='_blank' href={NEW_NAV_URL}>
-              New Nav
-            </a>
             <button
               className='copyBookmarkToClipboard'
               onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
-              Copy Bookmark
+              To Bookmark
             </button>
-            <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
+            <button onClick={() => _onCopyToClipboard(schema)}>To Schema</button>
           </DropdownButtons>
         </div>
       </div>
@@ -825,6 +822,44 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setHasPendingChanges(true);
     };
 
+    function onSortSchemaBySectionNameAndTitle(schema) {
+      const rows = schema.split('\n');
+      let sections = [];
+      let sectionIdx = 0;
+
+      for (const row of rows) {
+        if (row[0] === '#') {
+          sectionIdx++;
+        }
+        sections[sectionIdx] = sections[sectionIdx] || [];
+        sections[sectionIdx].push(row);
+      }
+
+      sections = sections.sort((a, b) => {
+        if (a[0][0] !== '#') {
+          // not a section
+          if (a[0][0] === b[0][0]) {
+            return 0;
+          }
+
+          return -1;
+        }
+
+        if (a[0].toLowerCase() === b[0].toLowerCase()) {
+          return 0;
+        }
+
+        if (a[0].toLowerCase() > b[0].toLowerCase()) {
+          return 1;
+        }
+
+        return -1;
+      });
+
+      const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
+      setBufferSchema(newBufferSchema);
+    }
+
     // effects
     useEffect(() => {
       // store it into cache
@@ -870,6 +905,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             <a target='_blank' href={NEW_NAV_URL}>
               New Nav
             </a>
+            <button onClick={() => onSortSchemaBySectionNameAndTitle(schema)}>Sort Schema</button>
             <button
               className='copyBookmarkToClipboard'
               onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
@@ -1170,6 +1206,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           case 'f':
           case '?':
           case '/':
+          case 't':
             if (!e.ctrlKey && !e.altKey && !e.metaKey) {
               searchBox.focus();
               e.preventDefault();
