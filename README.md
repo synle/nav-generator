@@ -150,7 +150,7 @@ sample blockId1
 
 ````
 
-#### Screenshots
+## Screenshots
 
 This is the generated view of the above schema
 ![image](https://user-images.githubusercontent.com/3792401/132922042-76a8b14d-270c-415c-8a0e-00d0f5f252f6.png)

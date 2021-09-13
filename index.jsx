@@ -3,7 +3,7 @@ import ReactDOM from 'https://cdn.skypack.dev/react-dom';
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
-const APP_BASE_URL = isRenderedInDataUrl
+const APP_BASE_URL = isRenderedInDataUrl || window.hasCustomNavBeforeLoad
   ? 'https://synle.github.io/nav-generator'
   : location.href.substr(0, location.href.lastIndexOf('/')); // this is the base url
 const APP_INDEX_URL = `${APP_BASE_URL}/index.html`;
@@ -766,19 +766,18 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           </button>
           <DropdownButtons type='pullUp'>
             {/*dropdown trigger*/}
-            <a className='dropdown-trigger' tabIndex='0'>
-              Actions
-            </a>
+            <button
+              className='dropdown-trigger'
+              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+              Copy
+            </button>
             {/*dropdown buttons*/}
-            <a target='_blank' href={NEW_NAV_URL}>
-              New Nav
-            </a>
             <button
               className='copyBookmarkToClipboard'
               onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
-              Copy Bookmark
+              To Bookmark
             </button>
-            <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
+            <button onClick={() => _onCopyToClipboard(schema)}>To Schema</button>
           </DropdownButtons>
         </div>
       </div>
@@ -825,6 +824,44 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setHasPendingChanges(true);
     };
 
+    function onSortSchemaBySectionNameAndTitle(schema) {
+      const rows = schema.split('\n');
+      let sections = [];
+      let sectionIdx = 0;
+
+      for (const row of rows) {
+        if (row[0] === '#') {
+          sectionIdx++;
+        }
+        sections[sectionIdx] = sections[sectionIdx] || [];
+        sections[sectionIdx].push(row);
+      }
+
+      sections = sections.sort((a, b) => {
+        if (a[0][0] !== '#') {
+          // not a section
+          if (a[0][0] === b[0][0]) {
+            return 0;
+          }
+
+          return -1;
+        }
+
+        if (a[0].toLowerCase() === b[0].toLowerCase()) {
+          return 0;
+        }
+
+        if (a[0].toLowerCase() > b[0].toLowerCase()) {
+          return 1;
+        }
+
+        return -1;
+      });
+
+      const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
+      setBufferSchema(newBufferSchema);
+    }
+
     // effects
     useEffect(() => {
       // store it into cache
@@ -870,12 +907,13 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             <a target='_blank' href={NEW_NAV_URL}>
               New Nav
             </a>
+            <button onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}>Sort Schema</button>
             <button
               className='copyBookmarkToClipboard'
-              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(bufferSchema))}>
               Copy Bookmark
             </button>
-            <button onClick={() => _onCopyToClipboard(schema)}>Copy Schema</button>
+            <button onClick={() => _onCopyToClipboard(bufferSchema)}>Copy Schema</button>
             <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.jsx'>
               JS Code
             </a>
@@ -1170,6 +1208,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           case 'f':
           case '?':
           case '/':
+          case 't':
             if (!e.ctrlKey && !e.altKey && !e.metaKey) {
               searchBox.focus();
               e.preventDefault();
