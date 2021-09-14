@@ -892,6 +892,25 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setBookmark(_getNavBookmarkletFromSchema(bufferSchema));
     }, [bufferSchema]);
 
+    const bufferSchemaHTML = bufferSchema.split('\n').map(s => {
+      s = s.replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+
+      if(!s){
+        return `<div style='height: 10px; width: 100%;'></div>`
+      }
+      if(s[0] === '!'){
+        return `<div style='color: red'>${s}</div>`;
+      }
+      if(s[0] === '#'){
+        return `<div style='color: blue'>${s}</div>`;
+      }
+      return `<div>${s}</div>`;
+    }).join('\n')
+
     // generate the view
     return (
       <div id='command'>
@@ -936,14 +955,17 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             </a>
           </DropdownButtons>
         </div>
-        <SchemaEditor
+        {/*<SchemaEditor
           id='input'
           wrap='soft'
           spellcheck='false'
           autoFocus
           value={bufferSchema}
           onInput={(e) => onSetBufferSchema(e.target.value)}
-          onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>
+          onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>*/}
+        <div contentEditable
+          dangerouslySetInnerHTML={{__html: bufferSchemaHTML}}
+          onBlur={(e) => onSetBufferSchema(e.target.innerText)}></div>
       </div>
     );
   }
