@@ -472,7 +472,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         // other processing for non block
         if (isInABlock) {
           if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
-            // end of a pre block
+            // end of a code block
             newDoms.push(
               <pre
                 key={newCacheId}
@@ -488,7 +488,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             currentHeaderName = ''; // reset the header name
             blockId = '';
           } else if (blockType === 'html' && link.trim() === HTML_BLOCK_SPLIT) {
-            // end of a pre block
+            // end of a html block
             newDoms.push(
               <div
                 key={newCacheId}
@@ -854,14 +854,14 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       }
 
       sections = sections
-            .filter((s) => !!s && s.length > 0)
-            .map((s) => {
-              if (s[s.length - 1] !== '') {
-                s.push('');
-              }
-              return s;
-            })
-            .sort(_schemaSectionNameOnlySorter);
+        .filter((s) => !!s && s.length > 0)
+        .map((s) => {
+          if (s[s.length - 1] !== '') {
+            s.push('');
+          }
+          return s;
+        })
+        .sort(_schemaSectionNameOnlySorter);
 
       const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
       setBufferSchema(newBufferSchema);
@@ -892,24 +892,83 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setBookmark(_getNavBookmarkletFromSchema(bufferSchema));
     }, [bufferSchema]);
 
-    const bufferSchemaHTML = bufferSchema.split('\n').map(s => {
-      s = s.replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
 
-      if(!s){
-        return `<div style='height: 10px; width: 100%;'></div>`
-      }
-      if(s[0] === '!'){
-        return `<div style='color: red'>${s}</div>`;
-      }
-      if(s[0] === '#'){
-        return `<div style='color: blue'>${s}</div>`;
-      }
-      return `<div>${s}</div>`;
-    }).join('\n')
+    let blockBuffer = '';
+    let isInABlock = false;
+    let blockType = ''; // code or html
+    let currentHeaderName = '';
+    let blockId = '';
+    let pageFavIcon = '📑';
+    let pageTitle;
+
+    const bufferSchemaHTML = bufferSchema
+      .split('\n')
+      .map((link) => {
+        link = _escapeHTML(link);
+
+        function _escapeHTML(s) {
+          return s
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        }
+        // other processing for non block
+        if (isInABlock) {
+          if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
+            // end of a code block
+            const res = `<pre style='font-size: 1rem; color: orange'>${CODE_BLOCK_SPLIT}\n${blockBuffer}\n${CODE_BLOCK_SPLIT}</pre>`;
+            isInABlock = false;
+            blockBuffer = '';
+            blockType = '';
+            currentHeaderName = ''; // reset the header name
+            blockId = '';
+
+            return res;
+          } else if (blockType === 'html' && link.trim() === HTML_BLOCK_SPLIT) {
+            // end of a html block
+            const res = `<div style='color: tomato'>${HTML_BLOCK_SPLIT}</div><div style='color: tomato'>${blockBuffer}</div><div style='color: tomato'>${HTML_BLOCK_SPLIT}</div>`;
+            isInABlock = false;
+            blockBuffer = '';
+            blockType = '';
+            currentHeaderName = ''; // reset the header name
+            blockId = '';
+
+            return res;
+          } else {
+            blockBuffer += link + '\n';
+          }
+          return null;
+        }
+
+        // other processing for non block
+        if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
+          pageFavIcon = link.replace(/^[@]+/, '').trim();
+          return `<div>${pageFavIcon}</div>`;
+        } else if (link.trim().indexOf(TITLE_SPLIT) === 0) {
+          // page title
+          return `<div style='color: red'>${link}</div>`;
+        } else if (link.trim().indexOf(HEADER_SPLIT) === 0) {
+          // section header
+          return `<div style='color: var(--colorTextLink)'>${link}</div>`;
+        } else if (link.trim().indexOf(CODE_BLOCK_SPLIT) === 0) {
+          // start a block
+          isInABlock = true;
+          blockType = 'code';
+        } else if (link.trim().indexOf(HTML_BLOCK_SPLIT) === 0) {
+          // start a block
+          isInABlock = true;
+          blockType = 'html';
+        } else if (link.trim().indexOf(TAB_SPLIT) === 0) {
+          return `<div style='color: yellow'>${link}</div>`;
+        } else if (link.trim().length > 0) {
+          return `<div style='color: grey'>${link}</div>`;
+        }
+        return `<div style='height: 1rem; width: 100%;'></div>`
+      })
+      .filter((s) => s !== null)
+      .join('\n');
 
     // generate the view
     return (
@@ -963,8 +1022,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           value={bufferSchema}
           onInput={(e) => onSetBufferSchema(e.target.value)}
           onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>*/}
-        <div contentEditable
-          dangerouslySetInnerHTML={{__html: bufferSchemaHTML}}
+        <div
+          style={{padding: '10px' }}
+          contentEditable
+          dangerouslySetInnerHTML={{ __html: bufferSchemaHTML }}
           onBlur={(e) => onSetBufferSchema(e.target.innerText)}></div>
       </div>
     );
