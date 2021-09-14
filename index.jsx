@@ -854,14 +854,14 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       }
 
       sections = sections
-            .filter((s) => !!s && s.length > 0)
-            .map((s) => {
-              if (s[s.length - 1] !== '') {
-                s.push('');
-              }
-              return s;
-            })
-            .sort(_schemaSectionNameOnlySorter);
+        .filter((s) => !!s && s.length > 0)
+        .map((s) => {
+          if (s[s.length - 1] !== '') {
+            s.push('');
+          }
+          return s;
+        })
+        .sort(_schemaSectionNameOnlySorter);
 
       const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
       setBufferSchema(newBufferSchema);
