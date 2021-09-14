@@ -3,9 +3,10 @@ import ReactDOM from 'https://cdn.skypack.dev/react-dom';
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
-const APP_BASE_URL = isRenderedInDataUrl || window.hasCustomNavBeforeLoad
-  ? 'https://synle.github.io/nav-generator'
-  : location.href.substr(0, location.href.lastIndexOf('/')); // this is the base url
+const APP_BASE_URL =
+  isRenderedInDataUrl || window.hasCustomNavBeforeLoad
+    ? 'https://synle.github.io/nav-generator'
+    : location.href.substr(0, location.href.lastIndexOf('/')); // this is the base url
 const APP_INDEX_URL = `${APP_BASE_URL}/index.html`;
 const NEW_NAV_URL = `${APP_INDEX_URL}?newNav`;
 
@@ -351,6 +352,21 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       document.head.appendChild(link);
       resolve();
     });
+  }
+
+  function _schemaSectionNameOnlySorter(a, b) {
+    const fa = a[0].toLowerCase();
+    const fb = b[0].toLowerCase();
+
+    if (fa > fb) {
+      return 1;
+    }
+
+    if (fa < fb) {
+      return -1;
+    }
+
+    return 0;
   }
 
   // react components
@@ -837,26 +853,15 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         sections[sectionIdx].push(row);
       }
 
-      sections = sections.sort((a, b) => {
-        if (a[0][0] !== '#') {
-          // not a section
-          if (a[0][0] === b[0][0]) {
-            return 0;
+      sections = sections
+        .filter((s) => !!s && s.length > 0)
+        .map((s) => {
+          if (s[s.length - 1] !== '') {
+            s.push('');
           }
-
-          return -1;
-        }
-
-        if (a[0].toLowerCase() === b[0].toLowerCase()) {
-          return 0;
-        }
-
-        if (a[0].toLowerCase() > b[0].toLowerCase()) {
-          return 1;
-        }
-
-        return -1;
-      });
+          return s;
+        })
+        .sort(_schemaSectionNameOnlySorter);
 
       const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
       setBufferSchema(newBufferSchema);
@@ -964,6 +969,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           e.preventDefault();
           _trimTrailingWhitespaces(e.target);
           break;
+        case 'F10':
+          e.preventDefault();
+          _sortSelectedLines(e.target);
+          break;
       }
 
       function _insertIndentAtCursor(myField, myValue) {
@@ -976,15 +985,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
         } else {
           // multiple line indentation
-          let lineStart = 0,
-            lineEnd = 0;
-          try {
-            lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
-          } catch (err) {}
-
-          try {
-            lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
-          } catch (err) {}
+          const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
 
           // calculate where we should put the cursor
           const [res, newStartPos, newEndPos] = _iterateOverRows(
@@ -1006,15 +1007,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           myField.value = myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
           myField.setSelectionRange(startPos - length, endPos - length);
         } else {
-          let lineStart = 0,
-            lineEnd = 0;
-          try {
-            lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
-          } catch (err) {}
-
-          try {
-            lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
-          } catch (err) {}
+          const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
 
           const [res, newStartPos, newEndPos] = _iterateOverRows(
             myField.value.split('\n'),
@@ -1053,10 +1046,62 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         myField.setSelectionRange(0, 0);
       }
 
+      function _sortSelectedLines(myField) {
+        let startPos = myField.selectionStart;
+        let endPos = myField.selectionEnd;
+        const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+
+        const [_res, newStartPos, newEndPos] = _iterateOverRows(myField.value.split('\n'), lineStart, lineEnd);
+
+        let res1 = myField.value.substr(0, newStartPos);
+        let res2 = myField.value.substr(newStartPos, newEndPos - newStartPos);
+        let res3 = myField.value.substr(newEndPos);
+
+        res2 = sortMiddlePart(res2);
+        function sortMiddlePart(schema) {
+          const rows = schema.split('\n');
+          let sections = [];
+          let sectionIdx = 0;
+
+          for (const row of rows) {
+            // TODO: there's a bug there that if section name is part of the
+            // code block or html block - this will not work
+            if (row[0] === HEADER_SPLIT) {
+              sectionIdx++;
+            }
+            sections[sectionIdx] = sections[sectionIdx] || [];
+            sections[sectionIdx].push(row);
+          }
+
+          sections = sections
+            .filter((s) => !!s && s.length > 0)
+            .map((s) => {
+              if (s[s.length - 1] !== '') {
+                s.push('');
+              }
+              return s;
+            })
+            .sort(_schemaSectionNameOnlySorter);
+
+          return sections.map((s) => s.join('\n')).join('\n');
+        }
+
+        const res = res1 + res2 + res3;
+
+        myField.value = res;
+        myField.setSelectionRange(newStartPos, newEndPos);
+      }
+
       function _iterateOverRows(rows, lineStart, lineEnd, func) {
         let newStartPos;
         let newEndPos;
         let curCharCount = 0;
+
+        func =
+          func ||
+          function (row) {
+            return row;
+          };
 
         const res = [];
         for (let i = 0; i < rows.length; i++) {
@@ -1080,6 +1125,20 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         }
 
         return [res.join('\n'), newStartPos, newEndPos];
+      }
+
+      function _getLineStartEnd(myField, startPos, endPos) {
+        let lineStart = 0,
+          lineEnd = 0;
+        try {
+          lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
+        } catch (err) {}
+
+        try {
+          lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
+        } catch (err) {}
+
+        return [lineStart, lineEnd];
       }
     };
 
