@@ -840,6 +840,28 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setHasPendingChanges(true);
     };
 
+    const onSetBufferSchema2 = (newBufferSchemaHTML) => {
+      newBufferSchemaHTML = newBufferSchemaHTML
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, `<`)
+        .replace(/&gt;/g, `>`)
+        .replace(/&quot;/g, `"`)
+        .replace(/&#039;/g, `'`);
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(newBufferSchemaHTML, 'text/html');
+
+      const newLines = [];
+
+      for (const child of doc.body.children) {
+        newLines.push(child.innerText);
+      }
+
+      const newBufferSchema = newLines.join('\n');
+      setBufferSchema(newBufferSchema);
+      setHasPendingChanges(true);
+    };
+
     function onSortSchemaBySectionNameAndTitle(schema) {
       const rows = schema.split('\n');
       let sections = [];
@@ -891,7 +913,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     useEffect(() => {
       setBookmark(_getNavBookmarkletFromSchema(bufferSchema));
     }, [bufferSchema]);
-
 
     let blockBuffer = '';
     let isInABlock = false;
@@ -966,7 +987,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         } else if (link.trim().length > 0) {
           return `<div style='color: grey'>${link}</div>`;
         }
-        return `<div style='height: 1rem; width: 100%;'></div>`
+        return `<div style='height: 1rem; width: 100%;'></div>`;
       })
       .filter((s) => s !== null)
       .join('\n');
@@ -1024,10 +1045,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           onInput={(e) => onSetBufferSchema(e.target.value)}
           onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>*/}
         <div
-          style={{padding: '10px' }}
+          style={{ padding: '10px' }}
           contentEditable
           dangerouslySetInnerHTML={{ __html: bufferSchemaHTML }}
-          onBlur={(e) => onSetBufferSchema(e.target.innerText)}></div>
+          onBlur={(e) => onSetBufferSchema2(e.target.innerHTML)}></div>
       </div>
     );
   }
