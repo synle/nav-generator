@@ -478,9 +478,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                 key={newCacheId}
                 className='block codeBlock'
                 id={_upsertBlockId(blockId)}
-                onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>
-                {blockBuffer.trim()}
-              </pre>,
+                onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>{blockBuffer.trim()}</pre>,
             );
             isInABlock = false;
             blockBuffer = '';
@@ -840,6 +838,35 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setHasPendingChanges(true);
     };
 
+    const onSetBufferSchema2 = (newBufferSchemaHTML) => {
+      newBufferSchemaHTML = newBufferSchemaHTML
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, `<`)
+        .replace(/&gt;/g, `>`)
+        .replace(/&quot;/g, `"`)
+        .replace(/&#039;/g, `'`);
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(newBufferSchemaHTML, 'text/html');
+
+      const newLines = [];
+      for (const child of doc.body.children) {
+        const text = child.innerHTML
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, `<`)
+        .replace(/&gt;/g, `>`)
+        .replace(/&quot;/g, `"`)
+        .replace(/&#039;/g, `'`)
+          .replace(/<br[ ]*[/]*>/g, '\n')
+
+        newLines.push(text);
+      }
+
+      const newBufferSchema = newLines.join('\n').replace(/[\n][\n][\n]+/, '\n\n');
+      setBufferSchema(newBufferSchema);
+      setHasPendingChanges(true);
+    };
+
     function onSortSchemaBySectionNameAndTitle(schema) {
       const rows = schema.split('\n');
       let sections = [];
@@ -892,7 +919,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setBookmark(_getNavBookmarkletFromSchema(bufferSchema));
     }, [bufferSchema]);
 
-
     let blockBuffer = '';
     let isInABlock = false;
     let blockType = ''; // code or html
@@ -903,7 +929,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
     const bufferSchemaHTML = bufferSchema
       .split('\n')
-      .map((link) => {
+      .map((link, idx) => {
         const originalLink = link;
         link = _escapeHTML(link);
 
@@ -919,7 +945,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         if (isInABlock) {
           if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
             // end of a code block
-            const res = `<pre style='font-size: 1rem; color: orange'>${CODE_BLOCK_SPLIT}\n${blockBuffer}\n${CODE_BLOCK_SPLIT}</pre>`;
+            const res = `<pre style='font-size: 1rem; color: orange'>${CODE_BLOCK_SPLIT}${blockId}\n${blockBuffer.trim()}\n${CODE_BLOCK_SPLIT}</pre>`;
             isInABlock = false;
             blockBuffer = '';
             blockType = '';
@@ -929,7 +955,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             return res;
           } else if (blockType === 'html' && link.trim() === HTML_BLOCK_SPLIT) {
             // end of a html block
-            const res = `<div style='color: tomato'>${HTML_BLOCK_SPLIT}</div><div style='color: tomato'>${blockBuffer}</div><div style='color: tomato'>${HTML_BLOCK_SPLIT}</div>`;
+            const res = `<div style='color: tomato'>${HTML_BLOCK_SPLIT}${blockId}</div><div style='color: tomato'>${blockBuffer.trim()}</div><div style='color: tomato'>${HTML_BLOCK_SPLIT}</div>`;
             isInABlock = false;
             blockBuffer = '';
             blockType = '';
@@ -949,24 +975,30 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           return `<div>${pageFavIcon}</div>`;
         } else if (link.trim().indexOf(TITLE_SPLIT) === 0) {
           // page title
-          return `<div style='color: red'>${link}</div>`;
+          return `<div style='color: red'>${link.trim()}</div>`;
         } else if (link.trim().indexOf(HEADER_SPLIT) === 0) {
           // section header
-          return `<div style='color: var(--colorTextLink)'>${link}</div>`;
+          return `<div style='color: var(--colorTextLink)'>${link.trim()}</div>`;
         } else if (link.trim().indexOf(CODE_BLOCK_SPLIT) === 0) {
           // start a block
           isInABlock = true;
           blockType = 'code';
+          if (link.length > HTML_BLOCK_SPLIT.length) {
+            blockId = link.substr(blockId.indexOf(HTML_BLOCK_SPLIT) + CODE_BLOCK_SPLIT.length + 1);
+          }
         } else if (link.trim().indexOf(HTML_BLOCK_SPLIT) === 0) {
           // start a block
           isInABlock = true;
           blockType = 'html';
+          if (link.length > HTML_BLOCK_SPLIT.length) {
+            blockId = link.substr(blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1);
+          }
         } else if (originalLink.trim().indexOf(TAB_SPLIT) === 0) {
-          return `<div style='color: green'>${link}</div>`;
+          return `<div style='color: green'>${link.trim()}</div>`;
         } else if (link.trim().length > 0) {
-          return `<div style='color: grey'>${link}</div>`;
+          return `<div style='color: grey'>${link.trim()}</div>`;
         }
-        return `<div style='height: 1rem; width: 100%;'></div>`
+        return `<p style='background: #333; width: 20px;'></p>`
       })
       .filter((s) => s !== null)
       .join('\n');
@@ -1024,10 +1056,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           onInput={(e) => onSetBufferSchema(e.target.value)}
           onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>*/}
         <div
-          style={{padding: '10px' }}
+          style={{ padding: '10px' }}
           contentEditable
           dangerouslySetInnerHTML={{ __html: bufferSchemaHTML }}
-          onBlur={(e) => onSetBufferSchema(e.target.innerText)}></div>
+          onBlur={(e) => onSetBufferSchema2(e.target.innerHTML)}></div>
       </div>
     );
   }
