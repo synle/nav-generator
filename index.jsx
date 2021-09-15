@@ -382,7 +382,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       lines.unshift(headerSchemaSampleCode);
     }
 
-    let blockBuffer = '';
+    let blockBuffer = [];
     let isInABlock = false;
     let blockType = ''; // code or html
     let currentHeaderName = '';
@@ -415,11 +415,11 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
-            value: blockBuffer.trim(),
+            value: blockBuffer.join('\n'),
             type: 'code_block',
           });
           isInABlock = false;
-          blockBuffer = '';
+          blockBuffer = [];
           blockType = '';
           currentHeaderName = ''; // reset the header name
           blockId = '';
@@ -428,16 +428,16 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
-            value: blockBuffer.trim(),
+            value: blockBuffer.join('\n'),
             type: 'html_block',
           });
           isInABlock = false;
-          blockBuffer = '';
+          blockBuffer = [];
           blockType = '';
           currentHeaderName = ''; // reset the header name
           blockId = '';
         } else {
-          blockBuffer += link + '\n';
+          blockBuffer.push(link);
         }
         return;
       }
@@ -594,9 +594,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
   function NavReadContainer(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
-    const [doms, setDoms] = useState('');
     const [searchText, setSearchText] = useState('');
-    const [autocompleteSearches, setAutocompleteSearches] = useState([]);
     const refContainer = useRef();
 
     // events
@@ -629,6 +627,259 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
       return false;
     };
+
+    // handling search
+    useEffect(() => {
+      if (refContainer && refContainer.current) {
+        const doc = refContainer.current;
+
+        if (searchText.length === 0) {
+          for (const elem of doc.querySelectorAll('.link')) {
+            elem.classList.remove('hidden');
+          }
+          return;
+        }
+
+        // remove all non alphanumeric
+        let exactMatchregex = new RegExp(searchText.replace(/"/g, ''), 'i');
+        let matchRegex = exactMatchregex;
+        if (searchText[0] === '/') {
+          // fuzzy match
+          const cleanedSearchText = searchText
+            .replace(/[\W_]+/gi, ' ')
+            .replace(/[ ][ ]+/, ' ')
+            .trim();
+
+          matchRegex = new RegExp('[ ]*' + cleanedSearchText.split('').join('[a-z0-9 -_]*'), 'i');
+        }
+
+        // show or hide
+        for (const elem of doc.querySelectorAll('.link')) {
+          let isHidden = true;
+
+          const link = (elem.href || '')
+            .replace(/http[s]/gi, '')
+            .replace(/www/gi, '')
+            .replace(/html/gi, '')
+            .replace(/index/gi, '')
+            .replace(/[/.]/gi, '');
+
+          const text = elem.innerText || '';
+
+          if (text.match(matchRegex)) {
+            isHidden = false;
+          } else if (elem.dataset.section && elem.dataset.section.match(exactMatchregex)) {
+            isHidden = false;
+          } else if (link.match(exactMatchregex)) {
+            isHidden = false;
+          }
+
+          elem.classList.toggle('hidden', isHidden);
+        }
+      }
+    }, [searchText, refContainer.current]);
+
+    return (
+      <div id='fav' ref={refContainer}>
+        <SchemaRender schema={schema} refContainer={refContainer} />
+        <form id='searchForm' onSubmit={(e) => onSubmitNavigationSearch(e)}>
+          <SearchBox onSearch={onSearch} />
+        </form>
+        <div className='commands'>
+          <button id='edit' onClick={onEdit}>
+            Edit
+          </button>
+          <DropdownButtons type='pullUp'>
+            {/*dropdown trigger*/}
+            <button
+              className='dropdown-trigger'
+              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+              Copy
+            </button>
+            {/*dropdown buttons*/}
+            <button
+              className='copyBookmarkToClipboard'
+              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+              To Bookmark
+            </button>
+            <button onClick={() => _onCopyToClipboard(schema)}>To Schema</button>
+          </DropdownButtons>
+          <a target='_blank' href={NEW_NAV_URL}>
+            New Nav
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  function NavEditContainer(props) {
+    const { schema, onSetViewMode, onSetSchema } = props;
+    const [bufferSchema, setBufferSchema] = useState(schema.trim());
+    const [hasPendingChanges, setHasPendingChanges] = useState(false);
+    const [bookmark, setBookmark] = useState('');
+
+    const urlDownloadSchema = _getUrlDownloadSchema(schema);
+
+    // events
+    const onApply = () => {
+      onSetSchema(bufferSchema); // update schema
+      onSetViewMode('read');
+
+      //update the cache in the session storage
+      _persistBufferSchema(bufferSchema); // commit the changes
+    };
+
+    const onCancel = async () => {
+      if (hasPendingChanges) {
+        try {
+          await confirm('You have unsaved changes. Discard unsaved changes?');
+        } catch (err) {
+          // user cancel, then stop...
+          return;
+        }
+      }
+
+      onSetViewMode('read');
+    };
+
+    const onTest = () => {
+      const base64URL = _getNavBookmarkletFromSchema(schema);
+      _navigateToDataUrl(base64URL, true);
+    };
+
+    const onSetBufferSchema = (newBufferSchema) => {
+      setBufferSchema(newBufferSchema);
+      setHasPendingChanges(true);
+    };
+
+    function onSortSchemaBySectionNameAndTitle(schema) {
+      const rows = schema.split('\n');
+      let sections = [];
+      let sectionIdx = 0;
+
+      for (const row of rows) {
+        if (row[0] === '#') {
+          sectionIdx++;
+        }
+        sections[sectionIdx] = sections[sectionIdx] || [];
+        sections[sectionIdx].push(row);
+      }
+
+      sections = sections
+        .filter((s) => !!s && s.length > 0)
+        .map((s) => {
+          if (s[s.length - 1] !== '') {
+            s.push('');
+          }
+          return s;
+        })
+        .sort(_schemaSectionNameOnlySorter);
+
+      const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
+      setBufferSchema(newBufferSchema);
+    }
+
+    // effects
+    useEffect(() => {
+      // store it into cache
+      _persistBufferSchema(schema);
+
+      // hook up the tab and shift tab to do modification
+      return () => {
+        window.onbeforeunload = undefined;
+      };
+    }, []);
+
+    // trigger the confirmation to save before unload
+    useEffect(() => {
+      if (hasPendingChanges) {
+        window.onbeforeunload = function (e) {
+          e.preventDefault();
+          return (e.returnValue = 'You have unsaved changes. Do you want to continue with exit?');
+        };
+      }
+    }, [hasPendingChanges]);
+
+    // update bookmarklet
+    useEffect(() => {
+      setBookmark(_getNavBookmarkletFromSchema(bufferSchema));
+    }, [bufferSchema]);
+
+    // generate the view
+    return (
+      <div id='command'>
+        <div className='title'>Edit Navigation</div>
+        <div className='commands'>
+          <button id='applyEdit' type='button' onClick={() => onApply()}>
+            Apply
+          </button>
+          <button id='cancelEdit' type='button' onClick={() => onCancel()}>
+            Cancel
+          </button>
+          <DropdownButtons>
+            {/*dropdown trigger*/}
+            <a className='dropdown-trigger' tabIndex='0'>
+              Actions
+            </a>
+            {/*dropdown buttons*/}
+            <a target='_blank' href={NEW_NAV_URL}>
+              New Nav
+            </a>
+            <button onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}>Sort Schema</button>
+            <button className='copyBookmarkToClipboard' onClick={() => _onCopyToClipboard(bookmark)}>
+              Copy Bookmark
+            </button>
+            <button onClick={() => _onCopyToClipboard(bufferSchema)}>Copy Schema</button>
+            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.jsx'>
+              JS Code
+            </a>
+            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.less'>
+              CSS Code
+            </a>
+            <button type='button' onClick={onTest}>
+              Test
+            </button>
+            <a href={urlDownloadSchema} download={`schema.${new Date().getTime()}.txt`}>
+              Download Schema
+            </a>
+            <a href={bookmark} download={`bookmark.${new Date().getTime()}.html`}>
+              Download Bookmark
+            </a>
+          </DropdownButtons>
+        </div>
+        <SchemaEditor
+          id='input'
+          wrap='soft'
+          spellcheck='false'
+          autoFocus
+          value={bufferSchema}
+          onInput={(e) => onSetBufferSchema(e.target.value)}
+          onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>
+      </div>
+    );
+  }
+
+  function SchemaRender(props) {
+    const { schema, refContainer } = props;
+
+    const [autocompleteSearches, setAutocompleteSearches] = useState([]);
+    const [doms, setDoms] = useState(null);
+
+    // handling tabs
+    useEffect(() => {
+      if (refContainer && refContainer.current) {
+        const doc = refContainer.current;
+
+        const tabsList = [...doc.querySelectorAll('tabs')];
+
+        for (const tabs of tabsList) {
+          const tabChildren = [...tabs.querySelectorAll('tab')];
+
+          // trigger first tab selection
+          _dispatchEvent(tabChildren[0], 'click');
+        }
+      }
+    }, [doms, refContainer.current]);
 
     // generate the view dom
     useEffect(() => {
@@ -759,258 +1010,15 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setAutocompleteSearches([...newAutocompleteSearches]);
     }, [schema]);
 
-    // handling search
-    useEffect(() => {
-      if (refContainer && refContainer.current) {
-        const doc = refContainer.current;
-
-        if (searchText.length === 0) {
-          for (const elem of doc.querySelectorAll('.link')) {
-            elem.classList.remove('hidden');
-          }
-          return;
-        }
-
-        // remove all non alphanumeric
-        let exactMatchregex = new RegExp(searchText.replace(/"/g, ''), 'i');
-        let matchRegex = exactMatchregex;
-        if (searchText[0] === '/') {
-          // fuzzy match
-          const cleanedSearchText = searchText
-            .replace(/[\W_]+/gi, ' ')
-            .replace(/[ ][ ]+/, ' ')
-            .trim();
-
-          matchRegex = new RegExp('[ ]*' + cleanedSearchText.split('').join('[a-z0-9 -_]*'), 'i');
-        }
-
-        // show or hide
-        for (const elem of doc.querySelectorAll('.link')) {
-          let isHidden = true;
-
-          const link = (elem.href || '')
-            .replace(/http[s]/gi, '')
-            .replace(/www/gi, '')
-            .replace(/html/gi, '')
-            .replace(/index/gi, '')
-            .replace(/[/.]/gi, '');
-
-          const text = elem.innerText || '';
-
-          if (text.match(matchRegex)) {
-            isHidden = false;
-          } else if (elem.dataset.section && elem.dataset.section.match(exactMatchregex)) {
-            isHidden = false;
-          } else if (link.match(exactMatchregex)) {
-            isHidden = false;
-          }
-
-          elem.classList.toggle('hidden', isHidden);
-        }
-      }
-    }, [doms, searchText, refContainer.current]);
-
-    // handling tabs
-    useEffect(() => {
-      if (refContainer && refContainer.current) {
-        const doc = refContainer.current;
-
-        const tabsList = [...doc.querySelectorAll('tabs')];
-
-        for (const tabs of tabsList) {
-          const tabChildren = [...tabs.querySelectorAll('tab')];
-
-          // trigger first tab selection
-          _dispatchEvent(tabChildren[0], 'click');
-        }
-      }
-    }, [doms, refContainer.current]);
-
-    // render the main view
-    if (!doms || doms.length === 0) {
-      return null;
-    }
-
     return (
-      <div id='fav' ref={refContainer}>
+      <>
         {doms}
-        <form id='searchForm' onSubmit={(e) => onSubmitNavigationSearch(e)}>
-          <SearchBox onSearch={onSearch} />
-        </form>
         <datalist id='autocompleteSearches'>
           {autocompleteSearches.map((search) => (
             <option key={search}>{search}</option>
           ))}
         </datalist>
-        <div className='commands'>
-          <button id='edit' onClick={onEdit}>
-            Edit
-          </button>
-          <DropdownButtons type='pullUp'>
-            {/*dropdown trigger*/}
-            <button
-              className='dropdown-trigger'
-              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
-              Copy
-            </button>
-            {/*dropdown buttons*/}
-            <button
-              className='copyBookmarkToClipboard'
-              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
-              To Bookmark
-            </button>
-            <button onClick={() => _onCopyToClipboard(schema)}>To Schema</button>
-          </DropdownButtons>
-        </div>
-      </div>
-    );
-  }
-
-  function NavEditContainer(props) {
-    const { schema, onSetViewMode, onSetSchema } = props;
-    const [bufferSchema, setBufferSchema] = useState(schema.trim());
-    const [hasPendingChanges, setHasPendingChanges] = useState(false);
-    const [bookmark, setBookmark] = useState('');
-
-    const urlDownloadSchema = _getUrlDownloadSchema(schema);
-
-    // events
-    const onApply = () => {
-      onSetSchema(bufferSchema); // update schema
-      onSetViewMode('read');
-
-      //update the cache in the session storage
-      _persistBufferSchema(bufferSchema); // commit the changes
-    };
-
-    const onCancel = async () => {
-      if (hasPendingChanges) {
-        try {
-          await confirm('You have unsaved changes. Discard unsaved changes?');
-        } catch (err) {
-          // user cancel, then stop...
-          return;
-        }
-      }
-
-      onSetViewMode('read');
-    };
-
-    const onTest = () => {
-      const base64URL = _getNavBookmarkletFromSchema(schema);
-      _navigateToDataUrl(base64URL, true);
-    };
-
-    const onSetBufferSchema = (newBufferSchema) => {
-      setBufferSchema(newBufferSchema);
-      setHasPendingChanges(true);
-    };
-
-    function onSortSchemaBySectionNameAndTitle(schema) {
-      const rows = schema.split('\n');
-      let sections = [];
-      let sectionIdx = 0;
-
-      for (const row of rows) {
-        if (row[0] === '#') {
-          sectionIdx++;
-        }
-        sections[sectionIdx] = sections[sectionIdx] || [];
-        sections[sectionIdx].push(row);
-      }
-
-      sections = sections
-        .filter((s) => !!s && s.length > 0)
-        .map((s) => {
-          if (s[s.length - 1] !== '') {
-            s.push('');
-          }
-          return s;
-        })
-        .sort(_schemaSectionNameOnlySorter);
-
-      const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
-      setBufferSchema(newBufferSchema);
-    }
-
-    // effects
-    useEffect(() => {
-      // store it into cache
-      _persistBufferSchema(schema);
-
-      // hook up the tab and shift tab to do modification
-      return () => {
-        window.onbeforeunload = undefined;
-      };
-    }, []);
-
-    // trigger the confirmation to save before unload
-    useEffect(() => {
-      if (hasPendingChanges) {
-        window.onbeforeunload = function (e) {
-          e.preventDefault();
-          return (e.returnValue = 'You have unsaved changes. Do you want to continue with exit?');
-        };
-      }
-    }, [hasPendingChanges]);
-
-    useEffect(() => {
-      setBookmark(_getNavBookmarkletFromSchema(bufferSchema));
-    }, [bufferSchema]);
-
-    // generate the view
-    return (
-      <div id='command'>
-        <div className='title'>Edit Navigation</div>
-        <div className='commands'>
-          <button id='applyEdit' type='button' onClick={() => onApply()}>
-            Apply
-          </button>
-          <button id='cancelEdit' type='button' onClick={() => onCancel()}>
-            Cancel
-          </button>
-          <DropdownButtons>
-            {/*dropdown trigger*/}
-            <a className='dropdown-trigger' tabIndex='0'>
-              Actions
-            </a>
-            {/*dropdown buttons*/}
-            <a target='_blank' href={NEW_NAV_URL}>
-              New Nav
-            </a>
-            <button onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}>Sort Schema</button>
-            <button
-              className='copyBookmarkToClipboard'
-              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(bufferSchema))}>
-              Copy Bookmark
-            </button>
-            <button onClick={() => _onCopyToClipboard(bufferSchema)}>Copy Schema</button>
-            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.jsx'>
-              JS Code
-            </a>
-            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.less'>
-              CSS Code
-            </a>
-            <button type='button' onClick={onTest}>
-              Test
-            </button>
-            <a href={urlDownloadSchema} download={`schema.${new Date().getTime()}.txt`}>
-              Download Schema
-            </a>
-            <a href={bookmark} download={`bookmark.${new Date().getTime()}.html`}>
-              Download Bookmark
-            </a>
-          </DropdownButtons>
-        </div>
-        <SchemaEditor
-          id='input'
-          wrap='soft'
-          spellcheck='false'
-          autoFocus
-          value={bufferSchema}
-          onInput={(e) => onSetBufferSchema(e.target.value)}
-          onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>
-      </div>
+      </>
     );
   }
 
@@ -1345,8 +1353,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             e.preventDefault();
             break;
           case 'c':
-            _dispatchEvent(document.querySelectorAll('.copyBookmarkToClipboard')[0], 'click');
-            e.preventDefault();
+            if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+              _dispatchEvent(document.querySelectorAll('.copyBookmarkToClipboard')[0], 'click');
+              e.preventDefault();
+            }
             break;
         }
       }
