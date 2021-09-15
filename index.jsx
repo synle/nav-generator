@@ -369,6 +369,211 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     return 0;
   }
 
+  function _getSerializedSchema(schema) {
+    // parse lines and generate views
+    const lines = schema
+      .trim()
+      .split('\n')
+      .filter((r) => r.indexOf('//') !== 0)
+      .map((r) => r.trimEnd());
+
+    if (lines[0][0] !== '!') {
+      const headerSchemaSampleCode = `${TITLE_SPLIT} Unnamed Navigation - ${new Date().toLocaleString()}`;
+      lines.unshift(headerSchemaSampleCode);
+    }
+
+    let blockBuffer = '';
+    let isInABlock = false;
+    let blockType = ''; // code or html
+    let currentHeaderName = '';
+    let blockId = '';
+    let pageFavIcon = '📑';
+
+    let blockIdMap = {};
+
+    const serializedSchema = [];
+
+    const _upsertBlockId = (blockId) => {
+      if (!blockId) {
+        return `block_${++cacheId}_generated`;
+      }
+
+      if (!blockIdMap[blockId]) {
+        blockIdMap[blockId] = `block_${++cacheId}_${blockId}`;
+      }
+
+      return blockIdMap[blockId];
+    };
+
+    lines.forEach((link) => {
+      const newCacheId = ++cacheId;
+
+      // other processing for non block
+      if (isInABlock) {
+        if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
+          // end of a code block
+          serializedSchema.push({
+            key: newCacheId,
+            id: _upsertBlockId(blockId),
+            value: blockBuffer.trim(),
+            type: 'code_block',
+          });
+          isInABlock = false;
+          blockBuffer = '';
+          blockType = '';
+          currentHeaderName = ''; // reset the header name
+          blockId = '';
+        } else if (blockType === 'html' && link.trim() === HTML_BLOCK_SPLIT) {
+          // end of a html block
+          serializedSchema.push({
+            key: newCacheId,
+            id: _upsertBlockId(blockId),
+            value: blockBuffer.trim(),
+            type: 'html_block',
+          });
+          isInABlock = false;
+          blockBuffer = '';
+          blockType = '';
+          currentHeaderName = ''; // reset the header name
+          blockId = '';
+        } else {
+          blockBuffer += link + '\n';
+        }
+        return;
+      }
+
+      // other processing for non block
+      if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
+        pageFavIcon = link.replace(/^[@]+/, '').trim();
+        serializedSchema.push({
+          key: newCacheId,
+          value: pageFavIcon,
+          type: 'favIcon',
+        });
+      } else if (link.trim().indexOf(TITLE_SPLIT) === 0) {
+        // page title
+        const headerText = link.replace(TITLE_SPLIT, '').trim();
+        serializedSchema.push({
+          key: newCacheId,
+          value: headerText,
+          type: 'title',
+        });
+      } else if (link.trim().indexOf(HEADER_SPLIT) === 0) {
+        // section header
+        const headerText = link.replace(HEADER_SPLIT, '').trim();
+        serializedSchema.push({
+          key: newCacheId,
+          value: headerText,
+          type: 'header',
+        });
+
+        currentHeaderName = headerText;
+      } else if (link.trim().indexOf(CODE_BLOCK_SPLIT) === 0) {
+        // start a block
+        isInABlock = true;
+        blockType = 'code';
+        if (link.length > CODE_BLOCK_SPLIT.length) {
+          blockId = link.substr(blockId.indexOf(CODE_BLOCK_SPLIT) + CODE_BLOCK_SPLIT.length + 1);
+          _upsertBlockId(blockId);
+        }
+      } else if (link.trim().indexOf(HTML_BLOCK_SPLIT) === 0) {
+        // start a block
+        isInABlock = true;
+        blockType = 'html';
+        if (link.length > HTML_BLOCK_SPLIT.length) {
+          blockId = link.substr(blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1);
+          _upsertBlockId(blockId);
+        }
+      } else if (link.trim().indexOf(TAB_SPLIT) === 0) {
+        // is a tab >>>tabName1|blockId1>>>tabName2|blockId2
+        let tabContent = [];
+        let isFirstTab = true;
+        link
+          .split(TAB_SPLIT)
+          .map((r) => r.trim())
+          .filter((r) => !!r)
+          .forEach((t) => {
+            const [tabName, tabId] = t.split(TAB_TITLE_SPLIT);
+            if (tabName && tabId) {
+              tabContent.push({
+                tabId: _upsertBlockId(tabId),
+                tabName,
+              });
+            }
+          });
+
+        serializedSchema.push({
+          key: newCacheId,
+          type: 'tabs',
+          tabContent: tabContent,
+        });
+      } else if (link.trim().length > 0) {
+        // anything else is a link
+        let linkType;
+        let linkText, linkUrl;
+
+        try {
+          // try parse as new tab link
+          if (
+            link.indexOf(NEW_TAB_LINK_SPLIT) !== -1 &&
+            link.indexOf(NEW_TAB_LINK_SPLIT) <= link.indexOf(SAME_TAB_LINK_SPLIT)
+          ) {
+            linkText = link.substr(0, link.indexOf(NEW_TAB_LINK_SPLIT)).trim();
+            linkUrl = link.substr(link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length).trim();
+            linkType = 'newTabLink';
+          }
+        } catch (err) {}
+
+        if (!linkType) {
+          // try parse as same tab link
+          try {
+            if (link.length > 0 && SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)) {
+              linkText = link.substr(0, link.indexOf(SAME_TAB_LINK_SPLIT)).trim();
+              linkUrl = link.substr(link.indexOf(SAME_TAB_LINK_SPLIT) + SAME_TAB_LINK_SPLIT.length).trim();
+              linkType = 'sameTabLink';
+            }
+          } catch (err) {}
+        }
+
+        // if found a link type...
+        if (linkType) {
+          if (linkUrl.indexOf('/') === 0) {
+            // prepend https:// for absolute links
+            // associated with domains
+            linkUrl = `${location.origin}${linkUrl}`;
+          } else if (
+            linkUrl.indexOf('http://') !== 0 &&
+            linkUrl.indexOf('https://') !== 0 &&
+            linkUrl.indexOf('javascript://') !== 0 &&
+            linkUrl.indexOf('data:') !== 0
+          ) {
+            // prepend the link url https://
+            // for link without anything prefix
+            linkUrl = `https://${linkUrl}`;
+          }
+
+          if (linkUrl.indexOf('javascript://') === 0) {
+            // js func link
+            linkType = 'jsLink';
+          } else if (linkUrl.indexOf('data:') === 0) {
+            linkType = 'dataLink';
+          }
+
+          serializedSchema.push({
+            key: newCacheId,
+            type: 'link',
+            linkUrl,
+            linkText,
+            linkType,
+            headerName: currentHeaderName,
+          });
+        }
+      }
+    });
+
+    return serializedSchema;
+  }
+
   // react components
   function SearchBox(props) {
     const { onSearch } = props;
@@ -392,7 +597,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     const [doms, setDoms] = useState('');
     const [searchText, setSearchText] = useState('');
     const [autocompleteSearches, setAutocompleteSearches] = useState([]);
-    const [schemaCacheMap, setSchemaCacheMap] = useState({});
     const refContainer = useRef();
 
     // events
@@ -429,266 +633,128 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     // generate the view dom
     useEffect(() => {
       const newAutocompleteSearches = new Set();
-      const newDoms = [];
-      const newSetSchemaCacheMap = {};
+      const serializedSchema = _getSerializedSchema(schema);
 
-      // parse lines and generate views
-      const lines = schema
-        .trim()
-        .split('\n')
-        .filter((r) => r.indexOf('//') !== 0)
-        .map((r) => r.trimEnd());
+      const newDoms = serializedSchema.map((schemaComponent) => {
+        switch (schemaComponent.type) {
+          case 'title':
+            return (
+              <div id={schemaComponent.id} key={schemaComponent.key} className='title'>
+                {schemaComponent.value}
+              </div>
+            );
 
-      if (lines[0][0] !== '!') {
-        const headerSchemaSampleCode = `${TITLE_SPLIT} Unnamed Navigation - ${new Date().toLocaleString()}`;
-        lines.unshift(headerSchemaSampleCode);
-      }
-
-      let blockBuffer = '';
-      let isInABlock = false;
-      let blockType = ''; // code or html
-      let currentHeaderName = '';
-      let blockId = '';
-      let pageFavIcon = '📑';
-      let pageTitle;
-
-      let blockIdMap = {};
-
-      const _upsertBlockId = (blockId) => {
-        if (!blockId) {
-          return `block_${++cacheId}_generated`;
-        }
-
-        if (!blockIdMap[blockId]) {
-          blockIdMap[blockId] = `block_${++cacheId}_${blockId}`;
-        }
-
-        return blockIdMap[blockId];
-      };
-
-      let rawLinkHTML = lines.forEach((link) => {
-        const newCacheId = ++cacheId;
-
-        // other processing for non block
-        if (isInABlock) {
-          if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
-            // end of a pre block
-            newDoms.push(
+            // set the page title
+            document.title = schemaComponent.value;
+            break;
+          case 'favIcon':
+            // insert the fav icon
+            const pageFavIcon = schemaComponent.value;
+            document.querySelector('#pageFavIcon') && document.querySelector('#pageFavIcon').remove();
+            const favIconEncoded =
+              encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14'>`) +
+              pageFavIcon +
+              encodeURIComponent(`</text></svg>`);
+            document.head.insertAdjacentHTML(
+              'beforeend',
+              `<link id='pageFavIcon' data-fav-icon="${pageFavIcon}" rel="icon" href="data:image/svg+xml,${favIconEncoded}" />`,
+            );
+            break;
+          case 'header':
+            return (
+              <div id={schemaComponent.id} key={schemaComponent.key} className='header'>
+                {schemaComponent.value}
+              </div>
+            );
+          case 'code_block':
+            return (
               <pre
-                key={newCacheId}
+                id={schemaComponent.id}
+                key={schemaComponent.key}
                 className='block codeBlock'
-                id={_upsertBlockId(blockId)}
                 onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>
-                {blockBuffer.trim()}
-              </pre>,
+                {schemaComponent.value}
+              </pre>
             );
-            isInABlock = false;
-            blockBuffer = '';
-            blockType = '';
-            currentHeaderName = ''; // reset the header name
-            blockId = '';
-          } else if (blockType === 'html' && link.trim() === HTML_BLOCK_SPLIT) {
-            // end of a pre block
-            newDoms.push(
+          case 'html_block':
+            return (
               <div
-                key={newCacheId}
+                id={schemaComponent.id}
+                key={schemaComponent.key}
                 className='block htmlBlock'
-                id={_upsertBlockId(blockId)}
-                dangerouslySetInnerHTML={{ __html: blockBuffer }}></div>,
+                dangerouslySetInnerHTML={{ __html: schemaComponent.value }}></div>
             );
-            isInABlock = false;
-            blockBuffer = '';
-            blockType = '';
-            currentHeaderName = ''; // reset the header name
-            blockId = '';
-          } else {
-            blockBuffer += link + '\n';
-          }
-          return;
-        }
+          case 'tabs':
+            const tabContent = [];
+            for (const tab of schemaComponent.tabContent) {
+              tabContent.push(
+                <tab className='tab' tabIndex='0' data-tab-id={tab.tabId}>
+                  {tab.tabName}
+                </tab>,
+              );
+            }
+            return (
+              <tabs id={schemaComponent.id} key={schemaComponent.key} className='tabs'>
+                {tabContent}
+              </tabs>
+            );
+          case 'link':
+            newAutocompleteSearches.add(schemaComponent.linkText);
 
-        // other processing for non block
-        if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
-          pageFavIcon = link.replace(/^[@]+/, '').trim();
-        } else if (link.trim().indexOf(TITLE_SPLIT) === 0) {
-          // page title
-          const headerText = link.replace(TITLE_SPLIT, '').trim();
-          pageTitle = headerText;
-          newDoms.push(
-            <div key={newCacheId} className='title'>
-              {headerText}
-            </div>,
-          );
-        } else if (link.trim().indexOf(HEADER_SPLIT) === 0) {
-          // section header
-          const headerText = link.replace(HEADER_SPLIT, '').trim();
-          newDoms.push(
-            <div key={newCacheId} className='header'>
-              {headerText}
-            </div>,
-          );
-
-          currentHeaderName = headerText;
-        } else if (link.trim().indexOf(CODE_BLOCK_SPLIT) === 0) {
-          // start a block
-          isInABlock = true;
-          blockType = 'code';
-          if (link.length > CODE_BLOCK_SPLIT.length) {
-            blockId = link.substr(blockId.indexOf(CODE_BLOCK_SPLIT) + CODE_BLOCK_SPLIT.length + 1);
-            _upsertBlockId(blockId);
-          }
-        } else if (link.trim().indexOf(HTML_BLOCK_SPLIT) === 0) {
-          // start a block
-          isInABlock = true;
-          blockType = 'html';
-          if (link.length > HTML_BLOCK_SPLIT.length) {
-            blockId = link.substr(blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1);
-            _upsertBlockId(blockId);
-          }
-        } else if (link.trim().indexOf(TAB_SPLIT) === 0) {
-          // is a tab >>>tabName1|blockId1>>>tabName2|blockId2
-          let tabContent = [];
-          let isFirstTab = true;
-          link
-            .split(TAB_SPLIT)
-            .map((r) => r.trim())
-            .filter((r) => !!r)
-            .forEach((t) => {
-              const [tabName, tabId] = t.split(TAB_TITLE_SPLIT);
-              if (tabName && tabId) {
-                tabContent.push(
-                  <tab className='tab' tabIndex='0' data-tab-id={_upsertBlockId(tabId)}>
-                    {tabName.trim()}
-                  </tab>,
+            switch (schemaComponent.linkType) {
+              case 'newTabLink':
+                return (
+                  <a
+                    id={schemaComponent.id}
+                    key={schemaComponent.key}
+                    className='link newTabLink'
+                    target='_blank'
+                    href={schemaComponent.linkUrl}
+                    data-section={schemaComponent.headerName}>
+                    {schemaComponent.linkText}
+                  </a>
                 );
-              }
-            });
-
-          newDoms.push(
-            <tabs key={newCacheId} className='tabs'>
-              {tabContent}
-            </tabs>,
-          );
-        } else if (link.trim().length > 0) {
-          // anything else is a link
-          let linkType;
-          let linkText, linkUrl;
-
-          try {
-            // try parse as new tab link
-            if (
-              link.indexOf(NEW_TAB_LINK_SPLIT) !== -1 &&
-              link.indexOf(NEW_TAB_LINK_SPLIT) <= link.indexOf(SAME_TAB_LINK_SPLIT)
-            ) {
-              linkText = link.substr(0, link.indexOf(NEW_TAB_LINK_SPLIT)).trim();
-              linkUrl = link.substr(link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length).trim();
-              linkType = 'newTabLink';
+              case 'sameTabLink':
+                return (
+                  <a
+                    id={schemaComponent.id}
+                    key={schemaComponent.key}
+                    className='link sameTabLink'
+                    href={schemaComponent.linkUrl}
+                    data-section={schemaComponent.headerName}>
+                    {schemaComponent.linkText}
+                  </a>
+                );
+              case 'jsLink':
+                return (
+                  <button
+                    id={schemaComponent.id}
+                    key={schemaComponent.key}
+                    className='link jsLink'
+                    type='button'
+                    onClick={() => eval(schemaComponent.linkUrl)}
+                    data-section={schemaComponent.headerName}>
+                    {schemaComponent.linkText}
+                  </button>
+                );
+              case 'dataLink':
+                return (
+                  <button
+                    id={schemaComponent.id}
+                    key={schemaComponent.key}
+                    className='link dataLink'
+                    type='button'
+                    onClick={() => _navigateToDataUrl(schemaComponent.linkUrl)}
+                    data-section={schemaComponent.headerName}>
+                    {schemaComponent.linkText}
+                  </button>
+                );
             }
-          } catch (err) {}
-
-          if (!linkType) {
-            // try parse as same tab link
-            try {
-              if (link.length > 0 && SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)) {
-                linkText = link.substr(0, link.indexOf(SAME_TAB_LINK_SPLIT)).trim();
-                linkUrl = link.substr(link.indexOf(SAME_TAB_LINK_SPLIT) + SAME_TAB_LINK_SPLIT.length).trim();
-                linkType = 'sameTabLink';
-              }
-            } catch (err) {}
-          }
-
-          // if found a link type...
-          if (linkType) {
-            if (linkUrl.indexOf('/') === 0) {
-              // prepend https:// for absolute links
-              // associated with domains
-              linkUrl = `${location.origin}${linkUrl}`;
-            } else if (
-              linkUrl.indexOf('http://') !== 0 &&
-              linkUrl.indexOf('https://') !== 0 &&
-              linkUrl.indexOf('javascript://') !== 0 &&
-              linkUrl.indexOf('data:') !== 0
-            ) {
-              // prepend the link url https://
-              // for link without anything prefix
-              linkUrl = `https://${linkUrl}`;
-            }
-
-            if (linkUrl.indexOf('javascript://') === 0) {
-              // js func link
-              const jsFunc = linkUrl.replace('javascript://', '');
-              schemaCacheMap[newCacheId] = jsFunc;
-              newDoms.push(
-                <button
-                  key={newCacheId}
-                  className='link jsLink'
-                  type='button'
-                  onClick={() => eval(schemaCacheMap[newCacheId])}
-                  data-section={currentHeaderName}>
-                  {linkText}
-                </button>,
-              );
-            } else if (linkUrl.indexOf('data:') === 0) {
-              // data url link
-              schemaCacheMap[newCacheId] = linkUrl;
-              newDoms.push(
-                <button
-                  key={newCacheId}
-                  className='link dataLink'
-                  type='button'
-                  onClick={() => _navigateToDataUrl(schemaCacheMap[newCacheId])}
-                  data-section={currentHeaderName}>
-                  {linkText}
-                </button>,
-              );
-            } else if (linkType === 'sameTabLink') {
-              // same tab link
-              schemaCacheMap[newCacheId] = linkUrl;
-              newDoms.push(
-                <a
-                  key={newCacheId}
-                  className='link sameTabLink'
-                  href={schemaCacheMap[newCacheId]}
-                  data-section={currentHeaderName}>
-                  {linkText}
-                </a>,
-              );
-            } else {
-              // new_tab_link
-              schemaCacheMap[newCacheId] = linkUrl;
-              newDoms.push(
-                <a
-                  key={newCacheId}
-                  className='link newTabLink'
-                  target='_blank'
-                  href={schemaCacheMap[newCacheId]}
-                  data-section={currentHeaderName}>
-                  {linkText}
-                </a>,
-              );
-            }
-
-            newAutocompleteSearches.add(linkText);
-          }
+            break;
         }
       });
 
-      // insert the fav icon
-      document.querySelector('#pageFavIcon') && document.querySelector('#pageFavIcon').remove();
-      const favIconEncoded =
-        encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14'>`) +
-        pageFavIcon +
-        encodeURIComponent(`</text></svg>`);
-      document.head.insertAdjacentHTML(
-        'beforeend',
-        `<link id='pageFavIcon' data-fav-icon="${pageFavIcon}" rel="icon" href="data:image/svg+xml,${favIconEncoded}" />`,
-      );
-
-      // set the page title
-      document.title = pageTitle;
-
       // update the doms
-      setSchemaCacheMap(newSetSchemaCacheMap);
       setDoms(newDoms);
       setAutocompleteSearches([...newAutocompleteSearches]);
     }, [schema]);
