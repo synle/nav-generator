@@ -478,7 +478,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                 key={newCacheId}
                 className='block codeBlock'
                 id={_upsertBlockId(blockId)}
-                onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>{blockBuffer.trim()}</pre>,
+                onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>
+                {blockBuffer.trim()}
+              </pre>,
             );
             isInABlock = false;
             blockBuffer = '';
@@ -850,16 +852,28 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       const doc = parser.parseFromString(newBufferSchemaHTML, 'text/html');
 
       const newLines = [];
-      for (const child of doc.body.children) {
-        const text = child.innerHTML
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, `<`)
-        .replace(/&gt;/g, `>`)
-        .replace(/&quot;/g, `"`)
-        .replace(/&#039;/g, `'`)
-          .replace(/<br[ ]*[/]*>/g, '\n')
+      // NOTES: use childNodes here is because children only returns
+      // HTML elements not text node
+      let childNodes = [...doc.body.childNodes]
+      while(childNodes.length > 0){
+        const child = childNodes.shift();
+        let text;
 
-        newLines.push(text);
+        if(child.childNodes && child.childNodes[0] && child.childNodes[0].tagName){
+          // nested nodes - do DFS to traverse
+          childNodes = [...child.childNodes, ...childNodes];
+        } else {
+          text = (child.innerHTML || child.textContent)
+
+          text = text.replace(/&amp;/g, '&')
+            .replace(/&lt;/g, `<`)
+            .replace(/&gt;/g, `>`)
+            .replace(/&quot;/g, `"`)
+            .replace(/&#039;/g, `'`)
+            .replace(/<br[ ]*[/]*>/g, '\n');
+
+          newLines.push(text);
+        }
       }
 
       const newBufferSchema = newLines.join('\n').replace(/[\n][\n][\n]+/, '\n\n');
@@ -971,8 +985,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
         // other processing for non block
         if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
-          pageFavIcon = link.replace(/^[@]+/, '').trim();
-          return `<div>${pageFavIcon}</div>`;
+          return `<div style='color: teal'>${link}</div>`;
         } else if (link.trim().indexOf(TITLE_SPLIT) === 0) {
           // page title
           return `<div style='color: red'>${link.trim()}</div>`;
@@ -998,7 +1011,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         } else if (link.trim().length > 0) {
           return `<div style='color: grey'>${link.trim()}</div>`;
         }
-        return `<p style='background: #333; width: 20px;'></p>`
+        return null;
       })
       .filter((s) => s !== null)
       .join('\n');
@@ -1047,218 +1060,13 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             </a>
           </DropdownButtons>
         </div>
-        {/*<SchemaEditor
-          id='input'
-          wrap='soft'
-          spellcheck='false'
-          autoFocus
-          value={bufferSchema}
-          onInput={(e) => onSetBufferSchema(e.target.value)}
-          onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>*/}
         <div
-          style={{ padding: '10px' }}
-          contentEditable
+          style={{ padding: '10px', background: '#222' }}
+          contentEditable='true'
           dangerouslySetInnerHTML={{ __html: bufferSchemaHTML }}
           onBlur={(e) => onSetBufferSchema2(e.target.innerHTML)}></div>
       </div>
     );
-  }
-
-  function SchemaEditor(props) {
-    const onInputKeyDown = (e) => {
-      const TAB_INDENT = '  ';
-      switch (e.key) {
-        case 'Tab':
-          e.preventDefault();
-          if (e.shiftKey === true) {
-            _deleteIndentAtCursor(e.target, TAB_INDENT.length);
-          } else {
-            _insertIndentAtCursor(e.target, TAB_INDENT);
-          }
-          break;
-        case 'Enter':
-          // attempted to persist the last row indentation
-          e.preventDefault();
-          _persistTabIndent(e.target);
-          break;
-        case 'Pause':
-          e.preventDefault();
-          _trimTrailingWhitespaces(e.target);
-          break;
-        case 'F10':
-          e.preventDefault();
-          _sortSelectedLines(e.target);
-          break;
-      }
-
-      function _insertIndentAtCursor(myField, myValue) {
-        let startPos = myField.selectionStart;
-        let endPos = myField.selectionEnd;
-
-        if (startPos === endPos) {
-          // single line indentation
-          myField.value = myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
-          myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
-        } else {
-          // multiple line indentation
-          const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
-
-          // calculate where we should put the cursor
-          const [res, newStartPos, newEndPos] = _iterateOverRows(
-            myField.value.split('\n'),
-            lineStart,
-            lineEnd,
-            (row) => myValue + row,
-          );
-          myField.value = res;
-          myField.setSelectionRange(newStartPos, newEndPos);
-        }
-      }
-
-      function _deleteIndentAtCursor(myField, length) {
-        let startPos = myField.selectionStart;
-        let endPos = myField.selectionEnd;
-
-        if (startPos === endPos) {
-          myField.value = myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
-          myField.setSelectionRange(startPos - length, endPos - length);
-        } else {
-          const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
-
-          const [res, newStartPos, newEndPos] = _iterateOverRows(
-            myField.value.split('\n'),
-            lineStart,
-            lineEnd,
-            (row) => {
-              for (let i = 0; i < row.length; i++) {
-                if (row[i] !== ' ' || i === length) {
-                  return row.substr(i);
-                }
-              }
-              return row;
-            },
-          );
-
-          myField.value = res;
-          myField.setSelectionRange(newStartPos, newEndPos);
-        }
-      }
-
-      function _persistTabIndent(myField) {
-        try {
-          const rows = myField.value.substr(0, myField.selectionStart).split('\n');
-          const lastRow = rows[rows.length - 1];
-          const lastRowIndent = lastRow.match(/^[ ]+/)[0];
-
-          _insertIndentAtCursor(e.target, '\n' + lastRowIndent);
-        } catch (err) {
-          _insertIndentAtCursor(e.target, '\n');
-        }
-      }
-
-      function _trimTrailingWhitespaces(myField) {
-        const rows = myField.value.split('\n').map((r) => r.trimEnd());
-        myField.value = rows.join('\n');
-        myField.setSelectionRange(0, 0);
-      }
-
-      function _sortSelectedLines(myField) {
-        let startPos = myField.selectionStart;
-        let endPos = myField.selectionEnd;
-        const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
-
-        const [_res, newStartPos, newEndPos] = _iterateOverRows(myField.value.split('\n'), lineStart, lineEnd);
-
-        let res1 = myField.value.substr(0, newStartPos);
-        let res2 = myField.value.substr(newStartPos, newEndPos - newStartPos);
-        let res3 = myField.value.substr(newEndPos);
-
-        res2 = sortMiddlePart(res2);
-        function sortMiddlePart(schema) {
-          const rows = schema.split('\n');
-          let sections = [];
-          let sectionIdx = 0;
-
-          for (const row of rows) {
-            // TODO: there's a bug there that if section name is part of the
-            // code block or html block - this will not work
-            if (row[0] === HEADER_SPLIT) {
-              sectionIdx++;
-            }
-            sections[sectionIdx] = sections[sectionIdx] || [];
-            sections[sectionIdx].push(row);
-          }
-
-          sections = sections
-            .filter((s) => !!s && s.length > 0)
-            .map((s) => {
-              if (s[s.length - 1] !== '') {
-                s.push('');
-              }
-              return s;
-            })
-            .sort(_schemaSectionNameOnlySorter);
-
-          return sections.map((s) => s.join('\n')).join('\n');
-        }
-
-        const res = res1 + res2 + res3;
-
-        myField.value = res;
-        myField.setSelectionRange(newStartPos, newEndPos);
-      }
-
-      function _iterateOverRows(rows, lineStart, lineEnd, func) {
-        let newStartPos;
-        let newEndPos;
-        let curCharCount = 0;
-
-        func =
-          func ||
-          function (row) {
-            return row;
-          };
-
-        const res = [];
-        for (let i = 0; i < rows.length; i++) {
-          let row = rows[i];
-
-          if (i >= lineStart && i <= lineEnd) {
-            row = func(row);
-          }
-
-          if (i === lineStart) {
-            newStartPos = curCharCount;
-          }
-
-          if (i === lineEnd) {
-            newEndPos = curCharCount + row.length;
-          }
-
-          curCharCount += row.length + 1;
-
-          res.push(row);
-        }
-
-        return [res.join('\n'), newStartPos, newEndPos];
-      }
-
-      function _getLineStartEnd(myField, startPos, endPos) {
-        let lineStart = 0,
-          lineEnd = 0;
-        try {
-          lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
-        } catch (err) {}
-
-        try {
-          lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
-        } catch (err) {}
-
-        return [lineStart, lineEnd];
-      }
-    };
-
-    return <textarea onKeyDown={(e) => onInputKeyDown(e)} {...props}></textarea>;
   }
 
   function DropdownButtons(props) {
