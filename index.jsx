@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'https://cdn.skypack.dev/react';
+import React, { useState, useEffect, useRef, useCallback } from 'https://cdn.skypack.dev/react';
 import ReactDOM from 'https://cdn.skypack.dev/react-dom';
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
@@ -598,15 +598,15 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     const refContainer = useRef();
 
     // events
-    const onEdit = () => {
+    const onEdit = useCallback(() => {
       onSetViewMode('edit');
-    };
+    }, []);
 
-    const onSearch = (newSearchText) => {
+    const onSearch = useCallback((newSearchText) => {
       setSearchText(newSearchText);
-    };
+    }, []);
 
-    const onSubmitNavigationSearch = (e) => {
+    const onSubmitNavigationSearch = useCallback((e) => {
       e.preventDefault();
 
       if (refContainer && refContainer.current) {
@@ -626,7 +626,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       }
 
       return false;
-    };
+    }, []);
 
     // handling search
     useEffect(() => {
@@ -721,15 +721,15 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     const urlDownloadSchema = _getUrlDownloadSchema(schema);
 
     // events
-    const onApply = () => {
+    const onApply = useCallback(() => {
       onSetSchema(bufferSchema); // update schema
       onSetViewMode('read');
 
       //update the cache in the session storage
       _persistBufferSchema(bufferSchema); // commit the changes
-    };
+    }, []);
 
-    const onCancel = async () => {
+    const onCancel = useCallback(async () => {
       if (hasPendingChanges) {
         try {
           await confirm('You have unsaved changes. Discard unsaved changes?');
@@ -740,17 +740,17 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       }
 
       onSetViewMode('read');
-    };
+    }, []);
 
-    const onTest = () => {
+    const onTest = useCallback(() => {
       const base64URL = _getNavBookmarkletFromSchema(schema);
       _navigateToDataUrl(base64URL, true);
-    };
+    }, []);
 
-    const onSetBufferSchema = (newBufferSchema) => {
+    const onSetBufferSchema = useCallback((newBufferSchema) => {
       setBufferSchema(newBufferSchema);
       setHasPendingChanges(true);
-    };
+    }, []);
 
     function onSortSchemaBySectionNameAndTitle(schema) {
       const rows = schema.split('\n');
@@ -1023,7 +1023,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function SchemaEditor(props) {
-    const onInputKeyDown = (e) => {
+    const onInputKeyDown = useCallback((e) => {
       const TAB_INDENT = '  ';
       switch (e.key) {
         case 'Tab':
@@ -1214,7 +1214,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
         return [lineStart, lineEnd];
       }
-    };
+    }, []);
 
     return <textarea onKeyDown={(e) => onInputKeyDown(e)} {...props}></textarea>;
   }
