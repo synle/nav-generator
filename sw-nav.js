@@ -1,48 +1,17 @@
-const version = 6;
-const CACHE_NAME = `nav-generator-${version}`;
+const CACHE_NAME = 'synle-nav-generator-1.0.4';
 
-function _shouldCacheThisUrl(url) {
-  if (url.includes('cdn.skypack.dev') || url.includes('cloudflare.com') || url.includes('unpkg.com')) {
-    return true;
-  }
+const dynamicUrlsToCache = [];
 
-  for (const dynamicUrl of cacheKeys) {
-    if (url.includes(dynamicUrl)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function _formatUrl(urlList) {
-  const newUrlList = [];
-
-  for (url of urlList) {
-    if (url.indexOf('//') === 0) {
-      newUrlList.push(`http://${url}`);
-      newUrlList.push(`https://${url}`);
-    } else {
-      newUrlList.push(url);
-    }
-  }
-
-  return newUrlList;
-}
-
-const staticUrlsToCache = _formatUrl([
-  // nav generator
-  'https://synle.github.io/nav-generator/index.jsx',
-  'https://synle.github.io/nav-generator/index.css',
-  'https://synle.github.io/nav-generator/index.html',
+const staticUrlsToCache = [
+  'index.jsx',
+  'index.css',
+  'index.html',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
-  'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js',
+  'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://cdn.skypack.dev/react',
   'https://cdn.skypack.dev/react-dom',
-]);
-
-const dynamicUrlsToCache = _formatUrl([]);
+];
 
 const cacheKeys = [...staticUrlsToCache, ...dynamicUrlsToCache];
 
@@ -53,7 +22,7 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(staticUrlsToCache))
+      .then((cache) => cache.addAll(cacheKeys))
       .catch((err) => console.log('sw.install failed', CACHE_NAME, err)),
   );
 });
@@ -136,3 +105,17 @@ self.addEventListener('fetch', function (event) {
     }),
   );
 });
+
+function _shouldCacheThisUrl(url) {
+  if (url.includes('cdn.skypack.dev') || url.includes('cloudflare.com') || url.includes('unpkg.com')) {
+    return true;
+  }
+
+  for (const dynamicUrl of cacheKeys) {
+    if (url.includes(dynamicUrl)) {
+      return true;
+    }
+  }
+
+  return false;
+}
