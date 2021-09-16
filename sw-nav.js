@@ -1,4 +1,4 @@
-const version = 3;
+const version = 4;
 const CACHE_NAME = `nav-generator-caches-${version}`;
 
 function _shouldCacheThisUrl(url) {
