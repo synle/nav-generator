@@ -1,5 +1,5 @@
-const version = 3;
-const CACHE_NAME = `nav-generator-caches`;
+const version = 6;
+const CACHE_NAME = `nav-generator-${version}`;
 
 function _shouldCacheThisUrl(url) {
   if (url.includes('cdn.skypack.dev') || url.includes('cloudflare.com') || url.includes('unpkg.com')) {
@@ -32,9 +32,9 @@ function _formatUrl(urlList) {
 
 const staticUrlsToCache = _formatUrl([
   // nav generator
-  'index.html',
-  'index.css',
-  'index.jsx',
+  'https://synle.github.io/nav-generator/index.jsx',
+  'https://synle.github.io/nav-generator/index.css',
+  'https://synle.github.io/nav-generator/index.html',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
   'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js',
@@ -48,12 +48,19 @@ const cacheKeys = [...staticUrlsToCache, ...dynamicUrlsToCache];
 
 self.addEventListener('install', function (event) {
   // Perform install steps
-  console.log('sw.install', version, event);
+  console.log('sw.install', CACHE_NAME, event);
+
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(staticUrlsToCache))
+      .catch((err) => console.log('sw.install failed', CACHE_NAME, err)),
+  );
 });
 
 self.addEventListener('activate', (event) => {
   // delete any caches that aren't in cacheKeys
-  console.log('sw.activate', version, event);
+  console.log('sw.activate', CACHE_NAME, event);
   event.waitUntil(
     Promise.allSettled([
       caches.keys().then((keys) =>

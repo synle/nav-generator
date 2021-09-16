@@ -377,7 +377,7 @@ textarea:focus {
   transition: all 0.5s ease-out;
   right: 0;
 }
-.dropdown .dropdown .dropdown-trigger {
+.dropdown .dropdown-trigger {
   width: 100%;
   display: block;
   padding: var(--spaceSize2);
@@ -386,7 +386,7 @@ textarea:focus {
 .dropdown:hover .dropdown-content,
 .dropdown:focus-within .dropdown-content {
   display: block;
-  animation: fadeInFromNone 0.2s ease-out;
+  animation: fadeInFromNone 0.3s ease-out;
 }
 .dropdown:hover .dropdown-content.pullUp,
 .dropdown:focus-within .dropdown-content.pullUp {
