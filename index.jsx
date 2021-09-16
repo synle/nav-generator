@@ -885,14 +885,14 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       const newDoms = serializedSchema.map((schemaComponent) => {
         switch (schemaComponent.type) {
           case 'title':
+            // set the page title
+            document.title = schemaComponent.value;
+
             return (
               <div id={schemaComponent.id} key={schemaComponent.key} className='title'>
                 {schemaComponent.value}
               </div>
             );
-
-            // set the page title
-            document.title = schemaComponent.value;
             break;
           case 'favIcon':
             // insert the fav icon

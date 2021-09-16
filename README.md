@@ -10,6 +10,10 @@ As of right now, it only requires the static html to be hosted somewhere in the 
 
 Follow this URL to create a new nav - https://synle.github.io/nav-generator
 
+## Deployment
+
+You can deploy the nav to Github Pages. For a quick deployment, refer to this Github Template. https://github.com/synle/nav-generator
+
 ## Features
 
 ### Supported Components
