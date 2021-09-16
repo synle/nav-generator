@@ -1,5 +1,5 @@
 const version = 3;
-const CACHE_NAME = `nav-generator-caches`;
+const CACHE_NAME = `nav-generator-caches-${version}`;
 
 function _shouldCacheThisUrl(url) {
   if (url.includes('cdn.skypack.dev') || url.includes('cloudflare.com') || url.includes('unpkg.com')) {
@@ -49,6 +49,8 @@ const cacheKeys = [...staticUrlsToCache, ...dynamicUrlsToCache];
 self.addEventListener('install', function (event) {
   // Perform install steps
   console.log('sw.install', version, event);
+
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(staticUrlsToCache)));
 });
 
 self.addEventListener('activate', (event) => {
