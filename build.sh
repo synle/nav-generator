@@ -1,4 +1,7 @@
 sh format.sh
 
-echo 'build css'
+echo '>> Build css'
 npx -p less lessc index.less index.css
+
+echo '>> Update ServiceWorker Version'
+node updateServiceWorkerVersion.js 'sw-nav.js'
