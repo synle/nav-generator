@@ -556,7 +556,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             // js func link
             linkType = 'jsLink';
             linkUrl = linkUrl.replace('javascript://', '');
-            linkUrl = `(() => {${linkUrl}})()`;
+            linkUrl = `(async() => {${linkUrl}})()`;
           } else if (linkUrl.indexOf('data:') === 0) {
             linkType = 'dataLink';
           }
