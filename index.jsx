@@ -555,6 +555,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           if (linkUrl.indexOf('javascript://') === 0) {
             // js func link
             linkType = 'jsLink';
+            linkUrl = linkUrl.replace('javascript://', '');
+            linkUrl = `(() => {${linkUrl}})()`;
           } else if (linkUrl.indexOf('data:') === 0) {
             linkType = 'dataLink';
           }
@@ -723,7 +725,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
       //update the cache in the session storage
       _persistBufferSchema(bufferSchema); // commit the changes
-    }, []);
+    }, [bufferSchema]);
 
     const onCancel = useCallback(async () => {
       if (hasPendingChanges) {
@@ -739,9 +741,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     }, []);
 
     const onTest = useCallback(() => {
-      const base64URL = _getNavBookmarkletFromSchema(schema);
+      const base64URL = _getNavBookmarkletFromSchema(bufferSchema);
       _navigateToDataUrl(base64URL, true);
-    }, []);
+    }, [bufferSchema]);
 
     const onSetBufferSchema = useCallback((newBufferSchema) => {
       setBufferSchema(newBufferSchema);
