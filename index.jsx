@@ -901,7 +901,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             const pageFavIcon = schemaComponent.value;
             document.querySelector('#pageFavIcon') && document.querySelector('#pageFavIcon').remove();
             const favIconEncoded =
-              encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14'>`) +
+              encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='0' y='14'>`) +
               pageFavIcon +
               encodeURIComponent(`</text></svg>`);
             document.head.insertAdjacentHTML(
