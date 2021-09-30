@@ -1,6 +1,6 @@
 {
   "name": "synle-nav-generator",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "description": "Application to organize and generate bookmarks",
   "main": "index.html",
