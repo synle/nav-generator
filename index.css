@@ -284,6 +284,13 @@ textarea:focus {
 #fav#fav .block,
 #command#fav .block {
   background: var(--colorBgSecondary);
+  max-height: 200px;
+  cursor: zoom-in;
+}
+#fav#fav .block.expanded,
+#command#fav .block.expanded {
+  max-height: max-content;
+  cursor: zoom-out;
 }
 #fav#fav .block:focus,
 #command#fav .block:focus {
