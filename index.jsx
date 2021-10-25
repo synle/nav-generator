@@ -1381,6 +1381,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             targetTab.classList.remove('selected');
           }
         }
+      } else if (target.classList.contains('block')) {
+        target.classList.toggle('expanded');
       }
     },
     true,
