@@ -1,9 +1,9 @@
 :root {
   --colorBgMain: #0d1117;
   --colorBgSecondary: #161b22;
-  --colorBgHover: #102138;
+  --colorBgHover: #303134;
   --colorTextMain: #c9d1d9;
-  --colorTextLink: #58a6ff;
+  --colorTextLink: #8ab4f8;
   --colorBorderMain: #58a6ff;
   --colorBorderSecondary: #30363d;
   --colorShadow: #333;
@@ -21,9 +21,9 @@
 .dark-theme {
   --colorBgMain: #0d1117;
   --colorBgSecondary: #161b22;
-  --colorBgHover: #102138;
+  --colorBgHover: #303134;
   --colorTextMain: #c9d1d9;
-  --colorTextLink: #58a6ff;
+  --colorTextLink: #8ab4f8;
   --colorBorderMain: #58a6ff;
   --colorBorderSecondary: #30363d;
   --colorShadow: #333;
@@ -32,9 +32,9 @@
   :root {
     --colorBgMain: #0d1117;
     --colorBgSecondary: #161b22;
-    --colorBgHover: #102138;
+    --colorBgHover: #303134;
     --colorTextMain: #c9d1d9;
-    --colorTextLink: #58a6ff;
+    --colorTextLink: #8ab4f8;
     --colorBorderMain: #58a6ff;
     --colorBorderSecondary: #30363d;
     --colorShadow: #333;
