@@ -695,12 +695,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             {/*dropdown trigger*/}
             <button className='dropdown-trigger'>Copy</button>
             {/*dropdown buttons*/}
+            <button onClick={() => _onCopyToClipboard(schema)}>To Schema</button>
             <button
               className='copyBookmarkToClipboard'
               onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
               To Bookmark
             </button>
-            <button onClick={() => _onCopyToClipboard(schema)}>To Schema</button>
           </DropdownButtons>
           <a target='_blank' href={NEW_NAV_URL}>
             New Nav
