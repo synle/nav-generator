@@ -1381,8 +1381,19 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             targetTab.classList.remove('selected');
           }
         }
-      } else if (target.classList.contains('block')) {
-        target.classList.toggle('expanded');
+      }
+    },
+    true,
+  );
+
+  // double click to expand tab content expansion
+  document.addEventListener(
+    'dblclick',
+    (e) => {
+      const target = e.target;
+      if (target.classList.contains('tab')) {
+        const tab = target;
+        document.querySelector(`#${tab.dataset.tabId}`).classList.toggle('expanded');
       }
     },
     true,
