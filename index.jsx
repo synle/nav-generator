@@ -923,6 +923,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                 className='block codeBlock'
                 onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>
                 {schemaComponent.value}
+                <i className='zoom'></i>
               </pre>
             );
           case 'html_block':

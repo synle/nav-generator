@@ -284,7 +284,30 @@ textarea:focus {
 #fav#fav .block,
 #command#fav .block {
   background: var(--colorBgSecondary);
+  position: relative;
   max-height: 200px;
+}
+#fav#fav .block .zoom,
+#command#fav .block .zoom {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--colorBorderMain);
+  align-items: center;
+  justify-content: center;
+  display: none;
+  cursor: zoom-in;
+  font-weight: bold;
+}
+#fav#fav .block .zoom::before,
+#command#fav .block .zoom::before {
+  content: '+';
+}
+#fav#fav .block:hover .zoom,
+#command#fav .block:hover .zoom {
+  display: flex;
 }
 #fav#fav .block.expanded,
 #command#fav .block.expanded {

@@ -281,7 +281,31 @@ textarea {
 
     .block {
       background: var(--colorBgSecondary);
+      position: relative;
       max-height: 200px;
+
+      .zoom {
+        &::before {
+          content: '+';
+        }
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        border: 2px solid var(--colorBorderMain);
+        align-items: center;
+        justify-content: center;
+        display: none;
+        cursor: zoom-in;
+        font-weight: bold;
+      }
+
+      &:hover {
+        .zoom {
+          display: flex;
+        }
+      }
 
       &.expanded {
         max-height: max-content;
