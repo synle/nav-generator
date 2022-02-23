@@ -1,7 +1,7 @@
-name: Pull Request Build
+name: main-build
 
 on:
-  pull_request:
+  push:
     branches: [master, main]
 
 jobs:
@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -23,4 +25,4 @@ jobs:
       - run: npm run build
       - uses: EndBug/add-and-commit@v7
         with:
-          message: 'Server Automated Build'
+          message: 'CI / CD - Prettier Automatic Commit'

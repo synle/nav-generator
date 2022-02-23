@@ -228,7 +228,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   async function _navigateToDataUrl(base64URL, forceOpenWindow) {
     try {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(decodeURIComponent(base64URL.replace('data:text/html,', '')), 'text/html');
+      const doc = parser.parseFromString(
+        decodeURIComponent(base64URL.replace('data:text/html,', '')),
+        'text/html',
+      );
       const schema = doc.querySelector('[type=schema]').innerText.trim();
       const childWindow = window.open(`${APP_INDEX_URL}?loadNav`);
 
@@ -519,7 +522,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             link.indexOf(NEW_TAB_LINK_SPLIT) <= link.indexOf(SAME_TAB_LINK_SPLIT)
           ) {
             linkText = link.substr(0, link.indexOf(NEW_TAB_LINK_SPLIT)).trim();
-            linkUrl = link.substr(link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length).trim();
+            linkUrl = link
+              .substr(link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length)
+              .trim();
             linkType = 'newTabLink';
           }
         } catch (err) {}
@@ -529,7 +534,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           try {
             if (link.length > 0 && SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)) {
               linkText = link.substr(0, link.indexOf(SAME_TAB_LINK_SPLIT)).trim();
-              linkUrl = link.substr(link.indexOf(SAME_TAB_LINK_SPLIT) + SAME_TAB_LINK_SPLIT.length).trim();
+              linkUrl = link
+                .substr(link.indexOf(SAME_TAB_LINK_SPLIT) + SAME_TAB_LINK_SPLIT.length)
+                .trim();
               linkType = 'sameTabLink';
             }
           } catch (err) {}
@@ -588,7 +595,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         placeholder='🔍 Search for bookmark'
         autocomplete='off'
         spellcheck='false'
-        autoFocus
+        autoFocus={false}
         required
       />
     );
@@ -823,8 +830,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             <a target='_blank' href={NEW_NAV_URL}>
               New Nav
             </a>
-            <button onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}>Sort Schema</button>
-            <button className='copyBookmarkToClipboard' onClick={() => _onCopyToClipboard(bookmark)}>
+            <button onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}>
+              Sort Schema
+            </button>
+            <button
+              className='copyBookmarkToClipboard'
+              onClick={() => _onCopyToClipboard(bookmark)}>
               Copy Bookmark
             </button>
             <button onClick={() => _onCopyToClipboard(bufferSchema)}>Copy Schema</button>
@@ -899,9 +910,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           case 'favIcon':
             // insert the fav icon
             const pageFavIcon = schemaComponent.value;
-            document.querySelector('#pageFavIcon') && document.querySelector('#pageFavIcon').remove();
+            document.querySelector('#pageFavIcon') &&
+              document.querySelector('#pageFavIcon').remove();
             const favIconEncoded =
-              encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='0' y='14'>`) +
+              encodeURIComponent(
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='0' y='14'>`,
+              ) +
               pageFavIcon +
               encodeURIComponent(`</text></svg>`);
             document.head.insertAdjacentHTML(
@@ -1053,7 +1067,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
         if (startPos === endPos) {
           // single line indentation
-          myField.value = myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
+          myField.value =
+            myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
           myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
         } else {
           // multiple line indentation
@@ -1076,7 +1091,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         let endPos = myField.selectionEnd;
 
         if (startPos === endPos) {
-          myField.value = myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
+          myField.value =
+            myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
           myField.setSelectionRange(startPos - length, endPos - length);
         } else {
           const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
@@ -1123,7 +1139,11 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         let endPos = myField.selectionEnd;
         const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
 
-        const [_res, newStartPos, newEndPos] = _iterateOverRows(myField.value.split('\n'), lineStart, lineEnd);
+        const [_res, newStartPos, newEndPos] = _iterateOverRows(
+          myField.value.split('\n'),
+          lineStart,
+          lineEnd,
+        );
 
         let res1 = myField.value.substr(0, newStartPos);
         let res2 = myField.value.substr(newStartPos, newEndPos - newStartPos);
@@ -1445,7 +1465,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         }
       };
       window.addEventListener('message', _onHandlePostMessageEvent);
-    } else if (location.search.includes('newNav') || (!isRenderedInDataUrl && !location.href.includes('index.html'))) {
+    } else if (
+      location.search.includes('newNav') ||
+      (!isRenderedInDataUrl && !location.href.includes('index.html'))
+    ) {
       // render as edit mode for newNav
       window.history.replaceState('', '', APP_INDEX_URL);
       _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
@@ -1455,7 +1478,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       viewMode = 'edit';
 
       _render(); // rerender the dom
-    } else if (_getSessionValue('loadNavFromSessionStorage') === '1' && location.href.includes(APP_INDEX_URL)) {
+    } else if (
+      _getSessionValue('loadNavFromSessionStorage') === '1' &&
+      location.href.includes(APP_INDEX_URL)
+    ) {
       // if this flag is set, then continue
       // will proceed with loading from session storage
       _render(); // rerender the dom
