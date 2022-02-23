@@ -107,7 +107,11 @@ self.addEventListener('fetch', function (event) {
 });
 
 function _shouldCacheThisUrl(url) {
-  if (url.includes('cdn.skypack.dev') || url.includes('cloudflare.com') || url.includes('unpkg.com')) {
+  if (
+    url.includes('cdn.skypack.dev') ||
+    url.includes('cloudflare.com') ||
+    url.includes('unpkg.com')
+  ) {
     return true;
   }
 
