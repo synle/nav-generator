@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'https://cdn.skypack.dev/react';
 import ReactDOM from 'https://cdn.skypack.dev/react-dom';
+import fuzzysort from 'https://cdn.skypack.dev/fuzzysort';
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
