@@ -58,8 +58,8 @@
   --colorBlacklight: #333;
 }
 :root {
-  --fontFamilyMain: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji,
-    Segoe UI Emoji;
+  --fontFamilyMain: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji;
   --fontFamilySecondary: Helvetica, Tahoma, Geneva, sans-serif;
   --fontFamilyMonospace: monospace;
   --fontWeightBold: 800;
@@ -118,7 +118,8 @@ h5 {
   --spaceSize5: 3rem;
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
-  --gridColumnLayout: calc(275px - var(--gridGapWidth)) calc(275px - var(--gridGapWidth)) calc(275px - var(--gridGapWidth));
+  --gridColumnLayout: calc(275px - var(--gridGapWidth)) calc(275px - var(--gridGapWidth))
+    calc(275px - var(--gridGapWidth));
   --maxBodyWidth: 900px;
 }
 *,
