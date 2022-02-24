@@ -1,4 +1,4 @@
-const CACHE_NAME = 'synle-nav-generator-1.1.0-1645725392247';
+const CACHE_NAME = 'synle-nav-generator-1.1.1645727926763';
 
 const dynamicUrlsToCache = [];
 
@@ -106,7 +106,7 @@ self.addEventListener('fetch', function (event) {
 });
 
 function _shouldCacheThisUrl(url) {
-  if(url.includes('chrome-extension://')){
+  if (url.includes('chrome-extension://')) {
     return false;
   }
 
