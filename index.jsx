@@ -595,7 +595,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         placeholder='🔍 Search for bookmark'
         autocomplete='off'
         spellcheck='false'
-        autoFocus
+        autoFocus={false}
         required
       />
     );
