@@ -615,27 +615,35 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       setSearchText(newSearchText);
     }, []);
 
-    const onSubmitNavigationSearch = useCallback((e) => {
-      e.preventDefault();
+    const onSubmitNavigationSearch = useCallback(
+      (e) => {
+        e.preventDefault();
 
-      if (refContainer && refContainer.current) {
-        const doc = refContainer.current;
+        if (refContainer && refContainer.current) {
+          const doc = refContainer.current;
 
-        const links = [...doc.querySelectorAll('.link:not(.hidden)')];
+          const [firstSearchChar, ...searchWord] = searchText;
+          if (firstSearchChar === '?') {
+            location.href = `https://www.google.com/search?q=${searchWord.join('')}`;
+          }
 
-        // focus on the first link
-        if (links.length > 0) {
-          links[0].focus();
+          const links = [...doc.querySelectorAll('.link:not(.hidden)')];
+
+          // focus on the first link
+          if (links.length > 0) {
+            links[0].focus();
+          }
+
+          // only 1 result, then let's redirect
+          if (links.length === 1 && links[0].href) {
+            location.href = links[0].href;
+          }
         }
 
-        // only 1 result, then let's redirect
-        if (links.length === 1 && links[0].href) {
-          location.href = links[0].href;
-        }
-      }
-
-      return false;
-    }, []);
+        return false;
+      },
+      [searchText],
+    );
 
     // handling search
     useEffect(() => {
@@ -650,9 +658,11 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         }
 
         // remove all non alphanumeric
-        let exactMatchregex = new RegExp(searchText.replace(/"/g, ''), 'i');
+        let exactMatchregex = new RegExp((searchText.match(/[a-z0-9]/gi) || []).join(''), 'i');
         let matchRegex = exactMatchregex;
-        if (searchText[0] === '/') {
+
+        const [firstSearchChar] = searchText;
+        if (firstSearchChar === '/') {
           // fuzzy match
           const cleanedSearchText = searchText
             .replace(/[\W_]+/gi, ' ')
