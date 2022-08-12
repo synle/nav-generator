@@ -103,6 +103,8 @@ h5 {
   font-size: var(--fontSize5);
 }
 
+@gridColumnWidth: 300px;
+
 :root {
   --borderSize1: 2px;
   --borderSize2: 4px;
@@ -117,8 +119,20 @@ h5 {
 
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
-  --gridColumnLayout: calc(275px - var(--gridGapWidth)) calc(275px - var(--gridGapWidth))
-    calc(275px - var(--gridGapWidth));
+  --gridColumnWidthMin: @gridColumnWidth;
+  --gridColumnWidthMax: 30%;
+  --gridColumnLayout: minmax(
+      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
+      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
+    )
+    minmax(
+      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
+      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
+    )
+    minmax(
+      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
+      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
+    );
 
   --maxBodyWidth: 900px;
 }
@@ -479,7 +493,7 @@ load {
   display: none;
 }
 
-@media only screen and (max-width: 825px) {
+@media only screen and (max-width: @gridColumnWidth * 3) {
   :root {
     --gridGapHeight: 0.4rem;
     --gridGapWidth: 0.5rem;
@@ -487,7 +501,7 @@ load {
   }
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: @gridColumnWidth * 2) {
   :root {
     --fontSize1: 1rem;
     --fontSize2: 1rem;
