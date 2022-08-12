@@ -8,7 +8,7 @@ const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 const packageName = packageJson.name;
 let packageNewVersion = packageJson.version;
 const [major, minor, patch] = packageJson.version.split('.');
-packageNewVersion = `${major}.${minor}.${Date.now()}`;
+packageNewVersion = `${major}.${minor}.${patch}-${Date.now()}`;
 
 const newCacheName = `${packageName}-${packageNewVersion}`;
 
