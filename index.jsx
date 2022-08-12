@@ -593,8 +593,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         list='autocompleteSearches'
         onInput={(e) => onSearch(e.target.value)}
         placeholder='🔍 Search for bookmark'
-        autocomplete='off'
-        spellcheck='false'
+        autoComplete='off'
+        spellCheck='false'
         autoFocus={false}
         required
       />
@@ -719,9 +719,17 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               To Bookmark
             </button>
           </DropdownButtons>
-          <a target='_blank' href={NEW_NAV_URL}>
-            New Nav
-          </a>
+          <DropdownButtons type='pullUp'>
+            {/*dropdown trigger*/}
+            <button className='dropdown-trigger'>Actions</button>
+            {/*dropdown buttons*/}
+            <a target='_blank' href={NEW_NAV_URL}>
+              New Nav
+            </a>
+            <a href={_getNavBookmarkletFromSchema(schema)}>
+              Navigate to New Bookmark
+            </a>
+          </DropdownButtons>
         </div>
       </div>
     );
