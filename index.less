@@ -119,20 +119,7 @@ h5 {
 
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
-  --gridColumnWidthMin: 33%;
-  --gridColumnWidthMax: @gridColumnWidth;
-  --gridColumnLayout: minmax(
-      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
-      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
-    )
-    minmax(
-      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
-      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
-    )
-    minmax(
-      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
-      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
-    );
+  --gridColumnLayout: 22% 22% 22% 22%;
 
   --maxBodyWidth: 900px;
 }
@@ -492,6 +479,12 @@ load {
 // utils
 .hidden {
   display: none;
+}
+
+@media only screen and (max-width: @gridColumnWidth * 4) {
+  :root {
+    --gridColumnLayout: 30% 30% 30%;
+  }
 }
 
 @media only screen and (max-width: @gridColumnWidth * 3) {
