@@ -118,8 +118,8 @@ h5 {
   --spaceSize5: 3rem;
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
-  --gridColumnWidthMin: 330px;
-  --gridColumnWidthMax: 33%;
+  --gridColumnWidthMin: 33%;
+  --gridColumnWidthMax: 330px;
   --gridColumnLayout: minmax(
       calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
       calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
