@@ -103,7 +103,7 @@ h5 {
   font-size: var(--fontSize5);
 }
 
-@gridColumnWidth: 300px;
+@gridColumnWidth: 330px;
 
 :root {
   --borderSize1: 2px;
@@ -120,7 +120,7 @@ h5 {
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
   --gridColumnWidthMin: @gridColumnWidth;
-  --gridColumnWidthMax: 30%;
+  --gridColumnWidthMax: 33%;
   --gridColumnLayout: minmax(
       calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
       calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
@@ -376,6 +376,7 @@ textarea {
 .dropdown {
   position: relative;
   display: inline-block;
+  padding: 0 !important;
 
   button,
   a {

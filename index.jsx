@@ -1404,25 +1404,18 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           const targetTabId = targetTab.dataset.tabId;
           if (tab === targetTab) {
             document.querySelector(`#${tab.dataset.tabId}`).style.display = 'block';
+            if (tab.classList.contains('selected')) {
+              // select the same tab twice will trigger expansion of the content
+              document.querySelector(`#${tab.dataset.tabId}`).classList.toggle('expanded', true);
+            }
             tab.classList.add('selected');
           } else {
             document.querySelector(`#${targetTabId}`).style.display = 'none';
             targetTab.classList.remove('selected');
           }
         }
-      }
-    },
-    true,
-  );
-
-  // double click to expand tab content expansion
-  document.addEventListener(
-    'dblclick',
-    (e) => {
-      const target = e.target;
-      if (target.classList.contains('tab')) {
-        const tab = target;
-        document.querySelector(`#${tab.dataset.tabId}`).classList.toggle('expanded');
+        e.repventDefault();
+        e.stopPropagation();
       }
     },
     true,

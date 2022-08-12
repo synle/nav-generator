@@ -118,8 +118,8 @@ h5 {
   --spaceSize5: 3rem;
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
-  --gridColumnWidthMin: 300px;
-  --gridColumnWidthMax: 30%;
+  --gridColumnWidthMin: 330px;
+  --gridColumnWidthMax: 33%;
   --gridColumnLayout: minmax(
       calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
       calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
@@ -373,6 +373,7 @@ textarea:focus {
 .dropdown {
   position: relative;
   display: inline-block;
+  padding: 0 !important;
 }
 .dropdown button,
 .dropdown a {
@@ -466,14 +467,14 @@ load {
 .hidden {
   display: none;
 }
-@media only screen and (max-width: 900px) {
+@media only screen and (max-width: 990px) {
   :root {
     --gridGapHeight: 0.4rem;
     --gridGapWidth: 0.5rem;
     --gridColumnLayout: calc(50% - var(--gridGapWidth)) calc(50% - var(--gridGapWidth));
   }
 }
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 660px) {
   :root {
     --fontSize1: 1rem;
     --fontSize2: 1rem;
