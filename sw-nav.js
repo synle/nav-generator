@@ -1,4 +1,4 @@
-const CACHE_NAME = 'synle-nav-generator-1.1.1652806382323';
+const CACHE_NAME = 'synle-nav-generator-1.1.0-1660308620428';
 
 const dynamicUrlsToCache = [];
 
