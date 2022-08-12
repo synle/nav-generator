@@ -1034,7 +1034,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     return (
       <>
         {doms}
-        <datalist id='autocompleteSearches'>
+        <datalist
+          id='autocompleteSearches'
+          style={{ maxHeight: '50%', overflow: 'auto !important' }}>
           {autocompleteSearches.map((search) => (
             <option key={search}>{search}</option>
           ))}
