@@ -118,20 +118,7 @@ h5 {
   --spaceSize5: 3rem;
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
-  --gridColumnWidthMin: 33%;
-  --gridColumnWidthMax: 330px;
-  --gridColumnLayout: minmax(
-      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
-      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
-    )
-    minmax(
-      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
-      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
-    )
-    minmax(
-      calc(var(--gridColumnWidthMin) - var(--gridGapWidth)),
-      calc(var(--gridColumnWidthMax) - var(--gridGapWidth))
-    );
+  --gridColumnLayout: 22% 22% 22% 22%;
   --maxBodyWidth: 900px;
 }
 *,
@@ -466,6 +453,11 @@ load {
 }
 .hidden {
   display: none;
+}
+@media only screen and (max-width: 1320px) {
+  :root {
+    --gridColumnLayout: 30% 30% 30%;
+  }
 }
 @media only screen and (max-width: 990px) {
   :root {
