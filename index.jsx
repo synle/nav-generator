@@ -1320,6 +1320,15 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       const target = e.target;
       const focusedElement = document.activeElement;
 
+      if (e.target.id === 'search') {
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+          if (e.key === 'Enter') {
+            // with alt enter, triggers google search
+            location.href = `https://www.google.com/search?q=${encodeURIComponent(e.target.value)}`;
+            return;
+          }
+        }
+      }
       if (key === 'Enter' || key === ' ') {
         if (
           parseInt(target.tabIndex) === 0 &&
@@ -1366,6 +1375,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       ) {
         // special handling to focus on searchbox
         const searchBox = document.querySelector('#search');
+
         switch (key) {
           case 'f':
           case '?':
@@ -1416,7 +1426,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             targetTab.classList.remove('selected');
           }
         }
-        e.repventDefault();
+        e.preventDefault();
         e.stopPropagation();
       }
     },
