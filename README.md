@@ -8,7 +8,7 @@ As of right now, it only requires the static html to be hosted somewhere in the 
 
 ## Demo
 
-Follow this URL to create a new nav - https://synle.github.io/nav-generator
+Follow this URL to create a new nav - https://synle.github.io/nav-generator/
 
 ## Deployment
 
