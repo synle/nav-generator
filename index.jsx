@@ -908,7 +908,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       }
     }
 
-    return <>📙</>;
+    return <span>📙</span>;
   }
 
   function SchemaRender(props) {
