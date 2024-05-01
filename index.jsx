@@ -885,27 +885,30 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     return `${domain}/favicon.ico`;
   }
 
-
   function FavIcon(props) {
     const { linkUrl, linkType } = props;
-    switch (linkType) {
-      default:
-        if (linkUrl.indexOf('http://') === 0 || linkUrl.indexOf('https://') === 0) {
-          let favIconUrl = `http://${_getFaviconUrl(linkUrl)}`;
-          return (
-            <img
-              src={favIconUrl}
-              alt='Fav'
-              onError={(e) => {
-                e.target.remove();
-              }}
-            />
-          );
-        }
-        break;
+    const [error, setError] = useState(false);
+
+    if (!error) {
+      switch (linkType) {
+        default:
+          if (linkUrl.indexOf('http://') === 0 || linkUrl.indexOf('https://') === 0) {
+            let favIconUrl = `http://${_getFaviconUrl(linkUrl)}`;
+            return (
+              <img
+                src={favIconUrl}
+                alt='Fav'
+                onError={(e) => {
+                  setError(true);
+                }}
+              />
+            );
+          }
+          break;
+      }
     }
 
-    return <></>;
+    return <>📙</>;
   }
 
   function SchemaRender(props) {
