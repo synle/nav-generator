@@ -173,6 +173,9 @@ a {
   font-family: var(--fontFamilyMain);
   word-break: break-all;
   border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 
   &:hover {
     background: var(--colorBgSecondary) !important;
@@ -184,6 +187,11 @@ a {
 
   &:active {
     transform: translate(0, 5px);
+  }
+
+  img {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -231,7 +239,9 @@ textarea {
     background: var(--colorBgSecondary);
     border-left: var(--borderSize4) solid var(--colorBorderMain);
     font-weight: var(--fontWeightBold);
-    box-shadow: 0 2px 2px -1px var(--colorShadow), 0 4px 4px -2px var(--colorShadow);
+    box-shadow:
+      0 2px 2px -1px var(--colorShadow),
+      0 4px 4px -2px var(--colorShadow);
   }
 
   .title,
@@ -458,7 +468,9 @@ load {
     font-weight: var(--fontWeightBold);
     background: var(--colorBgSecondary);
     text-align: center;
-    box-shadow: 0 2px 2px -1px var(--colorShadow), 0 4px 4px -2px var(--colorShadow);
+    box-shadow:
+      0 2px 2px -1px var(--colorShadow),
+      0 4px 4px -2px var(--colorShadow);
   }
 
   &#alertModal {

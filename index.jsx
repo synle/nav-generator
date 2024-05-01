@@ -877,6 +877,37 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     );
   }
 
+  function _getFaviconUrl(url) {
+    // Extract domain from URL
+    let domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im)[1];
+
+    // Add "/favicon.ico" to the domain
+    return `${domain}/favicon.ico`;
+  }
+
+
+  function FavIcon(props) {
+    const { linkUrl, linkType } = props;
+    switch (linkType) {
+      default:
+        if (linkUrl.indexOf('http://') === 0 || linkUrl.indexOf('https://') === 0) {
+          let favIconUrl = `http://${_getFaviconUrl(linkUrl)}`;
+          return (
+            <img
+              src={favIconUrl}
+              alt='Fav'
+              onError={(e) => {
+                e.target.remove();
+              }}
+            />
+          );
+        }
+        break;
+    }
+
+    return <></>;
+  }
+
   function SchemaRender(props) {
     const { schema, refContainer } = props;
 
@@ -915,7 +946,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                 {schemaComponent.value}
               </div>
             );
-            break;
           case 'favIcon':
             // insert the fav icon
             const pageFavIcon = schemaComponent.value;
@@ -983,7 +1013,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                     target='_blank'
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}>
-                    {schemaComponent.linkText}
+                    <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
                 );
               case 'sameTabLink':
@@ -994,7 +1024,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                     className='link sameTabLink'
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}>
-                    {schemaComponent.linkText}
+                    <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
                 );
               case 'jsLink':
@@ -1006,7 +1036,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                     type='button'
                     onClick={() => eval(schemaComponent.linkUrl)}
                     data-section={schemaComponent.headerName}>
-                    {schemaComponent.linkText}
+                    <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </button>
                 );
               case 'dataLink':
@@ -1018,7 +1048,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                     type='button'
                     onClick={() => _navigateToDataUrl(schemaComponent.linkUrl)}
                     data-section={schemaComponent.headerName}>
-                    {schemaComponent.linkText}
+                    <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </button>
                 );
             }
