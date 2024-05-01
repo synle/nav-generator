@@ -11,7 +11,7 @@
 .light-theme {
   --colorBgMain: #fff;
   --colorBgSecondary: #f2f2f2;
-  --colorBgHover: #f2f2f2;
+  --colorBgHover: #c9c9c9;
   --colorTextMain: #000;
   --colorTextLink: #005594;
   --colorBorderMain: #58a6ff;
@@ -44,7 +44,7 @@
   :root {
     --colorBgMain: #fff;
     --colorBgSecondary: #f2f2f2;
-    --colorBgHover: #f2f2f2;
+    --colorBgHover: #c9c9c9;
     --colorTextMain: #000;
     --colorTextLink: #005594;
     --colorBorderMain: #58a6ff;
@@ -169,6 +169,9 @@ a {
   font-family: var(--fontFamilyMain);
   word-break: break-all;
   border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 button:hover,
 a:hover {
@@ -181,6 +184,11 @@ a:focus {
 button:active,
 a:active {
   transform: translate(0, 5px);
+}
+button img,
+a img {
+  width: 18px;
+  height: 18px;
 }
 input,
 textarea {
@@ -226,7 +234,9 @@ textarea:focus {
   background: var(--colorBgSecondary);
   border-left: var(--borderSize4) solid var(--colorBorderMain);
   font-weight: var(--fontWeightBold);
-  box-shadow: 0 2px 2px -1px var(--colorShadow), 0 4px 4px -2px var(--colorShadow);
+  box-shadow:
+    0 2px 2px -1px var(--colorShadow),
+    0 4px 4px -2px var(--colorShadow);
 }
 #fav .title,
 #command .title,
@@ -444,7 +454,9 @@ load {
   font-weight: var(--fontWeightBold);
   background: var(--colorBgSecondary);
   text-align: center;
-  box-shadow: 0 2px 2px -1px var(--colorShadow), 0 4px 4px -2px var(--colorShadow);
+  box-shadow:
+    0 2px 2px -1px var(--colorShadow),
+    0 4px 4px -2px var(--colorShadow);
 }
 .modal#promptModal > textarea#promptInput {
   max-height: 650px;
