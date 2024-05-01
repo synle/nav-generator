@@ -9,8 +9,7 @@ const staticUrlsToCache = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js',
   'https://unpkg.com/@babel/standalone/babel.min.js',
-  'https://cdn.skypack.dev/react',
-  'https://cdn.skypack.dev/react-dom',
+  'https://esm.sh',
 ];
 
 const cacheKeys = [...staticUrlsToCache, ...dynamicUrlsToCache];
@@ -113,7 +112,9 @@ function _shouldCacheThisUrl(url) {
   if (
     url.includes('cdn.skypack.dev') ||
     url.includes('cloudflare.com') ||
-    url.includes('unpkg.com')
+    url.includes('unpkg.com') ||
+    url.includes('esm.sh') ||
+    false
   ) {
     return true;
   }
