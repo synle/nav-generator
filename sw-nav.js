@@ -112,7 +112,9 @@ function _shouldCacheThisUrl(url) {
   if (
     url.includes('cdn.skypack.dev') ||
     url.includes('cloudflare.com') ||
-    url.includes('unpkg.com')
+    url.includes('unpkg.com') ||
+    url.includes('esm.sh') ||
+    false
   ) {
     return true;
   }
