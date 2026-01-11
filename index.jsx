@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'https://cdn.skypack.dev/react';
-import ReactDOM from 'https://cdn.skypack.dev/react-dom';
+import ReactDOM from "https://esm.sh/react-dom@18";
+import React, { useContext, useEffect, useMemo, useState, useRef, useCallback } from "https://esm.sh/react@18";
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
