@@ -10,6 +10,7 @@ const staticUrlsToCache = [
   'https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js',
   'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://esm.sh',
+  'https://cdn.jsdelivr.net',
 ];
 
 const cacheKeys = [...staticUrlsToCache, ...dynamicUrlsToCache];

@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <title>Loading...</title>
-    <link rel="stylesheet" href="index.css" />
 
-  <!-- Babel -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="index.css" />
 
-  <!-- Import maps -->
+  <!-- Babel Standalone (pinned) -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js"></script>
+
+  <!-- Import maps (same CDN, pinned versions) -->
   <script type="importmap">
     {
       "imports": {
-        "react": "https://esm.sh/react@18",
-        "react-dom": "https://esm.sh/react-dom@18"
+        "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/+esm",
+        "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/+esm"
       }
     }
   </script>
 </head>
+
 <body>
   <div id="root"></div>
 
-  <!-- Loader -->
+  <!-- JSX Loader -->
   <script type="module">
     async function loadJSX(path) {
       const src = await fetch(path).then(r => r.text());
@@ -36,7 +38,7 @@
       return import(url);
     }
 
-    // load entry
+    // Entry
     await loadJSX("./index.jsx");
   </script>
 </body>
