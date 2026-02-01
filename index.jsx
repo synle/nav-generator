@@ -1,5 +1,5 @@
-import ReactDOM from "https://esm.sh/react-dom@18";
-import React, { useContext, useEffect, useMemo, useState, useRef, useCallback } from "https://esm.sh/react@18";
+import ReactDOM from 'react-dom';
+import React, { useContext, useEffect, useMemo, useState, useRef, useCallback } from 'react';
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
