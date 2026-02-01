@@ -3,40 +3,63 @@
   <head>
     <meta charset="UTF-8" />
     <title>Loading...</title>
-
     <link rel="stylesheet" href="index.css" />
-
-    <!-- Babel Standalone (pinned) -->
-    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js"></script>
-
-    <!-- Import maps (same CDN, pinned versions) -->
-    <script type="importmap">
-      {
-        "imports": {
-          "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/+esm",
-          "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/+esm"
-        }
-      }
-    </script>
   </head>
-
   <body>
     <load></load>
+    <script>
+      (async function bootstrap() {
+        /* -------- Load CDN Scripts -------- */
+        const cdnScripts = ['https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js'];
 
-    <!-- JSX Loader -->
-    <script type="module">
-      (async function loadJSX(path) {
-        const src = await fetch(path).then((r) => r.text());
+        /* -------- Import Map URL Resolution -------- */
+        // protocol-relative for http/https compatibility
+        const isGithubPages = location.hostname === 'synle.github.io';
+        const importMapURL = isGithubPages
+          ? '//synle.github.io/nav-generator/import-map.json'
+          : './import-map.json';
 
-        const { code } = Babel.transform(src, {
-          presets: ['react'],
-          sourceType: 'module',
+        for (const src of cdnScripts) {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = res;
+            s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        }
+
+        /* -------- Load Import Map -------- */
+        const importMapJSON = await fetch(importMapURL).then((r) => {
+          if (!r.ok) throw new Error('Failed to load import map');
+          return r.text();
         });
 
-        const blob = new Blob([code], { type: 'text/javascript' });
-        const url = URL.createObjectURL(blob);
-        return import(url);
-      })('./index.jsx'); // Entry
+        const importMapScript = document.createElement('script');
+        importMapScript.type = 'importmap';
+        importMapScript.textContent = importMapJSON;
+        document.head.appendChild(importMapScript);
+
+        /* -------- JSX Loader -------- */
+        async function loadJSX(path) {
+          const src = await fetch(path).then((r) => {
+            if (!r.ok) throw new Error(`Failed to load ${path}`);
+            return r.text();
+          });
+
+          const { code } = Babel.transform(src, {
+            presets: ['react'],
+            sourceType: 'module',
+          });
+
+          const blob = new Blob([code], { type: 'text/javascript' });
+          const url = URL.createObjectURL(blob);
+          return import(url);
+        }
+
+        /* -------- Entry -------- */
+        await loadJSX('./index.jsx');
+      })();
     </script>
   </body>
 </html>
