@@ -1,4 +1,4 @@
-const CACHE_NAME = 'synle-nav-generator-1.1.0-1714536233054';
+const CACHE_NAME = 'synle-nav-generator-1.2.0-1769927632924';
 
 const dynamicUrlsToCache = [];
 
@@ -10,6 +10,7 @@ const staticUrlsToCache = [
   'https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js',
   'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://esm.sh',
+  'https://cdn.jsdelivr.net',
 ];
 
 const cacheKeys = [...staticUrlsToCache, ...dynamicUrlsToCache];
