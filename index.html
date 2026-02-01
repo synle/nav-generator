@@ -1,20 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Loading...</title>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Loading...</title>
     <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <load />
-  </body>
-    <script>
-      // hooking up service worker
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw-nav.js', {
-          scope: '.',
-        });
+
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Import maps -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18",
+        "react-dom": "https://esm.sh/react-dom@18"
       }
-    </script>
-    <script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="index.jsx" type="text/babel" data-presets="react" data-type="module"></script>
+    }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Loader -->
+  <script type="module">
+    async function loadJSX(path) {
+      const src = await fetch(path).then(r => r.text());
+
+      const { code } = Babel.transform(src, {
+        presets: ["react"],
+        sourceType: "module"
+      });
+
+      const blob = new Blob([code], { type: "text/javascript" });
+      const url = URL.createObjectURL(blob);
+      return import(url);
+    }
+
+    // load entry
+    await loadJSX("./index.jsx");
+  </script>
+</body>
 </html>
