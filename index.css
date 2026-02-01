@@ -155,10 +155,10 @@ h5 {
   --borderSize3: 5px;
   --borderSize4: 0.5rem;
   --spaceSize1: 0.5rem;
-  --spaceSize2: 0.7rem;
-  --spaceSize3: 1rem;
-  --spaceSize4: 2rem;
-  --spaceSize5: 3rem;
+  --spaceSize2: 0.6rem;
+  --spaceSize3: 0.75rem;
+  --spaceSize4: 1rem;
+  --spaceSize5: 2rem;
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
   --gridColumnLayout: 22% 22% 22% 22%;
@@ -265,7 +265,7 @@ textarea:focus {
   font-size: var(--fontSize1);
   padding: var(--spaceSize2);
   text-transform: uppercase;
-  text-align: center;
+  text-align: left;
   border-top: var(--borderSize2) solid var(--colorBorderMain);
   border-bottom: var(--borderSize2) solid var(--colorBorderMain);
   font-weight: var(--fontWeightBold);
@@ -303,21 +303,21 @@ textarea:focus {
   justify-content: space-evenly;
   margin-bottom: var(--spaceSize3);
 }
-#fav .commands > *,
-#command .commands > * {
-  flex-grow: 1;
-  margin-right: var(--spaceSize4);
-  max-width: 220px;
-}
-#fav .commands > *:last-child,
-#command .commands > *:last-child {
-  margin-right: 0;
-}
 #fav .commands a,
 #command .commands a,
 #fav .commands button,
 #command .commands button {
-  text-align: center !important;
+  text-align: left !important;
+}
+#fav .commands > *,
+#command .commands > * {
+  flex-grow: 1;
+  margin-right: var(--spaceSize4);
+  max-width: 210px;
+}
+#fav .commands > *:last-child,
+#command .commands > *:last-child {
+  margin-right: 0;
 }
 #fav#fav,
 #command#fav {
@@ -417,7 +417,7 @@ textarea:focus {
 }
 .dropdown button,
 .dropdown a {
-  text-align: center;
+  text-align: left;
   width: 100%;
 }
 .dropdown button:active,
@@ -439,7 +439,7 @@ textarea:focus {
   width: 100%;
   display: block;
   padding: var(--spaceSize2);
-  text-align: center;
+  text-align: left;
 }
 .dropdown:hover .dropdown-content,
 .dropdown:focus-within .dropdown-content {
@@ -453,7 +453,7 @@ textarea:focus {
 load {
   box-sizing: border-box;
   border-top: 5px solid #58a6ff;
-  animation: 2s ease-out loadingBar;
+  animation: 1s ease-out loadingBar;
   display: block;
   position: fixed;
   left: 0;
@@ -496,7 +496,7 @@ load {
 .modal .modalBody {
   font-weight: var(--fontWeightBold);
   background: var(--colorBgSecondary);
-  text-align: center;
+  text-align: left;
   box-shadow:
     0 2px 2px -1px var(--colorShadow),
     0 4px 4px -2px var(--colorShadow);
@@ -568,5 +568,12 @@ load {
   100% {
     display: block;
     opacity: 1;
+  }
+}
+/* Disable all animations and transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }
