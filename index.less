@@ -1,28 +1,44 @@
-// BEGIN Color
+/* BEGIN Color */
 :root {
   .dark-theme();
 }
 
 .light-theme {
-  --colorBgMain: #fff;
-  --colorBgSecondary: #f2f2f2;
-  --colorBgHover: #c9c9c9;
-  --colorTextMain: #000;
-  --colorTextLink: #005594;
-  --colorBorderMain: #58a6ff;
-  --colorBorderSecondary: #c9d1d9;
-  --colorShadow: #aaa;
+  --colorBgMain: #ffffff;
+  /* pure white for max contrast */
+  --colorBgSecondary: #e6e6e6;
+  /* slightly darker secondary */
+  --colorBgHover: #cccccc;
+  /* darker hover */
+  --colorTextMain: #000000;
+  /* pure black for max contrast */
+  --colorTextLink: #003366;
+  /* darker blue link */
+  --colorBorderMain: #004aad;
+  /* stronger blue border */
+  --colorBorderSecondary: #999999;
+  /* more visible secondary border */
+  --colorShadow: #666666;
+  /* stronger shadow */
 }
 
 .dark-theme {
-  --colorBgMain: #0d1117;
-  --colorBgSecondary: #161b22;
-  --colorBgHover: #303134;
-  --colorTextMain: #c9d1d9;
-  --colorTextLink: #8ab4f8;
-  --colorBorderMain: #58a6ff;
-  --colorBorderSecondary: #30363d;
-  --colorShadow: #333;
+  --colorBgMain: #0a0a0a;
+  /* very dark background */
+  --colorBgSecondary: #1a1a1a;
+  /* slightly lighter secondary */
+  --colorBgHover: #333333;
+  /* stronger hover */
+  --colorTextMain: #f5f5f5;
+  /* almost white text for contrast */
+  --colorTextLink: #4ea1ff;
+  /* brighter blue links */
+  --colorBorderMain: #3399ff;
+  /* more visible blue border */
+  --colorBorderSecondary: #444444;
+  /* darker secondary border */
+  --colorShadow: #222222;
+  /* deeper shadow */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,12 +54,12 @@
 }
 
 :root {
-  --colorWhite: #fff;
-  --colorBlack: #000;
-  --colorBlacklight: #333;
+  --colorWhite: #ffffff;
+  --colorBlack: #000000;
+  --colorBlacklight: #222222;
 }
 
-// END Color
+/* END Color */
 
 :root {
   --fontFamilyMain:
