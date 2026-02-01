@@ -20,7 +20,7 @@ jobs:
           ref: ${{ github.head_ref }}
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '24'
           cache: 'npm'
       - run: npm install
       - run: npm run build
