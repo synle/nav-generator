@@ -1,20 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Loading...</title>
-    <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <load />
-  </body>
-    <script>
-      // hooking up service worker
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw-nav.js', {
-          scope: '.',
-        });
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Loading...</title>
+
+  <link rel="stylesheet" href="index.css" />
+
+  <!-- Babel Standalone (pinned) -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js"></script>
+
+  <!-- Import maps (same CDN, pinned versions) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/+esm",
+        "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/+esm"
       }
-    </script>
-    <script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="index.jsx" type="text/babel" data-presets="react" data-type="module"></script>
+    }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <!-- JSX Loader -->
+  <script type="module">
+    async function loadJSX(path) {
+      const src = await fetch(path).then(r => r.text());
+
+      const { code } = Babel.transform(src, {
+        presets: ["react"],
+        sourceType: "module"
+      });
+
+      const blob = new Blob([code], { type: "text/javascript" });
+      const url = URL.createObjectURL(blob);
+      return import(url);
+    }
+
+    // Entry
+    await loadJSX("./index.jsx");
+  </script>
+</body>
 </html>

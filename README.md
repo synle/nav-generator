@@ -12,7 +12,7 @@ Follow this URL to create a new nav - https://synle.github.io/nav-generator/
 
 ## Deployment
 
-You can deploy the nav to Github Pages. For a quick deployment, refer to this Github Template. https://github.com/synle/nav-generator
+You can deploy the nav to Github Pages. For a quick deployment, refer to this Github Template. https://github.com/synle/nav-generator-template
 
 ## Features
 
