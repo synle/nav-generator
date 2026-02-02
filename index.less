@@ -238,7 +238,7 @@ textarea {
   padding: var(--spaceSize3) var(--spaceSize3) var(--spaceSize4) var(--spaceSize3);
 
   > * {
-    animation: fadeInFromNone 0.5s ease-out;
+    animation: fadeInFromNone 0.35s ease-out;
     text-align: left;
   }
 
@@ -328,6 +328,8 @@ textarea {
       }
 
       &.htmlBlock {
+        padding: var(--spaceSize2);
+        overflow: hidden;
       }
     }
 
@@ -426,7 +428,7 @@ textarea {
   &:focus-within {
     .dropdown-content {
       display: block;
-      animation: fadeInFromNone 0.3s ease-out;
+      animation: fadeInFromNone 0.35s ease-out;
 
       &.pullUp {
         bottom: 41px;
@@ -438,7 +440,7 @@ textarea {
 load {
   box-sizing: border-box;
   border-top: 5px solid #58a6ff;
-  animation: 1s ease-out loadingBar;
+  animation: 0.9s ease-out loadingBar;
   display: block;
   position: fixed;
   left: 0;
@@ -585,13 +587,9 @@ load {
 }
 
 /* Disable all animations and transitions for users who prefer reduced motion */
-* {
+@media (prefers-reduced-motion: reduce) {
+  * {
     animation: none !important;
     transition: none !important;
   }
-// @media (prefers-reduced-motion: reduce) {
-//   * {
-//     animation: none !important;
-//     transition: none !important;
-//   }
-// }
+}
