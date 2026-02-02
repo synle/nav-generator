@@ -1,5 +1,5 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import React, { useContext, useEffect, useMemo, useState, useRef, useCallback } from 'react';
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
@@ -1553,6 +1553,12 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function _render() {
-    ReactDOM.render(<App schema={inputSchema} viewMode={viewMode} />, document.body);
+    ReactDOM.render(
+      React.createElement(App, {
+        schema: inputSchema,
+        viewMode: viewMode,
+      }),
+      document.body,
+    );
   }
 })();

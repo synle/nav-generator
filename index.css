@@ -356,6 +356,7 @@ textarea:focus {
 #fav#fav .block.htmlBlock,
 #command#fav .block.htmlBlock {
   padding: var(--spaceSize2);
+  overflow: hidden;
 }
 #fav#fav .tabs,
 #command#fav .tabs {
