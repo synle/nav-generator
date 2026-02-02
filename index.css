@@ -257,7 +257,7 @@ textarea:focus {
 }
 #fav > *,
 #command > * {
-  animation: fadeInFromNone 0.5s ease-out;
+  animation: fadeInFromNone 0.35s ease-out;
   text-align: left;
 }
 #fav .title,
@@ -307,7 +307,7 @@ textarea:focus {
 #command .commands a,
 #fav .commands button,
 #command .commands button {
-  text-align: left !important;
+  text-align: center !important;
 }
 #fav .commands > *,
 #command .commands > * {
@@ -352,6 +352,10 @@ textarea:focus {
   padding: var(--spaceSize2);
   overflow: hidden;
   font-family: var(--fontFamilyMonospace);
+}
+#fav#fav .block.htmlBlock,
+#command#fav .block.htmlBlock {
+  padding: var(--spaceSize2);
 }
 #fav#fav .tabs,
 #command#fav .tabs {
@@ -444,7 +448,7 @@ textarea:focus {
 .dropdown:hover .dropdown-content,
 .dropdown:focus-within .dropdown-content {
   display: block;
-  animation: fadeInFromNone 0.3s ease-out;
+  animation: fadeInFromNone 0.35s ease-out;
 }
 .dropdown:hover .dropdown-content.pullUp,
 .dropdown:focus-within .dropdown-content.pullUp {
@@ -453,7 +457,7 @@ textarea:focus {
 load {
   box-sizing: border-box;
   border-top: 5px solid #58a6ff;
-  animation: 1s ease-out loadingBar;
+  animation: 0.9s ease-out loadingBar;
   display: block;
   position: fixed;
   left: 0;
