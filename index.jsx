@@ -252,16 +252,56 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     input = input.trim();
 
     let rawOutput = `
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8' />
+    <meta charset="UTF-8" />
     <title>Loading...</title>
     <link rel="stylesheet" href="${APP_BASE_URL}/index.css" />
   </head>
-  <load />
-  <js_script type='schema'>${input}</js_script>
-  <js_script src='https://unpkg.com/@babel/standalone/babel.min.js'></js_script>
-  <js_script src='${APP_BASE_URL}/index.jsx' type='text/babel' data-presets='react' data-type='module'></js_script>
+  <body>
+    <load></load>
+    <js_script type='schema'>${input}</js_script>
+    <js_script>
+      (async function bootstrap() {
+        const js_scripts = [
+          "https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js",
+        ];
+        const importMapURL = "${APP_BASE_URL}//import-map.json";
+
+        for (const src of js_scripts) {
+          await new Promise((res) => {
+            const s = document.createElement("js_script");
+            s.src = src;
+            s.onload = res;
+            document.head.appendChild(s);
+          });
+        }
+
+        const importMapJSON = await fetch(importMapURL).then((r) => r.text());
+        const js_script = document.createElement("js_script");
+        js_script.type = "importmap";
+        js_script.textContent = importMapJSON;
+        document.head.appendChild(js_script);
+
+        async function loadJSX(path) {
+          const src = await fetch(path).then((r) => r.text());
+
+          const { code } = Babel.transform(src, {
+            presets: ["react"],
+            sourceType: "module",
+          });
+
+          const blob = new Blob([code], { type: "text/js_script" });
+          const url = URL.createObjectURL(blob);
+
+          return import(url);
+        }
+
+        await loadJSX("${APP_BASE_URL}/index.jsx");
+      })();
+    </js_script>
+  </body>
 </html>
     `
       .trim()
