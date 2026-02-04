@@ -1,65 +1,13 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Loading...</title>
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="https://synle.github.io/nav-generator/index.css" />
   </head>
+
   <body>
     <load></load>
-    <script>
-      (async function bootstrap() {
-        /* -------- Load CDN Scripts -------- */
-        const cdnScripts = ['https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js'];
-
-        /* -------- Import Map URL Resolution -------- */
-        // protocol-relative for http/https compatibility
-        const isGithubPages = location.hostname === 'synle.github.io';
-        const importMapURL = isGithubPages
-          ? '//synle.github.io/nav-generator/import-map.json'
-          : './import-map.json';
-
-        for (const src of cdnScripts) {
-          await new Promise((res, rej) => {
-            const s = document.createElement('script');
-            s.src = src;
-            s.onload = res;
-            s.onerror = rej;
-            document.head.appendChild(s);
-          });
-        }
-
-        /* -------- Load Import Map -------- */
-        const importMapJSON = await fetch(importMapURL).then((r) => {
-          if (!r.ok) throw new Error('Failed to load import map');
-          return r.text();
-        });
-
-        const importMapScript = document.createElement('script');
-        importMapScript.type = 'importmap';
-        importMapScript.textContent = importMapJSON;
-        document.head.appendChild(importMapScript);
-
-        /* -------- JSX Loader -------- */
-        async function loadJSX(path) {
-          const src = await fetch(path).then((r) => {
-            if (!r.ok) throw new Error(`Failed to load ${path}`);
-            return r.text();
-          });
-
-          const { code } = Babel.transform(src, {
-            presets: ['react'],
-            sourceType: 'module',
-          });
-
-          const blob = new Blob([code], { type: 'text/javascript' });
-          const url = URL.createObjectURL(blob);
-          return import(url);
-        }
-
-        /* -------- Entry -------- */
-        await loadJSX('./index.jsx');
-      })();
-    </script>
+    <script src="./index.js"></script>
   </body>
 </html>
