@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+import './index.scss';
 
 // Set global flag if script URL has ?hasCustomNavBeforeLoad=1
 const params = new URLSearchParams(document.currentScript?.src.split('?')[1]);
