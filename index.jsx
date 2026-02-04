@@ -418,12 +418,20 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
       // other processing for non block
       if (isInABlock) {
+        let valueToUse = '';
+
+        // attempt to format it as html
+        valueToUse = blockBuffer.join('\n');
+        try {
+          valueToUse = JSON.stringify(JSON.parse(valueToUse), null, 2);
+        } catch (err) {}
+
         if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
           // end of a code block
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
-            value: blockBuffer.join('\n'),
+            value: valueToUse,
             type: 'code_block',
           });
           isInABlock = false;
@@ -436,7 +444,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
-            value: blockBuffer.join('\n'),
+            value: valueToUse,
             type: 'html_block',
           });
           isInABlock = false;
