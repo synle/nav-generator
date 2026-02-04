@@ -8,7 +8,6 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
-  "devDependencies": {},
   "scripts": {
     "build": "sh build.sh",
     "format": "sh format.sh",
@@ -20,5 +19,8 @@
     "Le"
   ],
   "author": "Sy Le",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.27.2"
+  }
 }
