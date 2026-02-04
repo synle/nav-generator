@@ -1,9 +1,5 @@
 /* BEGIN Color */
-:root {
-  .dark-theme();
-}
-
-.light-theme {
+@mixin light-theme {
   --colorBgMain: #ffffff;
   /* pure white for max contrast */
   --colorBgSecondary: #e6e6e6;
@@ -22,7 +18,7 @@
   /* stronger shadow */
 }
 
-.dark-theme {
+@mixin dark-theme {
   --colorBgMain: #0a0a0a;
   /* very dark background */
   --colorBgSecondary: #1a1a1a;
@@ -41,15 +37,19 @@
   /* deeper shadow */
 }
 
+:root {
+  @include dark-theme;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    .dark-theme();
+    @include dark-theme;
   }
 }
 
 @media print, (prefers-color-scheme: light) {
   :root {
-    .light-theme();
+    @include light-theme;
   }
 }
 
@@ -96,32 +96,52 @@ ul {
   padding: 0;
 }
 
+@mixin h1 {
+  font-size: var(--fontSize1);
+}
+
+@mixin h2 {
+  font-size: var(--fontSize2);
+}
+
+@mixin h3 {
+  font-size: var(--fontSize3);
+}
+
+@mixin h4 {
+  font-size: var(--fontSize4);
+}
+
+@mixin h5 {
+  font-size: var(--fontSize5);
+}
+
 .h1,
 h1 {
-  font-size: var(--fontSize1);
+  @include h1;
 }
 
 .h2,
 h2 {
-  font-size: var(--fontSize2);
+  @include h2;
 }
 
 .h3,
 h3 {
-  font-size: var(--fontSize3);
+  @include h3;
 }
 
 .h4,
 h4 {
-  font-size: var(--fontSize4);
+  @include h4;
 }
 
 .h5,
 h5 {
-  font-size: var(--fontSize5);
+  @include h5;
 }
 
-@gridColumnWidth: 330px;
+$gridColumnWidth: 330px;
 
 :root {
   --borderSize1: 2px;
@@ -243,7 +263,7 @@ textarea {
   }
 
   .title {
-    .h1();
+    @include h1;
     padding: var(--spaceSize2);
     text-transform: uppercase;
     text-align: left;
@@ -253,7 +273,7 @@ textarea {
   }
 
   .header {
-    .h3();
+    @include h3;
     text-transform: uppercase;
     background: var(--colorBgSecondary);
     border-left: var(--borderSize4) solid var(--colorBorderMain);
@@ -514,13 +534,13 @@ load {
   display: none;
 }
 
-@media only screen and (max-width: @gridColumnWidth * 4) {
+@media only screen and (max-width: $gridColumnWidth * 4) {
   :root {
     --gridColumnLayout: 30% 30% 30%;
   }
 }
 
-@media only screen and (max-width: @gridColumnWidth * 3) {
+@media only screen and (max-width: $gridColumnWidth * 3) {
   :root {
     --gridGapHeight: 0.4rem;
     --gridGapWidth: 0.5rem;
@@ -528,7 +548,7 @@ load {
   }
 }
 
-@media only screen and (max-width: @gridColumnWidth * 2) {
+@media only screen and (max-width: $gridColumnWidth * 2) {
   :root {
     --fontSize1: 1rem;
     --fontSize2: 1rem;
