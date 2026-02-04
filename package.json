@@ -9,7 +9,7 @@
     "react-dom": "^17.0.2"
   },
   "scripts": {
-    "build": "npm run format && vite build && npm run format",
+    "build": "npm run format && NODE_ENV=production vite build",
     "format": "sh format.sh",
     "test": "echo \"TBD\"",
     "start": "npx http-server --cors .",
