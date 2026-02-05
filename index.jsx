@@ -947,8 +947,18 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             document.title = schemaComponent.value;
 
             return (
-              <div id={schemaComponent.id} key={schemaComponent.key} className='title'>
+              <div
+                id={schemaComponent.id}
+                key={schemaComponent.key}
+                className='title'
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 {schemaComponent.value}
+                <DropdownButtons>
+                  {/*dropdown trigger*/}
+                  <button className='dropdown-trigger'>Settings</button>
+                  {/*dropdown buttons*/}
+                  <ThemeToggle />
+                </DropdownButtons>
               </div>
             );
           case 'favIcon':
@@ -1553,6 +1563,45 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         },
       });
     });
+  }
+
+  const THEME_KEY = 'theme-mode';
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  function setTheme(theme) {
+    localStorage.setItem(THEME_KEY, theme);
+    applyTheme(theme);
+  }
+
+  function clearTheme() {
+    localStorage.removeItem(THEME_KEY);
+    document.documentElement.removeAttribute('data-theme');
+  }
+
+  function getInitialTheme() {
+    return localStorage.getItem(THEME_KEY) || null;
+  }
+
+  function ThemeToggle() {
+    const [theme, setThemeState] = useState(getInitialTheme);
+
+    useEffect(() => {
+      if (theme === 'dark' || theme === 'light') {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem(THEME_KEY, theme);
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.removeItem(THEME_KEY);
+      }
+    }, [theme]);
+
+    const toggleTheme = () => {
+      setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    };
+
+    return <button onClick={toggleTheme}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</button>;
   }
 
   function _render() {
