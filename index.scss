@@ -1,21 +1,24 @@
 /* BEGIN Color */
 @mixin light-theme {
-  --colorBgMain: #ffffff;
-  /* pure white for max contrast */
-  --colorBgSecondary: #e6e6e6;
-  /* slightly darker secondary */
-  --colorBgHover: #cccccc;
-  /* darker hover */
-  --colorTextMain: #000000;
-  /* pure black for max contrast */
-  --colorTextLink: #003366;
-  /* darker blue link */
-  --colorBorderMain: #004aad;
-  /* stronger blue border */
-  --colorBorderSecondary: #999999;
-  /* more visible secondary border */
-  --colorShadow: #666666;
-  /* stronger shadow */
+  --colorBgMain: #f9f9f9;
+  /* soft off-white */
+  --colorBgSecondary: #f0f0f0;
+  /* gentle contrast */
+  --colorBgHover: #e4e4e4;
+  /* subtle hover */
+
+  --colorTextMain: #1a1a1a;
+  /* dark gray instead of pure black */
+  --colorTextLink: #1a3d6e;
+  /* softer blue */
+
+  --colorBorderMain: #2a5cab;
+  /* softened blue */
+  --colorBorderSecondary: #cccccc;
+  /* lighter secondary border */
+
+  --colorShadow: rgba(0, 0, 0, 0.15);
+  /* lighter, transparent shadow */
 }
 
 @mixin dark-theme {
@@ -53,6 +56,15 @@
   }
 }
 
+/* Manual override */
+:root[data-theme='dark'] {
+  @include dark-theme;
+}
+
+:root[data-theme='light'] {
+  @include light-theme;
+}
+
 :root {
   --colorWhite: #ffffff;
   --colorBlack: #000000;
@@ -68,15 +80,9 @@
   --fontFamilySecondary: Helvetica, Tahoma, Geneva, sans-serif;
   --fontFamilyMonospace: monospace;
 
-  --fontWeightBold: 800;
+  --fontWeightBold: 700;
   --fontWeightSemiBold: 500;
-  --fontWeightLight: 300;
-
-  --fontSize1: 1.5rem;
-  --fontSize2: 1.2rem;
-  --fontSize3: 1.1rem;
-  --fontSize4: 1rem;
-  --fontSize5: 0.9rem;
+  --fontWeightLight: 400;
 
   --spaceSizeAuto: auto;
   --spaceSize0: 0;
@@ -144,10 +150,11 @@ h5 {
 $gridColumnWidth: 330px;
 
 :root {
-  --borderSize1: 2px;
-  --borderSize2: 4px;
-  --borderSize3: 5px;
-  --borderSize4: 0.5rem;
+  --fontSize1: 1.4rem;
+  --fontSize2: 1.2rem;
+  --fontSize3: 1.1rem;
+  --fontSize4: 1rem;
+  --fontSize5: 0.9rem;
 
   --spaceSize1: 0.5rem;
   --spaceSize2: 0.6rem;
@@ -157,6 +164,12 @@ $gridColumnWidth: 330px;
 
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
+
+  --borderSize1: 2px;
+  --borderSize2: 4px;
+  --borderSize3: 5px;
+  --borderSize4: 0.5rem;
+
   --gridColumnLayout: 22% 22% 22% 22%;
 
   --maxBodyWidth: 900px;
@@ -407,6 +420,7 @@ textarea {
   position: relative;
   display: inline-block;
   padding: 0 !important;
+  min-width: 120px;
 
   button,
   a {
