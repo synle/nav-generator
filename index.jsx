@@ -940,11 +940,26 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       const newAutocompleteSearches = new Set();
       const serializedSchema = _getSerializedSchema(schema);
 
+      let renderedSettingButtonOnTitle = false;
+
       const newDoms = serializedSchema.map((schemaComponent) => {
         switch (schemaComponent.type) {
           case 'title':
             // set the page title
             document.title = schemaComponent.value;
+
+            let domSettings = null;
+            if (renderedSettingButtonOnTitle === false) {
+              renderedSettingButtonOnTitle = true;
+              domSettings = (
+                <DropdownButtons>
+                  {/*dropdown trigger*/}
+                  <button className='dropdown-trigger'>Settings</button>
+                  {/*dropdown buttons*/}
+                  <ThemeToggle />
+                </DropdownButtons>
+              );
+            }
 
             return (
               <div
@@ -953,12 +968,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
                 className='title'
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 {schemaComponent.value}
-                <DropdownButtons>
-                  {/*dropdown trigger*/}
-                  <button className='dropdown-trigger'>Settings</button>
-                  {/*dropdown buttons*/}
-                  <ThemeToggle />
-                </DropdownButtons>
+                {domSettings}
               </div>
             );
           case 'favIcon':
@@ -1571,17 +1581,21 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function setTheme(theme) {
-    localStorage.setItem(THEME_KEY, theme);
     applyTheme(theme);
+    _setLocalValue(THEME_KEY, theme);
   }
 
   function clearTheme() {
-    localStorage.removeItem(THEME_KEY);
     document.documentElement.removeAttribute('data-theme');
+    _setLocalValue(THEME_KEY, '');
   }
 
   function getInitialTheme() {
-    return localStorage.getItem(THEME_KEY) || null;
+    try {
+      return _getLocalValue(THEME_KEY);
+    } catch (err) {
+      return null;
+    }
   }
 
   function ThemeToggle() {
@@ -1589,11 +1603,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
     useEffect(() => {
       if (theme === 'dark' || theme === 'light') {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(THEME_KEY, theme);
+        setTheme(theme);
       } else {
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.removeItem(THEME_KEY);
+        clearTheme();
       }
     }, [theme]);
 
