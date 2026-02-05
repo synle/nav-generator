@@ -75,14 +75,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
       function _removePrompt() {
         clearTimeout(timeoutRemovePromptDiv);
-
-        document.querySelector('#promptModal').style.opacity = '0.05';
-        document.querySelector('#promptModal').addEventListener('transitionend', () => {
-          try {
-            document.querySelector('#promptModal').remove();
-          } catch (err) {}
-        });
-
+        document.querySelector('#promptModal').remove();
         resolve();
       }
     });
@@ -171,12 +164,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       function _removeAlert() {
         clearTimeout(timeoutRemoveAlertDiv);
 
-        alertModalElem.style.opacity = '0.05';
-        alertModalElem.addEventListener('transitionend', () => {
-          try {
-            alertModalElem.remove();
-          } catch (err) {}
-        });
+        alertModalElem.remove();
 
         resolve();
       }
