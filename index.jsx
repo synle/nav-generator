@@ -707,7 +707,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           <SearchBox onSearch={onSearch} />
         </form>
         <div className='commands'>
-          <button id='edit' onClick={onEdit}>
+          <button id='edit' onClick={onEdit} role='button'>
             Edit
           </button>
           <DropdownButtons type='pullUp'>
@@ -826,10 +826,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       <div id='command'>
         <div className='title'>Edit Navigation</div>
         <div className='commands'>
-          <button id='applyEdit' type='button' onClick={() => onApply()}>
+          <button id='applyEdit' type='button' role='button' onClick={() => onApply()}>
             Apply
           </button>
-          <button id='cancelEdit' type='button' onClick={() => onCancel()}>
+          <button id='cancelEdit' type='button' role='button' onClick={() => onCancel()}>
             Cancel
           </button>
           <DropdownButtons>
