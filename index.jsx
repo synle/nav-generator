@@ -723,6 +723,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               Copy Bookmark
             </button>
           </DropdownButtons>
+          <VersionHistoryButton key={Date.now()} {...props} />
         </div>
       </div>
     );
@@ -743,6 +744,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
       //update the cache in the session storage
       _persistBufferSchema(bufferSchema); // commit the changes
+      createVersion(bufferSchema); // persist the schema in indexed db for version history
     }, [bufferSchema]);
 
     const onCancel = useCallback(async () => {
@@ -1349,7 +1351,94 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         return <NavEditContainer {...allProps} />;
       case 'create':
         return <NavCreateContainer {...allProps} />;
+      case 'version_history':
+        return <NavVersionHistory {...allProps} />;
     }
+  }
+
+  function NavVersionHistory(props) {
+    const { schema, onSetViewMode, onSetSchema } = props;
+
+    const [versions, setVersions] = useState([]);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedValue, setSelectedValue] = useState('');
+
+    // Load versions on mount
+    useEffect(() => {
+      let mounted = true;
+
+      async function loadVersions() {
+        try {
+          const allVersions = await getVersions();
+          if (mounted) {
+            // sort newest first
+            const sorted = allVersions.sort(
+              (a, b) => new Date(b.created_at) - new Date(a.created_at),
+            );
+            setVersions(sorted);
+          }
+        } catch (err) {
+          console.error('Failed to load versions:', err);
+        }
+      }
+
+      loadVersions();
+
+      return () => {
+        mounted = false;
+      };
+    }, []);
+
+    // Update selected value when dropdown changes
+    const handleSelectChange = (e) => {
+      const date = e.target.value;
+      setSelectedDate(date);
+
+      const version = versions.find((v) => v.created_at === date);
+      setSelectedValue(version ? version.value : '');
+    };
+
+    // Apply / Cancel handlers
+    const handleApply = () => {
+      if (selectedValue) {
+        onSetSchema(selectedValue); // update schema
+      }
+      onSetViewMode('read');
+    };
+
+    const handleCancel = () => {
+      onSetViewMode('read');
+    };
+
+    return (
+      <div id='command' className='nav-version-history'>
+        <div className='title'>Version History</div>
+        <div className='commands'>
+          <button id='applyEdit' type='button' role='button' onClick={() => handleApply()}>
+            Apply
+          </button>
+          <button id='cancelEdit' type='button' role='button' onClick={() => handleCancel()}>
+            Cancel
+          </button>
+          <select value={selectedDate} onChange={handleSelectChange}>
+            <option value=''>Select a Version</option>
+            {versions.map((v) => (
+              <option key={v.created_at} value={v.created_at}>
+                {new Date(v.created_at).toLocaleString()}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <SchemaEditor
+          id='input'
+          wrap='soft'
+          spellcheck='false'
+          autoFocus
+          value={selectedValue}
+          readOnly={true}></SchemaEditor>
+      </div>
+    );
   }
 
   // initialization
@@ -1614,6 +1703,136 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     };
 
     return <button onClick={toggleTheme}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</button>;
+  }
+
+  function VersionHistoryButton({ onSetViewMode }) {
+    const [hasVersions, setHasVersions] = useState(false);
+
+    useEffect(() => {
+      let mounted = true;
+
+      async function checkVersions() {
+        try {
+          const versions = await getVersions();
+          if (mounted) {
+            setHasVersions(versions.length > 0);
+          }
+        } catch (err) {
+          console.error('Failed to check versions:', err);
+        }
+      }
+
+      checkVersions();
+    }, []);
+
+    if (!hasVersions) return null;
+
+    return (
+      <button onClick={() => onSetViewMode('version_history')} type='button' role='button'>
+        Version History
+      </button>
+    );
+  }
+
+  // IndexedDB setup
+  const DB_NAME = 'VersionsDB';
+  const STORE_NAME = 'versions';
+  const DB_VERSION = 1;
+
+  let db;
+
+  // Initialize IndexedDB
+  function initDB() {
+    return new Promise((resolve, reject) => {
+      try {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = function (event) {
+          db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'created_at' });
+          }
+        };
+
+        request.onsuccess = function (event) {
+          db = event.target.result;
+          resolve(db);
+        };
+
+        request.onerror = function (event) {
+          console.error('IndexedDB error:', event.target.error);
+          reject(event.target.error);
+        };
+      } catch (err) {
+        console.error('Init DB failed:', err);
+        reject(err);
+      }
+    });
+  }
+
+  // Add a version (trim, no duplicates)
+  async function createVersion(value) {
+    try {
+      if (!db) await initDB();
+
+      // Trim input
+      const finalValue = value.trim();
+      if (!finalValue) {
+        console.log('Empty value, skipping insert.');
+        return null;
+      }
+
+      // Check for duplicates
+      const existingVersions = await getVersions();
+      const isDuplicate = existingVersions.some((v) => v.value === finalValue);
+      if (isDuplicate) {
+        console.log('Duplicate value detected, skipping insert.');
+        return null;
+      }
+
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+
+        const version = {
+          value: finalValue,
+          created_at: new Date().toISOString(),
+        };
+
+        const request = store.add(version);
+
+        request.onsuccess = () => resolve(version);
+        request.onerror = (e) => {
+          console.error('Add version failed:', e.target.error);
+          reject(e.target.error);
+        };
+      });
+    } catch (err) {
+      console.error('createVersion failed:', err);
+      throw err;
+    }
+  }
+
+  // Get all versions
+  async function getVersions() {
+    try {
+      if (!db) await initDB();
+
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = (e) => {
+          console.error('Get versions failed:', e.target.error);
+          reject(e.target.error);
+        };
+      });
+    } catch (err) {
+      console.error('getVersions failed:', err);
+      throw err;
+    }
   }
 
   function _render() {
