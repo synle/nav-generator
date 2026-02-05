@@ -44,7 +44,7 @@ Add a <Suspense fallback=...> component higher in the tree to provide a loading 
           <textarea id='promptInput'></textarea>
         </div>
       `),k();function k(){const _e=s.trim().split(`
-`).reduce((et,tt)=>(et+=Math.max(Math.floor(tt.length/75),1),et),1),ot=document.querySelector("#promptModal #promptInput");ot.value=s,ot.focus(),ot.setSelectionRange(0,s.length),ot.rows=Math.min(Math.max(_e,5),15),ot.onblur=_,c&&(o=setTimeout(_,1300))}function _(){clearTimeout(o),document.querySelector("#promptModal").style.opacity="0.05",document.querySelector("#promptModal").addEventListener("transitionend",()=>{try{document.querySelector("#promptModal").remove()}catch{}}),d()}})),window.alert=(a,s)=>i(a,!1,s),window.confirm=(a,s)=>i(a,!0,!0);function i(a,s,c){return clearTimeout(e),new Promise((d,k)=>{s?document.body.insertAdjacentHTML("beforeend",`
+`).reduce((et,tt)=>(et+=Math.max(Math.floor(tt.length/75),1),et),1),ot=document.querySelector("#promptModal #promptInput");ot.value=s,ot.focus(),ot.setSelectionRange(0,s.length),ot.rows=Math.min(Math.max(_e,5),15),ot.onblur=_,c&&(o=setTimeout(_,1300))}function _(){clearTimeout(o),document.querySelector("#promptModal").remove(),d()}})),window.alert=(a,s)=>i(a,!1,s),window.confirm=(a,s)=>i(a,!0,!0);function i(a,s,c){return clearTimeout(e),new Promise((d,k)=>{s?document.body.insertAdjacentHTML("beforeend",`
         <div id='confirmModal' class='modal'>
           <div class='modalBody'>
             ${a}
@@ -69,7 +69,7 @@ Add a <Suspense fallback=...> component higher in the tree to provide a loading 
               </footer>
             </div>
           </div>
-        `);const _=document.querySelector("#alertModal,#confirmModal");_e();function _e(){s?(_.querySelector(".yes").addEventListener("click",()=>{d(),ot()}),_.querySelector(".no").addEventListener("click",()=>{k(),ot()}),_.querySelector(".yes").focus()):c!==!1?e=setTimeout(ot,1300):(_.querySelector(".no").addEventListener("click",()=>{d(),ot()}),_.querySelector(".no").focus())}function ot(){clearTimeout(e),_.style.opacity="0.05",_.addEventListener("transitionend",()=>{try{_.remove()}catch{}}),d()}})}})(),(async()=>{const SAME_TAB_LINK_SPLIT="|",NEW_TAB_LINK_SPLIT="|||",HEADER_SPLIT="#",TITLE_SPLIT="!",CODE_BLOCK_SPLIT="```",HTML_BLOCK_SPLIT="---",TAB_SPLIT=">>>",TAB_TITLE_SPLIT="|",FAV_ICON_SPLIT="@";let cacheId=parseInt(Date.now());const DEFAULT_SCHEMA_TO_RENDER=`
+        `);const _=document.querySelector("#alertModal,#confirmModal");_e();function _e(){s?(_.querySelector(".yes").addEventListener("click",()=>{d(),ot()}),_.querySelector(".no").addEventListener("click",()=>{k(),ot()}),_.querySelector(".yes").focus()):c!==!1?e=setTimeout(ot,1300):(_.querySelector(".no").addEventListener("click",()=>{d(),ot()}),_.querySelector(".no").focus())}function ot(){clearTimeout(e),_.remove(),d()}})}})(),(async()=>{const SAME_TAB_LINK_SPLIT="|",NEW_TAB_LINK_SPLIT="|||",HEADER_SPLIT="#",TITLE_SPLIT="!",CODE_BLOCK_SPLIT="```",HTML_BLOCK_SPLIT="---",TAB_SPLIT=">>>",TAB_TITLE_SPLIT="|",FAV_ICON_SPLIT="@";let cacheId=parseInt(Date.now());const DEFAULT_SCHEMA_TO_RENDER=`
     ! Navigation ${new Date().toLocaleString()}
 
     # Main Link Section
