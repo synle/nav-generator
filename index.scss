@@ -196,7 +196,6 @@ body {
 
 button,
 a {
-  transition: all 0.5s ease-out;
   cursor: pointer;
   text-transform: uppercase;
   font-weight: var(--fontWeightSemiBold);
@@ -224,10 +223,6 @@ a {
     background: var(--colorBgHover) !important;
   }
 
-  &:active {
-    transform: translate(0, 5px);
-  }
-
   img {
     width: 16px;
     height: 16px;
@@ -236,7 +231,6 @@ a {
 
 input,
 textarea {
-  transition: all 0.15s ease-out;
   font-weight: var(--fontWeightLight);
   background: var(--colorBgMain);
   outline: none;
@@ -258,7 +252,6 @@ textarea {
   padding: var(--spaceSize3) var(--spaceSize3) var(--spaceSize4) var(--spaceSize3);
 
   > * {
-    animation: fadeInFromNone 0.35s ease-out;
     text-align: left;
   }
 
@@ -364,7 +357,6 @@ textarea {
         user-select: none;
         cursor: pointer;
         text-transform: uppercase;
-        transition: border 0.2s ease-out;
 
         &:hover,
         &:focus {
@@ -420,11 +412,6 @@ textarea {
   a {
     text-align: left;
     width: 100%;
-
-    &:active,
-    &:active {
-      transform: translate(5px, 0);
-    }
   }
 
   .dropdown-content {
@@ -432,7 +419,6 @@ textarea {
     position: absolute;
     background: var(--colorBgMain);
     z-index: 1;
-    transition: all 0.5s ease-out;
     left: 0;
     right: 0;
   }
@@ -448,7 +434,6 @@ textarea {
   &:focus-within {
     .dropdown-content {
       display: block;
-      animation: fadeInFromNone 0.35s ease-out;
 
       &.pullUp {
         bottom: 41px;
@@ -460,7 +445,6 @@ textarea {
 load {
   box-sizing: border-box;
   border-top: 5px solid #58a6ff;
-  animation: 0.9s ease-out loadingBar;
   display: block;
   position: fixed;
   left: 0;
@@ -472,7 +456,6 @@ load {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 0.4s ease-out;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -578,7 +561,6 @@ load {
   }
 }
 
-/* animation */
 @keyframes loadingBar {
   0% {
     width: 0;
@@ -606,10 +588,7 @@ load {
   }
 }
 
-/* Disable all animations and transitions for users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * {
-    animation: none !important;
-    transition: none !important;
   }
 }
