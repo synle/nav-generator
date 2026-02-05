@@ -416,16 +416,23 @@ textarea {
   }
 }
 
+button[role='button'] {
+  text-align: center;
+  display: inline-block !important;
+}
+
 .dropdown {
   position: relative;
   display: inline-block;
   padding: 0 !important;
   min-width: 120px;
+  text-align: center;
 
   button,
   a {
-    text-align: left;
+    text-align: center;
     width: 100%;
+    display: block;
   }
 
   .dropdown-content {
@@ -441,7 +448,6 @@ textarea {
     width: 100%;
     display: block;
     padding: var(--spaceSize2);
-    text-align: left;
   }
 
   &:hover,
