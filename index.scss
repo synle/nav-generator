@@ -532,6 +532,93 @@ load {
   }
 }
 
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  display: block;
+  padding: 6px 12px;
+
+  background-color: var(--colorBgSecondary);
+  color: var(--colorTextMain);
+  border: 1px solid var(--colorBorderMain);
+  border-radius: 4px;
+  padding: 10px 12px; // space for arrow
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+  box-shadow: 0 2px 4px var(--colorShadow);
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+
+  // Custom arrow
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%231a1a1a' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+
+  &:hover {
+    background-color: var(--colorBgHover);
+    border-color: var(--colorBorderMain);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--colorTextLink);
+    box-shadow: 0 0 0 2px rgba(42, 92, 171, 0.25);
+  }
+}
+
+textarea {
+  background-color: var(--colorBgSecondary);
+  color: var(--colorTextMain);
+  border: 1px solid var(--colorBorderMain);
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  width: 100%;
+  resize: vertical;
+  box-shadow: 0 2px 4px var(--colorShadow);
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--colorTextLink);
+    box-shadow: 0 0 0 2px rgba(42, 92, 171, 0.25);
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+
+  button {
+    background-color: var(--colorBgSecondary);
+    color: var(--colorTextMain);
+    border: 1px solid var(--colorBorderMain);
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+
+    &:hover {
+      background-color: var(--colorBgHover);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--colorTextLink);
+      box-shadow: 0 0 0 2px rgba(42, 92, 171, 0.25);
+    }
+  }
+}
+
 // utils
 .hidden {
   display: none;
@@ -578,33 +665,6 @@ load {
   body {
     width: 800px;
     min-width: 800px;
-  }
-}
-
-@keyframes loadingBar {
-  0% {
-    width: 0;
-  }
-
-  100% {
-    width: 100%;
-  }
-}
-
-@keyframes fadeInFromNone {
-  0% {
-    display: none;
-    opacity: 0;
-  }
-
-  1% {
-    display: block;
-    opacity: 0;
-  }
-
-  100% {
-    display: block;
-    opacity: 1;
   }
 }
 
