@@ -1,4 +1,4 @@
 echo '>> format formatting'
 npx prettier --write \
-  **/*.{html,jsx,less,scss,yml,md,json,prettierrc} \
+  **/*.{html,jsx,scss,yml,md,json,prettierrc}  vite.config.js \
 && echo '>> done formatting...'
