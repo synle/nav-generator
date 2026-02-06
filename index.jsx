@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 
@@ -34,7 +34,7 @@ function Modal(props) {
   const { isOpen, onClose, children } = props;
   const modalRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen) return;
 
     const handleEscape = (e) => {
@@ -72,7 +72,7 @@ function AlertModal(props) {
   const { message, onClose, type = 'alert' } = props;
   const primaryButtonRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (primaryButtonRef.current) {
       primaryButtonRef.current.focus();
     }
@@ -127,7 +127,7 @@ function PromptModal(props) {
   const textareaRef = useRef(null);
   const primaryButtonRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (textareaRef.current) {
       if (hasCallback) {
         textareaRef.current.focus();
@@ -780,7 +780,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     );
 
     // handling search
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (refContainer && refContainer.current) {
         const doc = refContainer.current;
 
@@ -855,10 +855,9 @@ window.prompt = (message, initialValue = '', callback = null) => {
             <button onClick={() => onSetViewMode('bookmark_import_chrome')}>
               Import Chrome Bookmarks
             </button>
-            {/*TODO:*/}
-            {/*<button onClick={() => onSetViewMode('bookmark_export_chrome')}>
+            <button onClick={() => onSetViewMode('bookmark_export_chrome')}>
               Export Chrome Bookmarks
-            </button>*/}
+            </button>
           </DropdownButtons>
           <VersionHistoryButton key={Date.now()} {...props} />
         </div>
@@ -935,7 +934,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }
 
     // effects
-    useEffect(() => {
+    useLayoutEffect(() => {
       // store it into cache
       _persistBufferSchema(schema);
 
@@ -946,7 +945,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, []);
 
     // trigger the confirmation to save before unload
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (hasPendingChanges) {
         window.onbeforeunload = function (e) {
           e.preventDefault();
@@ -956,7 +955,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, [hasPendingChanges]);
 
     // update bookmarklet
-    useEffect(() => {
+    useLayoutEffect(() => {
       setBookmark(_getNavBookmarkletFromSchema(bufferSchema));
     }, [bufferSchema]);
 
@@ -1057,7 +1056,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const [doms, setDoms] = useState(null);
 
     // handling tabs
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (refContainer && refContainer.current) {
         const doc = refContainer.current;
 
@@ -1073,7 +1072,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, [doms, refContainer.current]);
 
     // generate the view dom
-    useEffect(() => {
+    useLayoutEffect(() => {
       const newAutocompleteSearches = new Set();
       const serializedSchema = _getSerializedSchema(schema);
 
@@ -1236,7 +1235,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
   }
 
   function SchemaEditor(props) {
-    const MONACO_LOAD_TIMEOUT = 3000; // 3 seconds timeout
+    const MONACO_LOAD_TIMEOUT = 5000; // seconds timeout
     const {
       value,
       onInput,
@@ -1254,7 +1253,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const [useFallback, setUseFallback] = useState(false);
     const fallbackTimeoutRef = useRef(null);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       // Set fallback timeout
       fallbackTimeoutRef.current = setTimeout(() => {
         if (!monacoRef.current) {
@@ -1452,7 +1451,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, []);
 
     // Update editor value when prop changes
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (monacoRef.current && monacoRef.current.getValue() !== value) {
         const position = monacoRef.current.getPosition();
         monacoRef.current.setValue(value || '');
@@ -1463,7 +1462,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, [value]);
 
     // Update language when type prop changes
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (monacoRef.current && window.monaco) {
         const language = type === 'html' ? 'html' : 'nav-generator';
         const model = monacoRef.current.getModel();
@@ -1474,7 +1473,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, [type]);
 
     // Update theme when it changes
-    useEffect(() => {
+    useLayoutEffect(() => {
       const observer = new MutationObserver(() => {
         if (window.monaco && monacoRef.current) {
           const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -1667,7 +1666,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, []);
 
     // Close dropdown when clicking outside
-    useEffect(() => {
+    useLayoutEffect(() => {
       const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
           closeDropdown();
@@ -1741,7 +1740,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const onSetSchema = (newSchema) => setSchema(newSchema);
 
     // effect
-    useEffect(() => {
+    useLayoutEffect(() => {
       switch (viewMode) {
         case 'edit':
           document.title = 'Edit Navigation';
@@ -1784,7 +1783,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const [selectedValue, setSelectedValue] = useState('');
 
     // Load versions on mount
-    useEffect(() => {
+    useLayoutEffect(() => {
       let mounted = true;
 
       async function loadVersions() {
@@ -1862,9 +1861,89 @@ window.prompt = (message, initialValue = '', callback = null) => {
   }
 
   function parseNavGeneratorToChromeBookmark(schema) {
-    // TODO: Implement conversion from nav-generator schema to Chrome bookmark HTML
-    // For now, just return the input as-is
-    return schema;
+    // Safety check for empty schema
+    if (!schema || typeof schema !== 'string' || schema.trim().length === 0) {
+      return '<!-- No bookmarks to export -->';
+    }
+
+    // Parse the schema to get structured data
+    const serializedSchema = _getSerializedSchema(schema);
+
+    // Filter for only title, header, and link types
+    const relevantItems = serializedSchema.filter(
+      (item) => item.type === 'title' || item.type === 'header' || item.type === 'link',
+    );
+
+    if (relevantItems.length === 0) {
+      return '<!-- No bookmarks to export -->';
+    }
+
+    // Find the title (page title)
+    const titleItem = relevantItems.find((item) => item.type === 'title');
+    const pageTitle = titleItem ? titleItem.value : 'Bookmarks';
+
+    // Group links under headers
+    const groups = [];
+    let currentGroup = null;
+
+    for (const item of relevantItems) {
+      if (item.type === 'header') {
+        // Start a new group
+        if (currentGroup && currentGroup.links.length > 0) {
+          groups.push(currentGroup);
+        }
+        currentGroup = {
+          name: item.value,
+          links: [],
+        };
+      } else if (item.type === 'link') {
+        // Add link to current group or create default group
+        if (!currentGroup) {
+          currentGroup = {
+            name: 'Bookmarks',
+            links: [],
+          };
+        }
+        currentGroup.links.push({
+          text: item.linkText,
+          url: item.linkUrl,
+        });
+      }
+    }
+
+    // Don't forget the last group
+    if (currentGroup && currentGroup.links.length > 0) {
+      groups.push(currentGroup);
+    }
+
+    // Generate Chrome bookmark HTML
+    const timestamp = Math.floor(Date.now() / 1000);
+    let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>${pageTitle}</TITLE>
+<H1>${pageTitle}</H1>
+<DL><p>
+`;
+
+    // Add each group as a folder
+    groups.forEach((group) => {
+      html += `    <DT><H3 ADD_DATE="${timestamp}" LAST_MODIFIED="${timestamp}">${group.name}</H3>\n`;
+      html += `    <DL><p>\n`;
+
+      // Add links in this group
+      group.links.forEach((link) => {
+        html += `        <DT><A HREF="${link.url}" ADD_DATE="${timestamp}">${link.text}</A>\n`;
+      });
+
+      html += `    </DL><p>\n`;
+    });
+
+    html += `</DL><p>\n`;
+
+    return html;
   }
 
   function NavChromeBookmarkImport(props) {
@@ -2094,7 +2173,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const [htmlOutput, setHtmlOutput] = useState('');
 
     // Generate the Chrome bookmark HTML on mount
-    useEffect(() => {
+    useLayoutEffect(() => {
       const chromeBookmarkHtml = parseNavGeneratorToChromeBookmark(schema);
       setHtmlOutput(chromeBookmarkHtml);
     }, [schema]);
@@ -2398,7 +2477,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
   function ThemeToggle() {
     const [theme, setThemeState] = useState(getInitialTheme);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (theme === 'dark' || theme === 'light') {
         setTheme(theme);
       } else {
@@ -2416,7 +2495,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
   function VersionHistoryButton({ onSetViewMode }) {
     const [hasVersions, setHasVersions] = useState(false);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       let mounted = true;
 
       async function checkVersions() {

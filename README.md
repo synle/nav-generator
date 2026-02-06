@@ -34,8 +34,8 @@ You can deploy the nav to Github Pages. For a quick deployment, refer to this Gi
 - [x] Supported Version History to prevent accidental edits
 - [x] Uses monaco Text Editor for better visualization
   - [x] Added syntax highlights
-- [x] Support offline mode
-- [ ] Ability to extract links as bookmark for Chrome / Brave / Edge
+- [x] Support offline mode to cache the resources
+- [x] Ability to import and extract links as bookmark for Chrome / Brave / Edge
 
 ## Syntax
 
