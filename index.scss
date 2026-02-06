@@ -172,7 +172,7 @@ $gridColumnWidth: 330px;
 
   --gridColumnLayout: 22% 22% 22% 22%;
 
-  --maxBodyWidth: 900px;
+  --maxBodyWidth: 96vw;
 }
 
 *,
@@ -436,28 +436,70 @@ button[role='button'] {
   }
 
   .dropdown-content {
-    display: none;
     position: absolute;
     background: var(--colorBgMain);
-    z-index: 1;
+    border: var(--borderSize1) solid var(--colorBorderSecondary);
+    border-radius: 5px;
+    box-shadow:
+      0 2px 4px var(--colorShadow),
+      0 4px 8px var(--colorShadow);
+    z-index: 1000;
     left: 0;
-    right: 0;
+    width: max-content;
+    min-width: 100%;
+    margin-top: 2px;
+
+    &.pullUp {
+      bottom: calc(100% + 2px);
+      margin-top: 0;
+      margin-bottom: 2px;
+    }
+
+    button,
+    a {
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--colorBorderSecondary);
+      white-space: nowrap;
+      word-break: normal;
+      text-align: left;
+      justify-content: flex-start;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:first-child {
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+      }
+
+      &:last-child {
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+    }
   }
 
   .dropdown-trigger {
     width: 100%;
     display: block;
     padding: var(--spaceSize2);
-  }
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
-  &:hover,
-  &:focus-within {
-    .dropdown-content {
-      display: block;
+    &::after {
+      content: '▼';
+      margin-left: 0.5rem;
+      font-size: 0.7rem;
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
 
-      &.pullUp {
-        bottom: 41px;
-      }
+    &[aria-expanded='true']::after {
+      transform: rotate(180deg);
     }
   }
 }
@@ -477,58 +519,143 @@ load {
   align-items: center;
   justify-content: center;
   position: fixed;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-  z-index: 1;
-  font-size: 16px;
-  background: rgba(80, 80, 80, 0.6);
-  color: var(--colorTextMain);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease-out;
 
-  > div {
+  .modalContent {
     max-width: var(--maxBodyWidth);
-    width: 100%;
-    padding: var(--spaceSize3);
-  }
-
-  > textarea {
-    max-width: var(--maxBodyWidth);
-    width: 100%;
-  }
-
-  footer {
+    width: 90%;
+    max-height: 90vh;
     display: flex;
-    justify-content: flex-end;
-    margin-top: var(--spaceSize4);
-
-    button {
-      margin-left: 40px;
-      min-width: 120px;
-    }
+    flex-direction: column;
+    animation: slideIn 0.2s ease-out;
   }
 
   .modalBody {
-    font-weight: var(--fontWeightBold);
     background: var(--colorBgSecondary);
-    text-align: left;
+    border: var(--borderSize1) solid var(--colorBorderMain);
+    border-radius: 8px;
+    padding: var(--spaceSize4);
     box-shadow:
-      0 2px 2px -1px var(--colorShadow),
-      0 4px 4px -2px var(--colorShadow);
+      0 4px 6px var(--colorShadow),
+      0 8px 16px var(--colorShadow);
   }
 
-  &#alertModal {
+  .modalMessage {
+    font-weight: var(--fontWeightBold);
+    font-size: var(--fontSize3);
+    line-height: 1.5;
+    margin-bottom: var(--spaceSize3);
+    word-break: break-word;
   }
 
-  &#confirmModal {
-  }
+  .modalTextarea {
+    max-width: 100%;
+    width: 100%;
+    max-height: 60vh;
+    min-height: 150px;
+    margin-top: var(--spaceSize3);
+    margin-bottom: 0;
+    font-family: var(--fontFamilyMonospace);
+    background: var(--colorBgMain);
+    border: var(--borderSize1) solid var(--colorBorderMain);
+    border-radius: 8px;
+    padding: var(--spaceSize3);
+    font-size: var(--fontSize4);
+    resize: vertical;
 
-  &#promptModal {
-    > textarea#promptInput {
-      max-height: 650px;
-      font-family: var(--fontFamilyMonospace);
-      border: none !important;
+    &--readonly {
+      resize: none;
+      cursor: default;
+      opacity: 0.9;
+      user-select: text;
     }
+  }
+
+  .modalBody .modalTextarea {
+    margin-top: var(--spaceSize3);
+    margin-bottom: 0;
+  }
+
+  .modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spaceSize3);
+    margin-top: var(--spaceSize4);
+
+    .modalBtn {
+      min-width: 100px;
+      padding: var(--spaceSize2) var(--spaceSize4);
+      font-weight: var(--fontWeightSemiBold);
+      border-radius: 6px;
+      transition: all 0.2s ease;
+
+      &.modalBtnPrimary {
+        color: var(--colorBgMain);
+        background: var(--colorBorderMain);
+        border-color: var(--colorBorderMain);
+
+        &:hover {
+          opacity: 0.9;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px var(--colorShadow);
+        }
+
+        &:focus {
+          outline: 3px solid var(--colorWhite);
+          outline-offset: 2px;
+          box-shadow:
+            0 0 0 6px var(--colorBorderMain),
+            0 2px 8px var(--colorShadow);
+        }
+
+        &:hover,
+        &:focus {
+          color: var(--colorBgMain);
+          background: var(--colorBorderMain);
+          border-color: var(--colorBorderMain);
+        }
+      }
+
+      &.modalBtnSecondary {
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px var(--colorShadow);
+        }
+
+        &:focus {
+          outline: 3px solid var(--colorBorderMain);
+          outline-offset: 2px;
+          box-shadow: 0 2px 8px var(--colorShadow);
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -552,7 +679,6 @@ select {
     background-color 0.2s,
     border-color 0.2s;
 
-  // Custom arrow
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%231a1a1a' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
@@ -619,7 +745,6 @@ textarea {
   }
 }
 
-// utils
 .hidden {
   display: none;
 }
@@ -665,10 +790,5 @@ textarea {
   body {
     width: 800px;
     min-width: 800px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
   }
 }
