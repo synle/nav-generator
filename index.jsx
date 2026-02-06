@@ -2559,9 +2559,32 @@ window.prompt = (message, initialValue = '', callback = null) => {
   const COLUMN_LAYOUT_KEY = 'column-layout';
   const COLUMN_LAYOUTS = {
     1: 'calc(100% - var(--gridGapWidth))',
-    2: 'calc(50% - var(--gridGapWidth)) calc(50% - var(--gridGapWidth))',
-    3: '30% 30% 30%',
-    4: '22% 22% 22% 22%',
+
+    2: `
+    calc(50% - (var(--gridGapWidth) / 2))
+    calc(50% - (var(--gridGapWidth) / 2))
+  `,
+
+    3: `
+    calc(33.333% - (2 * var(--gridGapWidth) / 3))
+    calc(33.333% - (2 * var(--gridGapWidth) / 3))
+    calc(33.333% - (2 * var(--gridGapWidth) / 3))
+  `,
+
+    4: `
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+  `,
+
+    5: `
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+  `,
   };
 
   function applyColumnLayout(columns) {
@@ -2616,11 +2639,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
     return (
       <>
+        <button onClick={() => setLayoutState(null)}>Responsive</button>
         <button onClick={() => setLayoutState('1')}>1 Column</button>
         <button onClick={() => setLayoutState('2')}>2 Columns</button>
         <button onClick={() => setLayoutState('3')}>3 Columns</button>
         <button onClick={() => setLayoutState('4')}>4 Columns</button>
-        <button onClick={() => setLayoutState(null)}>Responsive</button>
+        <button onClick={() => setLayoutState('5')}>5 Columns</button>
       </>
     );
   }
