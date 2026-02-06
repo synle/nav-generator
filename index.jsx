@@ -87,7 +87,7 @@ function AlertModal(props) {
             <button
               ref={primaryButtonRef}
               type='button'
-              className='modalBtn modalBtnPrimary'
+              className='modalBtn primary'
               onClick={() => onClose(true)}>
               Yes
             </button>
@@ -111,7 +111,7 @@ function AlertModal(props) {
           <button
             ref={primaryButtonRef}
             type='button'
-            className='modalBtn modalBtnPrimary'
+            className='modalBtn primary'
             onClick={() => onClose()}>
             OK
           </button>
@@ -174,7 +174,7 @@ function PromptModal(props) {
             <button
               ref={primaryButtonRef}
               type='button'
-              className='modalBtn modalBtnPrimary'
+              className='modalBtn primary'
               onClick={handleOk}>
               OK
             </button>
@@ -201,7 +201,7 @@ function PromptModal(props) {
           <button
             ref={primaryButtonRef}
             type='button'
-            className='modalBtn modalBtnPrimary'
+            className='modalBtn primary'
             onClick={handleOk}>
             OK
           </button>
