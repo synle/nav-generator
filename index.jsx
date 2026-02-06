@@ -681,6 +681,27 @@ window.prompt = (message, initialValue = '', callback = null) => {
             linkType = 'dataLink';
           }
 
+          if (!linkText) {
+            // Generate linkText from domain if not provided
+            try {
+              if (linkType === 'jsLink') {
+                linkText = 'JS Link';
+              } else if (linkType === 'dataLink') {
+                linkText = 'Data URL Link';
+              } else {
+                // Generate linkText from domain for regular URLs only
+                const url = new URL(linkUrl);
+                let hostname = url.hostname.replace(/^www\./, '');
+                const parts = hostname.split('.');
+                // Get root domain name (second-to-last part before TLD)
+                linkText = parts.length >= 2 ? parts[parts.length - 2] : hostname;
+              }
+            } catch (e) {
+              // If URL parsing fails, use the raw linkUrl
+              linkText = linkUrl.substr(0, 20) + '...';
+            }
+          }
+
           serializedSchema.push({
             key: newCacheId,
             type: 'link',
