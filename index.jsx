@@ -17,160 +17,283 @@ const NEW_NAV_URL = `${APP_INDEX_URL}?newNav`;
 
 // custom events
 window.copyToClipboard = async (text) => {
-  text = text || '';
+  text = (text || '').trim();
   if (text) {
     try {
       await navigator.clipboard.writeText(text);
-      await alert('Copied to clipboard!', true);
+      await alert('Copied to clipboard!');
     } catch (err) {
-      await prompt('Clipboard', text, false);
+      await prompt('Clipboard', text);
     }
   }
 };
 document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboard(e.text));
 
-// prompts and alert overrides
-(async () => {
-  let timeoutRemoveAlertDiv;
-  let timeoutRemovePromptDiv;
+// Modal component for alerts, prompts, and confirms
+function Modal(props) {
+  const { isOpen, onClose, children } = props;
+  const modalRef = useRef(null);
 
-  window.prompt = (promptText, promptInput, autoDismiss) => {
-    clearTimeout(timeoutRemovePromptDiv);
+  useEffect(() => {
+    if (!isOpen) return;
 
-    return new Promise((resolve) => {
-      promptInput = promptInput || '';
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
 
-      document.body.insertAdjacentHTML(
-        'beforeend',
-        `
-        <div id='promptModal' class='modal'>
-          <div class='modalBody'>${promptText}</div>
-          <textarea id='promptInput'></textarea>
+    const handleClickOutside = (e) => {
+      if (modalRef.current && e.target === modalRef.current) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return ReactDOM.createPortal(
+    <div className='modal' ref={modalRef}>
+      <div className='modalContent'>{children}</div>
+    </div>,
+    document.body,
+  );
+}
+
+function AlertModal(props) {
+  const { message, onClose, type = 'alert' } = props;
+  const primaryButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (primaryButtonRef.current) {
+      primaryButtonRef.current.focus();
+    }
+  }, []);
+
+  if (type === 'confirm') {
+    return (
+      <Modal isOpen={true} onClose={() => onClose(false)}>
+        <div className='modalBody'>
+          <div className='modalMessage'>{message}</div>
+          <footer className='modalFooter'>
+            <button
+              ref={primaryButtonRef}
+              type='button'
+              className='modalBtn modalBtnPrimary'
+              onClick={() => onClose(true)}>
+              Yes
+            </button>
+            <button
+              type='button'
+              className='modalBtn modalBtnSecondary'
+              onClick={() => onClose(false)}>
+              No
+            </button>
+          </footer>
         </div>
-      `,
-      );
+      </Modal>
+    );
+  }
 
-      _setupPrompt();
+  return (
+    <Modal isOpen={true} onClose={() => onClose()}>
+      <div className='modalBody'>
+        <div className='modalMessage'>{message}</div>
+        <footer className='modalFooter'>
+          <button
+            ref={primaryButtonRef}
+            type='button'
+            className='modalBtn modalBtnPrimary'
+            onClick={() => onClose()}>
+            OK
+          </button>
+        </footer>
+      </div>
+    </Modal>
+  );
+}
 
-      function _setupPrompt() {
-        const rowCount = promptInput
-          .trim()
-          .split('\n')
-          .reduce((totalCount, s) => {
-            totalCount += Math.max(Math.floor(s.length / 75), 1);
-            return totalCount;
-          }, 1);
+function PromptModal(props) {
+  const { message, initialValue = '', onClose, hasCallback = false } = props;
+  const [value, setValue] = useState(initialValue);
+  const textareaRef = useRef(null);
+  const primaryButtonRef = useRef(null);
 
-        const promtInputElem = document.querySelector('#promptModal #promptInput');
-        promtInputElem.value = promptInput;
-        promtInputElem.focus();
-        promtInputElem.setSelectionRange(0, promptInput.length);
-        promtInputElem.rows = Math.min(Math.max(rowCount, 5), 15);
-        promtInputElem.onblur = _removePrompt;
-
-        if (autoDismiss) {
-          timeoutRemovePromptDiv = setTimeout(_removePrompt, 1300);
-        }
+  useEffect(() => {
+    if (textareaRef.current) {
+      if (hasCallback) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(0, initialValue.length);
       }
 
-      function _removePrompt() {
-        clearTimeout(timeoutRemovePromptDiv);
-        document.querySelector('#promptModal').remove();
-        resolve();
-      }
-    });
+      // Calculate rows based on actual line count + buffer
+      const lines = initialValue.split('\n');
+      const lineCount = lines.length;
+
+      // Add 2-3 extra rows for editing comfort
+      const extraRows = hasCallback ? 3 : 2;
+      const calculatedRows = lineCount + extraRows;
+
+      // Calculate max rows based on viewport height
+      // Assume ~20px per row, and max 60% of viewport height for textarea
+      const maxViewportRows = Math.floor((window.innerHeight * 0.6) / 20);
+
+      // Set rows: minimum 5, maximum based on viewport, with our calculated value in between
+      textareaRef.current.rows = Math.min(Math.max(calculatedRows, 5), maxViewportRows, 30);
+    }
+  }, [initialValue, hasCallback]);
+
+  const handleOk = () => {
+    onClose(value, true);
   };
 
-  window.alert = (alertText, manualDismiss) => _showAlertPopup(alertText, false, manualDismiss);
-  window.confirm = (alertText, manualDismiss) => _showAlertPopup(alertText, true, true);
+  const handleCancel = () => {
+    onClose(null, false);
+  };
 
-  function _showAlertPopup(alertText, isConfirm, manualDismiss) {
-    clearTimeout(timeoutRemoveAlertDiv);
-
-    return new Promise((resolve, reject) => {
-      if (isConfirm) {
-        document.body.insertAdjacentHTML(
-          'beforeend',
-          `
-        <div id='confirmModal' class='modal'>
-          <div class='modalBody'>
-            ${alertText}
-            <footer>
-              <button type='button' class='yes'>Yes</button>
-              <button type='button' class='no'>No</button>
-            </footer>
-          </div>
+  if (hasCallback) {
+    return (
+      <Modal isOpen={true} onClose={handleCancel}>
+        <div className='modalBody'>
+          <div className='modalMessage'>{message}</div>
+          <textarea
+            ref={textareaRef}
+            className='modalTextarea'
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+          />
+          <footer className='modalFooter'>
+            <button
+              ref={primaryButtonRef}
+              type='button'
+              className='modalBtn modalBtnPrimary'
+              onClick={handleOk}>
+              OK
+            </button>
+            <button type='button' className='modalBtn modalBtnSecondary' onClick={handleCancel}>
+              Cancel
+            </button>
+          </footer>
         </div>
-      `,
-        );
-      } else {
-        if (manualDismiss !== false) {
-          document.body.insertAdjacentHTML(
-            'beforeend',
-            `
-          <div id='alertModal' class='modal'>
-            <div class='modalBody'>
-              ${alertText}
-            </div>
-          </div>
-        `,
-          );
-        } else {
-          document.body.insertAdjacentHTML(
-            'beforeend',
-            `
-          <div id='alertModal' class='modal'>
-            <div class='modalBody'>
-              ${alertText}
-              <footer>
-                <button type='button' class='no'>OK</button>
-              </footer>
-            </div>
-          </div>
-        `,
-          );
-        }
-      }
-
-      const alertModalElem = document.querySelector('#alertModal,#confirmModal');
-
-      _setupAlert();
-
-      function _setupAlert() {
-        if (isConfirm) {
-          alertModalElem.querySelector('.yes').addEventListener('click', () => {
-            resolve();
-            _removeAlert();
-          });
-          alertModalElem.querySelector('.no').addEventListener('click', () => {
-            reject();
-            _removeAlert();
-          });
-          alertModalElem.querySelector('.yes').focus();
-        } else {
-          if (manualDismiss !== false) {
-            timeoutRemoveAlertDiv = setTimeout(_removeAlert, 1300);
-          } else {
-            alertModalElem.querySelector('.no').addEventListener('click', () => {
-              resolve();
-              _removeAlert();
-            });
-
-            alertModalElem.querySelector('.no').focus();
-          }
-        }
-      }
-
-      function _removeAlert() {
-        clearTimeout(timeoutRemoveAlertDiv);
-
-        alertModalElem.remove();
-
-        resolve();
-      }
-    });
+      </Modal>
+    );
   }
-})();
+
+  return (
+    <Modal isOpen={true} onClose={handleOk}>
+      <div className='modalBody'>
+        <div className='modalMessage'>{message}</div>
+        <textarea
+          ref={textareaRef}
+          className='modalTextarea modalTextarea--readonly'
+          value={value}
+          readOnly
+        />
+        <footer className='modalFooter'>
+          <button
+            ref={primaryButtonRef}
+            type='button'
+            className='modalBtn modalBtnPrimary'
+            onClick={handleOk}>
+            OK
+          </button>
+        </footer>
+      </div>
+    </Modal>
+  );
+}
+
+// Modal manager to render modals
+const modalManager = {
+  container: null,
+
+  init() {
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'modal-root';
+      document.body.appendChild(this.container);
+    }
+  },
+
+  render(component) {
+    this.init();
+    ReactDOM.render(component, this.container);
+  },
+
+  unmount() {
+    if (this.container) {
+      ReactDOM.unmountComponentAtNode(this.container);
+    }
+  },
+};
+
+// Override window.alert, window.prompt, window.confirm
+window.alert = (message) => {
+  return new Promise((resolve) => {
+    modalManager.render(
+      <AlertModal
+        message={message}
+        type='alert'
+        onClose={() => {
+          modalManager.unmount();
+          resolve();
+        }}
+      />,
+    );
+  });
+};
+
+window.confirm = (message) => {
+  return new Promise((resolve, reject) => {
+    modalManager.render(
+      <AlertModal
+        message={message}
+        type='confirm'
+        onClose={(confirmed) => {
+          modalManager.unmount();
+          if (confirmed) {
+            resolve();
+          } else {
+            reject();
+          }
+        }}
+      />,
+    );
+  });
+};
+
+window.prompt = (message, initialValue = '', callback = null) => {
+  return new Promise((resolve) => {
+    const hasCallback = typeof callback === 'function';
+
+    modalManager.render(
+      <PromptModal
+        message={message}
+        initialValue={initialValue}
+        hasCallback={hasCallback}
+        onClose={(value, confirmed) => {
+          modalManager.unmount();
+          if (hasCallback) {
+            if (confirmed) {
+              callback(value);
+            }
+            resolve(confirmed ? value : null);
+          } else {
+            resolve(value);
+          }
+        }}
+      />,
+    );
+  });
+};
 
 // component rendering code starts here
 (async () => {
@@ -191,10 +314,16 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
     # Main Link Section
     google finance | finance.google.com
+    www.cnbc.com
 
     # Secondary Section
     sample alert js | javascript://alert('hello')
-    sample data url | data:text/html,%3Chtml%3E%0A%20%20%3Chead%3E%0A%20%20%20%20%3Cmeta%20charset%3D'utf-8'%20%2F%3E%0A%20%20%20%20%3Ctitle%3ELoading...%3C%2Ftitle%3E%0A%20%20%20%20%3Clink%20rel%3D%22stylesheet%22%20href%3D%22http%3A%2F%2Flocalhost%3A8080%2Findex.css%22%20%2F%3E%0A%20%20%3C%2Fhead%3E%0A%20%20%3Cload%20%2F%3E%0A%20%20%3Cscript%20type%3D'schema'%3E!%20Data%20Test%20Navigation%0A%0A%23%20Main%20Section%0Agoogle%7Cgoogle.com%3C%2Fscript%3E%0A%20%20%3Cscript%20src%3D'https%3A%2F%2Funpkg.com%2F%40babel%2Fstandalone%2Fbabel.min.js'%3E%3C%2Fscript%3E%0A%20%20%3Cscript%20src%3D'http%3A%2F%2Flocalhost%3A8080%2Findex.jsx'%20type%3D'text%2Fbabel'%20data-presets%3D'react'%20data-type%3D'module'%3E%3C%2Fscript%3E%0A%3C%2Fhtml%3E
+    sample prompt editable js | javascript://prompt('this is an editable prompt','initial value', (a) => {console.log('test123',a)})
+    sample prompt readonly js | javascript://prompt('this is a read only prompt','initial value')
+    sample confirm js | javascript://confirm('are you sure?')
+
+    # Data URL Section
+    sample data url | data:text/html,%3C!doctype%20html%3E%0A%3Chtml%3E%0A%20%20%3Chead%3E%0A%20%20%20%20%3Cmeta%20charset%3D%22UTF-8%22%20%2F%3E%0A%20%20%20%20%3Ctitle%3ELoading...%3C%2Ftitle%3E%0A%20%20%20%20%3Clink%20rel%3D%22stylesheet%22%20href%3D%22https%3A%2F%2Fsynle.github.io%2Fnav-generator%2Findex.css%22%20%2F%3E%0A%20%20%3C%2Fhead%3E%0A%20%20%3Cbody%3E%0A%20%20%20%20%3Cscript%20type%3D'schema'%3E!%20Navigation%202%2F6%2F2026%2C%207%3A32%3A52%20AM%0A%0A%23%20Main%20Link%20Section%0Agoogle%20finance%20%7C%20finance.google.com%0A%0A%23%20Secondary%20Section%0Asample%20alert%20js%20%7C%20javascript%3A%2F%2Falert('hello')%0Asample%20prompt%20editable%20js%20%7C%20javascript%3A%2F%2Fprompt('this%20is%20an%20editable%20prompt'%2C'initial%20value'%2C%20(a)%20%3D%3E%20%7Bconsole.log('test123'%2Ca)%7D)%0Asample%20prompt%20readonly%20js%20%7C%20javascript%3A%2F%2Fprompt('this%20is%20a%20read%20only%20prompt'%2C'initial%20value')%0Asample%20confirm%20js%20%7C%20javascript%3A%2F%2Fconfirm('are%20you%20sure%3F')%0A%0A%23%20Data%20URL%20Section%0Asample%20data%20url%20%7C%20data%3Atext%2Fhtml%2C%253C!doctype%2520html%253E%250A%253Chtml%253E%250A%2520%2520%253Chead%253E%250A%2520%2520%2520%2520%253Cmeta%2520charset%253D%2522UTF-8%2522%2520%252F%253E%250A%2520%2520%2520%2520%253Ctitle%253ELoading...%253C%252Ftitle%253E%250A%2520%2520%2520%2520%253Clink%2520rel%253D%2522stylesheet%2522%2520href%253D%2522http%253A%252F%252F127.0.0.1%253A8080%252Findex.css%2522%2520%252F%253E%250A%2520%2520%253C%252Fhead%253E%250A%2520%2520%253Cbody%253E%250A%2520%2520%2520%2520%253Cscript%2520type%253D'schema'%253E!%2520Navigation%25202%252F6%252F2026%252C%25207%253A32%253A52%2520AM%250A%250A%2523%2520Main%2520Link%2520Section%250Agoogle%2520finance%2520%257C%2520finance.google.com%250A%250A%2523%2520Secondary%2520Section%250Asample%2520alert%2520js%2520%257C%2520javascript%253A%252F%252Falert('hello')%250Asample%2520prompt%2520editable%2520js%2520%257C%2520javascript%253A%252F%252Fprompt('this%2520is%2520an%2520editable%2520prompt'%252C''%252C%2520(a)%2520%253D%253E%2520%257Bconsole.log('test123'%252Ca)%257D)%250Asample%2520prompt%2520readonly%2520js%2520%257C%2520javascript%253A%252F%252Fprompt('this%2520is%2520a%2520read%2520only%2520prompt')%250Asample%2520confirm%2520js%2520%257C%2520javascript%253A%252F%252Fconfirm('are%2520you%2520sure%253F')%250A%250A%2523%2520Data%2520URL%2520Section%250Asample%2520data%2520url%2520%257C%2520data%253Atext%252Fhtml%252C%25253Chtml%25253E%25250A%252520%252520%25253Chead%25253E%25250A%252520%252520%252520%252520%25253Cmeta%252520charset%25253D'utf-8'%252520%25252F%25253E%25250A%252520%252520%252520%252520%25253Ctitle%25253ELoading...%25253C%25252Ftitle%25253E%25250A%252520%252520%252520%252520%25253Clink%252520rel%25253D%252522stylesheet%252522%252520href%25253D%252522http%25253A%25252F%25252Flocalhost%25253A8080%25252Findex.css%252522%252520%25252F%25253E%25250A%252520%252520%25253C%25252Fhead%25253E%25250A%252520%252520%25253Cload%252520%25252F%25253E%25250A%252520%252520%25253Cscript%252520type%25253D'schema'%25253E!%252520Data%252520Test%252520Navigation%25250A%25250A%252523%252520Main%252520Section%25250Agoogle%25257Cgoogle.com%25253C%25252Fscript%25253E%25250A%252520%252520%25253Cscript%252520src%25253D'https%25253A%25252F%25252Funpkg.com%25252F%252540babel%25252Fstandalone%25252Fbabel.min.js'%25253E%25253C%25252Fscript%25253E%25250A%252520%252520%25253Cscript%252520src%25253D'http%25253A%25252F%25252Flocalhost%25253A8080%25252Findex.jsx'%252520type%25253D'text%25252Fbabel'%252520data-presets%25253D'react'%252520data-type%25253D'module'%25253E%25253C%25252Fscript%25253E%25250A%25253C%25252Fhtml%25253E%250A%250A%2523%2520Notes%250A%2560%2560%2560%250ATODO%25201%250ATODO%25202%250A%2560%2560%2560%250A%250A%2523%2520Tabs%250A%253E%253E%253EtabName1%257CblockId1%253E%253E%253EtabName2%257CblockId2%250A%250A%2560%2560%2560blockId1%250Asample%2520blockId1%250A%2560%2560%2560%250A%250A---blockId2%250A%253Cu%253E%253Cb%253Esample%2520html%253C%252Fb%253E%253C%252Fu%253E%2520blockId2%250A---%253C%252Fscript%253E%250A%2520%2520%2520%2520%253Cscript%2520src%253D%2522http%253A%252F%252F127.0.0.1%253A8080%252Findex.js%2522%253E%253C%252Fscript%253E%250A%2520%2520%253C%252Fbody%253E%250A%253C%252Fhtml%253E%0A%0A%23%20Notes%0A%60%60%60%0ATODO%201%0ATODO%202%0A%60%60%60%0A%0A%23%20Tabs%0A%3E%3E%3EtabName1%7CblockId1%3E%3E%3EtabName2%7CblockId2%0A%0A%60%60%60blockId1%0Asample%20blockId1%0A%60%60%60%0A%0A---blockId2%0A%3Cu%3E%3Cb%3Esample%20html%3C%2Fb%3E%3C%2Fu%3E%20blockId2%0A---%3C%2Fscript%3E%0A%20%20%20%20%3Cscript%20src%3D%22https%3A%2F%2Fsynle.github.io%2Fnav-generator%2Findex.js%22%3E%3C%2Fscript%3E%0A%20%20%3C%2Fbody%3E%0A%3C%2Fhtml%3E
 
     # Notes
     \`\`\`
@@ -265,9 +394,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function _dispatchEvent(target, evName, evExtra = {}) {
-    // trigger first tab selection
     const evType = 'MouseEvents';
-    var evObj = document.createEvent(evType);
+    const evObj = document.createEvent(evType);
     evObj.initEvent(evName, true, false);
 
     for (const extraKey of Object.keys(evExtra)) {
@@ -278,8 +406,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function _dispatchCustomEvent(target, evName, evExtra = {}) {
-    // trigger first tab selection
-    var evObj = new Event(evName);
+    const evObj = new Event(evName);
 
     for (const extraKey of Object.keys(evExtra)) {
       evObj[extraKey] = evExtra[extraKey];
@@ -295,7 +422,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   function _setSessionValue(key, value) {
     try {
       sessionStorage[key] = value;
-    } catch (err) {}
+    } catch (err) {
+      // Session storage not available
+    }
   }
 
   function _getSessionValue(key) {
@@ -309,7 +438,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   function _setLocalValue(key, value) {
     try {
       localStorage[key] = value;
-    } catch (err) {}
+    } catch (err) {
+      // Local storage not available
+    }
   }
 
   function _getLocalValue(key) {
@@ -333,7 +464,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function _addScript(src) {
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
       const script = document.createElement('script');
       script.src = src;
       script.onload = resolve;
@@ -342,7 +473,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function _addStyle(src, rel = 'stylesheet/less') {
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
       const link = document.createElement('link');
       link.rel = rel;
       link.href = src;
@@ -404,8 +535,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
     lines.forEach((link) => {
       const newCacheId = ++cacheId;
-
-      // other processing for non block
       if (isInABlock) {
         let valueToUse = '';
 
@@ -416,7 +545,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         } catch (err) {}
 
         if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
-          // end of a code block
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
@@ -426,10 +554,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           isInABlock = false;
           blockBuffer = [];
           blockType = '';
-          currentHeaderName = ''; // reset the header name
+          currentHeaderName = '';
           blockId = '';
         } else if (blockType === 'html' && link.trim() === HTML_BLOCK_SPLIT) {
-          // end of a html block
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
@@ -439,7 +566,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           isInABlock = false;
           blockBuffer = [];
           blockType = '';
-          currentHeaderName = ''; // reset the header name
+          currentHeaderName = '';
           blockId = '';
         } else {
           blockBuffer.push(link);
@@ -447,7 +574,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         return;
       }
 
-      // other processing for non block
       if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
         pageFavIcon = link.replace(/^[@]+/, '').trim();
         serializedSchema.push({
@@ -456,7 +582,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           type: 'favIcon',
         });
       } else if (link.trim().indexOf(TITLE_SPLIT) === 0) {
-        // page title
         const headerText = link.replace(TITLE_SPLIT, '').trim();
         serializedSchema.push({
           key: newCacheId,
@@ -464,7 +589,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           type: 'title',
         });
       } else if (link.trim().indexOf(HEADER_SPLIT) === 0) {
-        // section header
         const headerText = link.replace(HEADER_SPLIT, '').trim();
         serializedSchema.push({
           key: newCacheId,
@@ -474,7 +598,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
 
         currentHeaderName = headerText;
       } else if (link.trim().indexOf(CODE_BLOCK_SPLIT) === 0) {
-        // start a block
         isInABlock = true;
         blockType = 'code';
         if (link.length > CODE_BLOCK_SPLIT.length) {
@@ -482,7 +605,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           _upsertBlockId(blockId);
         }
       } else if (link.trim().indexOf(HTML_BLOCK_SPLIT) === 0) {
-        // start a block
         isInABlock = true;
         blockType = 'html';
         if (link.length > HTML_BLOCK_SPLIT.length) {
@@ -490,9 +612,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           _upsertBlockId(blockId);
         }
       } else if (link.trim().indexOf(TAB_SPLIT) === 0) {
-        // is a tab >>>tabName1|blockId1>>>tabName2|blockId2
         let tabContent = [];
-        let isFirstTab = true;
         link
           .split(TAB_SPLIT)
           .map((r) => r.trim())
@@ -513,7 +633,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
           tabContent: tabContent,
         });
       } else if (link.trim().length > 0) {
-        // anything else is a link
         let linkType;
         let linkText, linkUrl;
 
@@ -532,7 +651,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
         } catch (err) {}
 
         if (!linkType) {
-          // try parse as same tab link
           try {
             if (link.length > 0 && SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)) {
               linkText = link.substr(0, link.indexOf(SAME_TAB_LINK_SPLIT)).trim();
@@ -543,12 +661,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             }
           } catch (err) {}
         }
-
-        // if found a link type...
         if (linkType) {
           if (linkUrl.indexOf('/') === 0) {
-            // prepend https:// for absolute links
-            // associated with domains
             linkUrl = `${location.origin}${linkUrl}`;
           } else if (
             linkUrl.indexOf('http://') !== 0 &&
@@ -556,13 +670,10 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             linkUrl.indexOf('javascript://') !== 0 &&
             linkUrl.indexOf('data:') !== 0
           ) {
-            // prepend the link url https://
-            // for link without anything prefix
             linkUrl = `https://${linkUrl}`;
           }
 
           if (linkUrl.indexOf('javascript://') === 0) {
-            // js func link
             linkType = 'jsLink';
             linkUrl = linkUrl.replace('javascript://', '');
             linkUrl = `(async() => {${linkUrl}})()`;
@@ -711,9 +822,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             Edit
           </button>
           <DropdownButtons type='pullUp'>
-            {/*dropdown trigger*/}
             <button className='dropdown-trigger'>Actions</button>
-            {/*dropdown buttons*/}
             <a target='_blank' href={NEW_NAV_URL}>
               New Nav
             </a>
@@ -835,11 +944,9 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             Cancel
           </button>
           <DropdownButtons>
-            {/*dropdown trigger*/}
-            <a className='dropdown-trigger' tabIndex='0'>
+            <button className='dropdown-trigger' type='button'>
               Actions
-            </a>
-            {/*dropdown buttons*/}
+            </button>
             <a target='_blank' href={NEW_NAV_URL}>
               New Nav
             </a>
@@ -955,9 +1062,7 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
               renderedSettingButtonOnTitle = true;
               domSettings = (
                 <DropdownButtons>
-                  {/*dropdown trigger*/}
                   <button className='dropdown-trigger'>Settings</button>
-                  {/*dropdown buttons*/}
                   <ThemeToggle />
                 </DropdownButtons>
               );
@@ -1103,221 +1208,397 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
   }
 
   function SchemaEditor(props) {
-    const onInputKeyDown = useCallback((e) => {
-      const TAB_INDENT = '  ';
-      switch (e.key) {
-        case 'Tab':
-          e.preventDefault();
-          if (e.shiftKey === true) {
-            _deleteIndentAtCursor(e.target, TAB_INDENT.length);
-          } else {
-            _insertIndentAtCursor(e.target, TAB_INDENT);
-          }
-          break;
-        case 'Enter':
-          // attempted to persist the last row indentation
-          e.preventDefault();
-          _persistTabIndent(e.target);
-          break;
-        case 'Pause':
-          e.preventDefault();
-          _trimTrailingWhitespaces(e.target);
-          break;
-        case 'F10':
-          e.preventDefault();
-          _sortSelectedLines(e.target);
-          break;
-      }
+    const MONACO_LOAD_TIMEOUT = 3000; // 3 seconds timeout
+    const { value, onInput, onBlur, autoFocus, id, ...restProps } = props;
+    const editorRef = useRef(null);
+    const monacoRef = useRef(null);
+    const containerRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [useFallback, setUseFallback] = useState(false);
+    const fallbackTimeoutRef = useRef(null);
 
-      function _insertIndentAtCursor(myField, myValue) {
-        let startPos = myField.selectionStart;
-        let endPos = myField.selectionEnd;
-
-        if (startPos === endPos) {
-          // single line indentation
-          myField.value =
-            myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
-          myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
-        } else {
-          // multiple line indentation
-          const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
-
-          // calculate where we should put the cursor
-          const [res, newStartPos, newEndPos] = _iterateOverRows(
-            myField.value.split('\n'),
-            lineStart,
-            lineEnd,
-            (row) => myValue + row,
-          );
-          myField.value = res;
-          myField.setSelectionRange(newStartPos, newEndPos);
+    useEffect(() => {
+      // Set fallback timeout
+      fallbackTimeoutRef.current = setTimeout(() => {
+        if (!monacoRef.current) {
+          console.warn('Monaco Editor failed to load within timeout, using fallback textarea');
+          setUseFallback(true);
+          setIsLoading(false);
         }
+      }, MONACO_LOAD_TIMEOUT);
+
+      // Load Monaco Editor from CDN
+      if (!window.monaco && !window.monacoLoading) {
+        window.monacoLoading = true;
+
+        const loader = document.createElement('script');
+        loader.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js';
+        loader.onload = () => {
+          window.require.config({
+            paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' },
+          });
+          window.require(['vs/editor/editor.main'], () => {
+            window.monacoLoaded = true;
+            window.monacoLoading = false;
+            initMonaco();
+          });
+        };
+        loader.onerror = () => {
+          console.error('Failed to load Monaco Editor');
+          clearTimeout(fallbackTimeoutRef.current);
+          setUseFallback(true);
+          setIsLoading(false);
+        };
+        document.head.appendChild(loader);
+      } else if (window.monacoLoaded) {
+        initMonaco();
+      } else {
+        // Wait for Monaco to load
+        const checkInterval = setInterval(() => {
+          if (window.monacoLoaded) {
+            clearInterval(checkInterval);
+            initMonaco();
+          }
+        }, 100);
+        return () => clearInterval(checkInterval);
       }
 
-      function _deleteIndentAtCursor(myField, length) {
-        let startPos = myField.selectionStart;
-        let endPos = myField.selectionEnd;
+      function initMonaco() {
+        if (!containerRef.current || monacoRef.current) return;
 
-        if (startPos === endPos) {
-          myField.value =
-            myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
-          myField.setSelectionRange(startPos - length, endPos - length);
-        } else {
-          const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+        try {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const theme = currentTheme === 'light' ? 'vs' : 'vs-dark';
 
-          const [res, newStartPos, newEndPos] = _iterateOverRows(
-            myField.value.split('\n'),
-            lineStart,
-            lineEnd,
-            (row) => {
-              for (let i = 0; i < row.length; i++) {
-                if (row[i] !== ' ' || i === length) {
-                  return row.substr(i);
-                }
-              }
-              return row;
+          const editor = window.monaco.editor.create(containerRef.current, {
+            value: value || '',
+            language: 'plaintext',
+            theme: theme,
+            automaticLayout: true,
+            minimap: { enabled: true },
+            lineNumbers: 'on',
+            scrollBeyondLastLine: false,
+            wordWrap: 'off',
+            fontSize: 14,
+            fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+            tabSize: 2,
+            insertSpaces: true,
+            renderWhitespace: 'selection',
+            contextmenu: true,
+            folding: true,
+            lineDecorationsWidth: 10,
+            lineNumbersMinChars: 4,
+            scrollbar: {
+              verticalScrollbarSize: 10,
+              horizontalScrollbarSize: 10,
             },
-          );
+          });
 
-          myField.value = res;
-          myField.setSelectionRange(newStartPos, newEndPos);
-        }
-      }
+          monacoRef.current = editor;
+          editorRef.current = editor;
+          clearTimeout(fallbackTimeoutRef.current);
+          setIsLoading(false);
 
-      function _persistTabIndent(myField) {
-        try {
-          const rows = myField.value.substr(0, myField.selectionStart).split('\n');
-          const lastRow = rows[rows.length - 1];
-          const lastRowIndent = lastRow.match(/^[ ]+/)[0];
-
-          _insertIndentAtCursor(e.target, '\n' + lastRowIndent);
-        } catch (err) {
-          _insertIndentAtCursor(e.target, '\n');
-        }
-      }
-
-      function _trimTrailingWhitespaces(myField) {
-        const rows = myField.value.split('\n').map((r) => r.trimEnd());
-        myField.value = rows.join('\n');
-        myField.setSelectionRange(0, 0);
-      }
-
-      function _sortSelectedLines(myField) {
-        let startPos = myField.selectionStart;
-        let endPos = myField.selectionEnd;
-        const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
-
-        const [_res, newStartPos, newEndPos] = _iterateOverRows(
-          myField.value.split('\n'),
-          lineStart,
-          lineEnd,
-        );
-
-        let res1 = myField.value.substr(0, newStartPos);
-        let res2 = myField.value.substr(newStartPos, newEndPos - newStartPos);
-        let res3 = myField.value.substr(newEndPos);
-
-        res2 = sortMiddlePart(res2);
-        function sortMiddlePart(schema) {
-          const rows = schema.split('\n');
-          let sections = [];
-          let sectionIdx = 0;
-
-          for (const row of rows) {
-            // TODO: there's a bug there that if section name is part of the
-            // code block or html block - this will not work
-            if (row[0] === HEADER_SPLIT) {
-              sectionIdx++;
+          // Handle value changes
+          editor.onDidChangeModelContent(() => {
+            const newValue = editor.getValue();
+            if (onInput) {
+              onInput({ target: { value: newValue } });
             }
-            sections[sectionIdx] = sections[sectionIdx] || [];
-            sections[sectionIdx].push(row);
+          });
+
+          // Handle blur
+          editor.onDidBlurEditorText(() => {
+            if (onBlur) {
+              onBlur({ target: { value: editor.getValue() } });
+            }
+          });
+
+          // Auto focus
+          if (autoFocus) {
+            setTimeout(() => editor.focus(), 100);
           }
-
-          sections = sections
-            .filter((s) => !!s && s.length > 0)
-            .map((s) => {
-              if (s[s.length - 1] !== '') {
-                s.push('');
-              }
-              return s;
-            })
-            .sort(_schemaSectionNameOnlySorter);
-
-          return sections.map((s) => s.join('\n')).join('\n');
+        } catch (err) {
+          console.error('Error initializing Monaco Editor:', err);
+          clearTimeout(fallbackTimeoutRef.current);
+          setUseFallback(true);
+          setIsLoading(false);
         }
-
-        const res = res1 + res2 + res3;
-
-        myField.value = res;
-        myField.setSelectionRange(newStartPos, newEndPos);
       }
 
-      function _iterateOverRows(rows, lineStart, lineEnd, func) {
-        let newStartPos;
-        let newEndPos;
-        let curCharCount = 0;
-
-        func =
-          func ||
-          function (row) {
-            return row;
-          };
-
-        const res = [];
-        for (let i = 0; i < rows.length; i++) {
-          let row = rows[i];
-
-          if (i >= lineStart && i <= lineEnd) {
-            row = func(row);
-          }
-
-          if (i === lineStart) {
-            newStartPos = curCharCount;
-          }
-
-          if (i === lineEnd) {
-            newEndPos = curCharCount + row.length;
-          }
-
-          curCharCount += row.length + 1;
-
-          res.push(row);
+      return () => {
+        clearTimeout(fallbackTimeoutRef.current);
+        if (monacoRef.current) {
+          monacoRef.current.dispose();
+          monacoRef.current = null;
         }
-
-        return [res.join('\n'), newStartPos, newEndPos];
-      }
-
-      function _getLineStartEnd(myField, startPos, endPos) {
-        let lineStart = 0,
-          lineEnd = 0;
-        try {
-          lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
-        } catch (err) {}
-
-        try {
-          lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
-        } catch (err) {}
-
-        return [lineStart, lineEnd];
-      }
+      };
     }, []);
 
-    return <textarea onKeyDown={(e) => onInputKeyDown(e)} {...props}></textarea>;
+    // Update editor value when prop changes
+    useEffect(() => {
+      if (monacoRef.current && monacoRef.current.getValue() !== value) {
+        const position = monacoRef.current.getPosition();
+        monacoRef.current.setValue(value || '');
+        if (position) {
+          monacoRef.current.setPosition(position);
+        }
+      }
+    }, [value]);
+
+    // Update theme when it changes
+    useEffect(() => {
+      const observer = new MutationObserver(() => {
+        if (window.monaco && monacoRef.current) {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const theme = currentTheme === 'light' ? 'vs' : 'vs-dark';
+          window.monaco.editor.setTheme(theme);
+        }
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+
+      return () => observer.disconnect();
+    }, []);
+
+    // Fallback to basic textarea
+    if (useFallback) {
+      return (
+        <BasicTextarea
+          value={value}
+          onInput={onInput}
+          onBlur={onBlur}
+          autoFocus={autoFocus}
+          id={id}
+          {...restProps}
+        />
+      );
+    }
+
+    return (
+      <div id={id} style={{ height: '100%', width: '100%', position: 'relative' }}>
+        {isLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: 'var(--colorTextMain)',
+            }}>
+            Loading Monaco Editor...
+          </div>
+        )}
+        <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
+      </div>
+    );
+  }
+
+  // Basic textarea fallback with keyboard shortcuts
+  function BasicTextarea(props) {
+    const { value, onInput, onBlur, ...restProps } = props;
+
+    const onInputKeyDown = useCallback(
+      (e) => {
+        const TAB_INDENT = '  ';
+        switch (e.key) {
+          case 'Tab':
+            e.preventDefault();
+            if (e.shiftKey === true) {
+              _deleteIndentAtCursor(e.target, TAB_INDENT.length);
+            } else {
+              _insertIndentAtCursor(e.target, TAB_INDENT);
+            }
+            break;
+          case 'Enter':
+            e.preventDefault();
+            _persistTabIndent(e.target);
+            break;
+        }
+
+        function _insertIndentAtCursor(myField, myValue) {
+          let startPos = myField.selectionStart;
+          let endPos = myField.selectionEnd;
+
+          if (startPos === endPos) {
+            myField.value =
+              myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
+            myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
+          } else {
+            const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+            const [res, newStartPos, newEndPos] = _iterateOverRows(
+              myField.value.split('\n'),
+              lineStart,
+              lineEnd,
+              (row) => myValue + row,
+            );
+            myField.value = res;
+            myField.setSelectionRange(newStartPos, newEndPos);
+          }
+          onInput && onInput({ target: myField });
+        }
+
+        function _deleteIndentAtCursor(myField, length) {
+          let startPos = myField.selectionStart;
+          let endPos = myField.selectionEnd;
+
+          if (startPos === endPos) {
+            myField.value =
+              myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
+            myField.setSelectionRange(startPos - length, endPos - length);
+          } else {
+            const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+            const [res, newStartPos, newEndPos] = _iterateOverRows(
+              myField.value.split('\n'),
+              lineStart,
+              lineEnd,
+              (row) => {
+                for (let i = 0; i < row.length; i++) {
+                  if (row[i] !== ' ' || i === length) {
+                    return row.substr(i);
+                  }
+                }
+                return row;
+              },
+            );
+            myField.value = res;
+            myField.setSelectionRange(newStartPos, newEndPos);
+          }
+          onInput && onInput({ target: myField });
+        }
+
+        function _persistTabIndent(myField) {
+          try {
+            const rows = myField.value.substr(0, myField.selectionStart).split('\n');
+            const lastRow = rows[rows.length - 1];
+            const lastRowIndent = lastRow.match(/^[ ]+/)[0];
+            _insertIndentAtCursor(e.target, '\n' + lastRowIndent);
+          } catch (err) {
+            _insertIndentAtCursor(e.target, '\n');
+          }
+        }
+
+        function _iterateOverRows(rows, lineStart, lineEnd, func) {
+          let newStartPos,
+            newEndPos,
+            curCharCount = 0;
+          const transformFunc = func || ((row) => row);
+          const res = [];
+          for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            if (i >= lineStart && i <= lineEnd) row = transformFunc(row);
+            if (i === lineStart) newStartPos = curCharCount;
+            if (i === lineEnd) newEndPos = curCharCount + row.length;
+            curCharCount += row.length + 1;
+            res.push(row);
+          }
+          return [res.join('\n'), newStartPos, newEndPos];
+        }
+
+        function _getLineStartEnd(myField, startPos, endPos) {
+          let lineStart = 0,
+            lineEnd = 0;
+          try {
+            lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
+          } catch (err) {}
+          try {
+            lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
+          } catch (err) {}
+          return [lineStart, lineEnd];
+        }
+      },
+      [onInput],
+    );
+
+    return (
+      <textarea
+        onKeyDown={onInputKeyDown}
+        value={value}
+        onInput={onInput}
+        onBlur={onBlur}
+        {...restProps}></textarea>
+    );
   }
 
   function DropdownButtons(props) {
-    const type = props.type || '';
-    const [triggerButton, ...buttonsElems] = props.children;
+    const { type = '', children } = props;
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+    const [triggerButton, ...buttonsElems] = children;
+
+    const toggleDropdown = useCallback(() => {
+      setIsOpen((prev) => !prev);
+    }, []);
+
+    const closeDropdown = useCallback(() => {
+      setIsOpen(false);
+    }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          closeDropdown();
+        }
+      };
+
+      const handleEscape = (event) => {
+        if (event.key === 'Escape' && isOpen) {
+          closeDropdown();
+        }
+      };
+
+      if (isOpen) {
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleEscape);
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+          document.removeEventListener('keydown', handleEscape);
+        };
+      }
+    }, [isOpen, closeDropdown]);
+
+    // Clone trigger button to add onClick handler
+    const enhancedTrigger = React.cloneElement(triggerButton, {
+      onClick: (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleDropdown();
+        if (triggerButton.props.onClick) {
+          triggerButton.props.onClick(e);
+        }
+      },
+      'aria-expanded': isOpen,
+      'aria-haspopup': 'true',
+    });
+
+    // Wrap buttons to close dropdown on click
+    const enhancedButtons = React.Children.map(buttonsElems, (child) => {
+      if (!child) return null;
+      return React.cloneElement(child, {
+        onClick: (e) => {
+          if (child.props.onClick) {
+            child.props.onClick(e);
+          }
+          // Close dropdown after action
+          setTimeout(closeDropdown, 100);
+        },
+      });
+    });
+
     return (
-      <div className='dropdown'>
-        {triggerButton}
-        <div className={`dropdown-content ${type}`.trim()}>{buttonsElems}</div>
+      <div className='dropdown' ref={dropdownRef}>
+        {enhancedTrigger}
+        {isOpen && <div className={`dropdown-content ${type}`.trim()}>{enhancedButtons}</div>}
       </div>
     );
   }
 
   function NavCreateContainer(props) {
-    const { schema, onSetViewMode, onSetSchema } = props;
+    const { schema } = props;
     return <>create {schema}</>;
   }
 
@@ -1497,21 +1778,6 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
             document.querySelector('#search').blur();
           }
         }
-        if (document.querySelector('#promptModal')) {
-          try {
-            document.querySelector('#promptModal #promptInput').onblur();
-          } catch (err) {}
-        }
-        if (document.querySelector('#alertModal .modalBody')) {
-          try {
-            document.querySelector('#alertModal .modalBody').onblur();
-          } catch (err) {}
-        }
-        if (document.querySelector('.modalBody .no')) {
-          try {
-            _dispatchEvent(document.querySelector('.modalBody .no'), 'click');
-          } catch (err) {}
-        }
       } else if (
         document.querySelector('#search') &&
         document.querySelector('#search') !== focusedElement &&
@@ -1592,12 +1858,8 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
     true,
   );
 
-  // add extra scripts if it's not there already
-  await Promise.all([
-    // debug
-    // _addStyle(isRenderedInDataUrl ? `${APP_BASE_URL}/index.less` : 'index.less'),
-    // _addScript('https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.1/less.min.js'),
-  ]);
+  // Reserved for additional scripts/styles if needed
+  await Promise.all([]);
 
   // find and parse the schema from script
   let inputSchema = _getPersistedBufferSchema() || '';
@@ -1686,6 +1948,14 @@ document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboar
       return null;
     }
   }
+
+  // Apply theme immediately on page load to prevent flash
+  (function initTheme() {
+    const savedTheme = getInitialTheme();
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      applyTheme(savedTheme);
+    }
+  })();
 
   function ThemeToggle() {
     const [theme, setThemeState] = useState(getInitialTheme);
