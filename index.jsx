@@ -858,6 +858,9 @@ window.prompt = (message, initialValue = '', callback = null) => {
             <button onClick={() => onSetViewMode('bookmark_export_chrome')}>
               Export Chrome Bookmarks
             </button>
+            <button onClick={() => onSetViewMode('backup_download')}>
+              Backup Download
+            </button>
           </DropdownButtons>
           <VersionHistoryButton key={Date.now()} {...props} />
         </div>
@@ -1754,6 +1757,9 @@ window.prompt = (message, initialValue = '', callback = null) => {
         case 'bookmark_export_chrome':
           document.title = 'Export Chrome Bookmarks';
           break;
+        case 'backup_download':
+          document.title = 'Backup Download';
+          break;
       }
     }, [viewMode]);
 
@@ -1772,6 +1778,8 @@ window.prompt = (message, initialValue = '', callback = null) => {
         return <NavChromeBookmarkImport {...allProps} />;
       case 'bookmark_export_chrome':
         return <NavChromeBookmarkExport {...allProps} />;
+      case 'backup_download':
+        return <NavBackupDownload {...allProps} />;
     }
   }
 
@@ -2233,6 +2241,67 @@ window.prompt = (message, initialValue = '', callback = null) => {
           spellcheck='false'
           autoFocus={false}
           value={htmlOutput}
+          readOnly={true}
+        />
+      </div>
+    );
+  }
+
+  function NavBackupDownload(props) {
+    const { schema, onSetViewMode } = props;
+
+    // Download handler
+    const handleDownload = () => {
+      // Generate filename with timestamp
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const filename = `nav-generator-${year}-${month}-${day}.md`;
+
+      // Create a blob and download link
+      const blob = new Blob([schema], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Close the view
+      onSetViewMode('read');
+    };
+
+    // Cancel handler
+    const handleCancel = () => {
+      onSetViewMode('read');
+    };
+
+    return (
+      <div id='command' className='nav-backup-download'>
+        <div className='title'>Backup Download</div>
+        <div className='commands'>
+          <button
+            id='downloadBackup'
+            type='button'
+            role='button'
+            onClick={() => handleDownload()}>
+            Download
+          </button>
+          <button id='cancelBackup' type='button' role='button' onClick={() => handleCancel()}>
+            Cancel
+          </button>
+        </div>
+
+        <SchemaEditor
+          id='backupOutput'
+          type='text'
+          wrap='soft'
+          spellcheck='false'
+          autoFocus={false}
+          value={schema}
           readOnly={true}
         />
       </div>
