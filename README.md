@@ -32,6 +32,8 @@ You can deploy the nav to Github Pages. For a quick deployment, refer to this Gi
 - [x] Download schema and bookmark
 - [x] Quick copy to clipboard
 - [x] Supported Version History to prevent accidental edits
+- [x] Uses monaco Text Editor for better visualization
+  - [x] Added syntax highlights
 
 ## Syntax
 
