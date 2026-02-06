@@ -735,7 +735,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     );
   }
 
-  function NavReadContainer(props) {
+  function PageRead(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [searchText, setSearchText] = useState('');
     const refContainer = useRef();
@@ -858,9 +858,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
             <button onClick={() => onSetViewMode('bookmark_export_chrome')}>
               Export Chrome Bookmarks
             </button>
-            <button onClick={() => onSetViewMode('backup_download')}>
-              Backup Download
-            </button>
+            <button onClick={() => onSetViewMode('backup_download')}>Backup Download</button>
           </DropdownButtons>
           <VersionHistoryButton key={Date.now()} {...props} />
         </div>
@@ -868,7 +866,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     );
   }
 
-  function NavEditContainer(props) {
+  function PageEdit(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [bufferSchema, setBufferSchema] = useState(schema.trim());
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -1728,7 +1726,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     );
   }
 
-  function NavCreateContainer(props) {
+  function PageCreate(props) {
     const { schema } = props;
     return <>create {schema}</>;
   }
@@ -1767,23 +1765,23 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const allProps = { schema, onSetSchema, onSetViewMode };
     switch (viewMode) {
       case 'read':
-        return <NavReadContainer {...allProps} />;
+        return <PageRead {...allProps} />;
       case 'edit':
-        return <NavEditContainer {...allProps} />;
+        return <PageEdit {...allProps} />;
       case 'create':
-        return <NavCreateContainer {...allProps} />;
+        return <PageCreate {...allProps} />;
       case 'version_history':
-        return <NavVersionHistory {...allProps} />;
+        return <PageVersionHistory {...allProps} />;
       case 'bookmark_import_chrome':
-        return <NavChromeBookmarkImport {...allProps} />;
+        return <PageChromeBookmarkImport {...allProps} />;
       case 'bookmark_export_chrome':
-        return <NavChromeBookmarkExport {...allProps} />;
+        return <PageChromeBookmarkExport {...allProps} />;
       case 'backup_download':
-        return <NavBackupDownload {...allProps} />;
+        return <PageBackupDownload {...allProps} />;
     }
   }
 
-  function NavVersionHistory(props) {
+  function PageVersionHistory(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
 
     const [versions, setVersions] = useState([]);
@@ -1954,7 +1952,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     return html;
   }
 
-  function NavChromeBookmarkImport(props) {
+  function PageChromeBookmarkImport(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
 
     const [htmlInput, setHtmlInput] = useState('');
@@ -2175,7 +2173,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     );
   }
 
-  function NavChromeBookmarkExport(props) {
+  function PageChromeBookmarkExport(props) {
     const { schema, onSetViewMode } = props;
 
     const [htmlOutput, setHtmlOutput] = useState('');
@@ -2247,7 +2245,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     );
   }
 
-  function NavBackupDownload(props) {
+  function PageBackupDownload(props) {
     const { schema, onSetViewMode } = props;
 
     // Download handler
@@ -2283,11 +2281,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
       <div id='command' className='nav-backup-download'>
         <div className='title'>Backup Download</div>
         <div className='commands'>
-          <button
-            id='downloadBackup'
-            type='button'
-            role='button'
-            onClick={() => handleDownload()}>
+          <button id='downloadBackup' type='button' role='button' onClick={() => handleDownload()}>
             Download
           </button>
           <button id='cancelBackup' type='button' role='button' onClick={() => handleCancel()}>
