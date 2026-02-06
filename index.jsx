@@ -852,6 +852,13 @@ window.prompt = (message, initialValue = '', callback = null) => {
               onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
               Copy Bookmark
             </button>
+            <button onClick={() => onSetViewMode('bookmark_import_chrome')}>
+              Import Chrome Bookmarks
+            </button>
+            {/*TODO:*/}
+            {/*<button onClick={() => onSetViewMode('bookmark_export_chrome')}>
+              Export Chrome Bookmarks
+            </button>*/}
           </DropdownButtons>
           <VersionHistoryButton key={Date.now()} {...props} />
         </div>
@@ -1230,7 +1237,16 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   function SchemaEditor(props) {
     const MONACO_LOAD_TIMEOUT = 3000; // 3 seconds timeout
-    const { value, onInput, onBlur, autoFocus, id, ...restProps } = props;
+    const {
+      value,
+      onInput,
+      onBlur,
+      autoFocus,
+      id,
+      type = 'nav-generator',
+      readOnly = false,
+      ...restProps
+    } = props;
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
     const containerRef = useRef(null);
@@ -1366,9 +1382,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
           const currentTheme = document.documentElement.getAttribute('data-theme');
           const theme = currentTheme === 'light' ? 'nav-generator-light' : 'nav-generator-dark';
 
+          // Determine language based on type prop
+          const language = type === 'html' ? 'html' : 'nav-generator';
+
           const editor = window.monaco.editor.create(containerRef.current, {
             value: value || '',
-            language: 'nav-generator',
+            language: language,
             theme: theme,
             automaticLayout: true,
             minimap: { enabled: true },
@@ -1384,6 +1403,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
             folding: true,
             lineDecorationsWidth: 10,
             lineNumbersMinChars: 4,
+            readOnly: readOnly,
             scrollbar: {
               verticalScrollbarSize: 10,
               horizontalScrollbarSize: 10,
@@ -1442,6 +1462,17 @@ window.prompt = (message, initialValue = '', callback = null) => {
       }
     }, [value]);
 
+    // Update language when type prop changes
+    useEffect(() => {
+      if (monacoRef.current && window.monaco) {
+        const language = type === 'html' ? 'html' : 'nav-generator';
+        const model = monacoRef.current.getModel();
+        if (model) {
+          window.monaco.editor.setModelLanguage(model, language);
+        }
+      }
+    }, [type]);
+
     // Update theme when it changes
     useEffect(() => {
       const observer = new MutationObserver(() => {
@@ -1469,6 +1500,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
           onBlur={onBlur}
           autoFocus={autoFocus}
           id={id}
+          type={type}
           {...restProps}
         />
       );
@@ -1495,7 +1527,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   // Basic textarea fallback with keyboard shortcuts
   function BasicTextarea(props) {
-    const { value, onInput, onBlur, ...restProps } = props;
+    const { value, onInput, onBlur, type, readOnly = false, ...restProps } = props;
 
     const onInputKeyDown = useCallback(
       (e) => {
@@ -1611,10 +1643,11 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
     return (
       <textarea
-        onKeyDown={onInputKeyDown}
+        onKeyDown={readOnly ? undefined : onInputKeyDown}
         value={value}
         onInput={onInput}
         onBlur={onBlur}
+        readOnly={readOnly}
         {...restProps}></textarea>
     );
   }
@@ -1716,6 +1749,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
         case 'create':
           document.title = 'New Navigation';
           break;
+        case 'bookmark_import_chrome':
+          document.title = 'Import Chrome Bookmarks';
+          break;
+        case 'bookmark_export_chrome':
+          document.title = 'Export Chrome Bookmarks';
+          break;
       }
     }, [viewMode]);
 
@@ -1730,6 +1769,10 @@ window.prompt = (message, initialValue = '', callback = null) => {
         return <NavCreateContainer {...allProps} />;
       case 'version_history':
         return <NavVersionHistory {...allProps} />;
+      case 'bookmark_import_chrome':
+        return <NavChromeBookmarkImport {...allProps} />;
+      case 'bookmark_export_chrome':
+        return <NavChromeBookmarkExport {...allProps} />;
     }
   }
 
@@ -1814,6 +1857,305 @@ window.prompt = (message, initialValue = '', callback = null) => {
           autoFocus
           value={selectedValue}
           readOnly={true}></SchemaEditor>
+      </div>
+    );
+  }
+
+  function parseNavGeneratorToChromeBookmark(schema) {
+    // TODO: Implement conversion from nav-generator schema to Chrome bookmark HTML
+    // For now, just return the input as-is
+    return schema;
+  }
+
+  function NavChromeBookmarkImport(props) {
+    const { schema, onSetViewMode, onSetSchema } = props;
+
+    const [htmlInput, setHtmlInput] = useState('');
+
+    // Helper function to parse Chrome bookmarks
+    function parseChromeBookmarksFromHTML(htmlString) {
+      try {
+        // ---- Parse HTML string into DOM ----
+        // Clean up common HTML issues from Chrome bookmarks
+        let cleanedHtml = htmlString
+          .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
+          .replace(/<p>/gi, '') // Remove opening <p> tags
+          .replace(/<\/p>/gi, ''); // Remove closing </p> tags
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(cleanedHtml, 'text/html');
+
+        // Check for parse errors
+        const parserError = doc.querySelector('parsererror');
+        if (parserError) {
+          console.warn('HTML parsing warning:', parserError.textContent);
+          // Try to continue anyway - the DOM might still have usable content
+        }
+
+        // Find all top-level DL elements
+        const allDLs = doc.querySelectorAll('DL');
+        if (allDLs.length === 0) {
+          console.error('No DL elements found in HTML');
+          return '';
+        }
+
+        const rootDLs = Array.from(allDLs).filter((dl) => {
+          // Find DLs that are not nested inside another DL
+          let parent = dl.parentElement;
+          while (parent && parent !== doc.body && parent !== doc.documentElement) {
+            if (parent.tagName === 'DL') {
+              return false; // This DL is nested, skip it
+            }
+            parent = parent.parentElement;
+          }
+          return true; // This is a root DL
+        });
+
+        if (rootDLs.length === 0) {
+          console.error('No root DL elements found');
+          return '';
+        }
+
+        // Helper function to extract domain name from URL
+        function getRootNameFromUrl(url) {
+          try {
+            // normalize missing protocol
+            if (!/^https?:\/\//i.test(url)) {
+              url = 'http://' + url;
+            }
+
+            const u = new URL(url);
+            let host = u.hostname.toLowerCase();
+
+            // remove common subdomains
+            host = host.replace(/^www\./, '');
+
+            // extract base domain
+            const parts = host.split('.');
+            if (parts.length >= 2) {
+              return parts[parts.length - 2]; // abc.com -> abc
+            }
+
+            return parts[0];
+          } catch {
+            return 'link';
+          }
+        }
+
+        // Recursive function to process DOM elements
+        function processElement(element, path = []) {
+          const results = [];
+          const children = Array.from(element.children);
+          const processedDLs = new Set(); // Track which DLs we've already processed
+
+          for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+
+            if (child.tagName === 'DT') {
+              // Check if this DT contains a folder (H3) or a link (A)
+              const h3 = child.querySelector(':scope > H3');
+              const a = child.querySelector(':scope > A');
+
+              if (h3) {
+                // This is a folder
+                const folderName = h3.textContent.trim();
+                const fullPath = [...path, folderName];
+
+                // Add folder header
+                results.push(`\n# ${fullPath.join(' > ')}`);
+
+                // Look for the folder's content DL in two possible locations:
+                // 1. As a child of this DT (browser may have moved it here during parsing)
+                // 2. As the next sibling of this DT (Chrome's original format)
+
+                let folderDL = null;
+
+                // First, check if DL is a direct child of this DT
+                const childDL = child.querySelector(':scope > DL');
+                if (childDL) {
+                  folderDL = childDL;
+                } else {
+                  // If not a child, look for it as a sibling
+                  let nextSibling = child.nextElementSibling;
+                  while (nextSibling) {
+                    if (nextSibling.tagName === 'DL') {
+                      folderDL = nextSibling;
+                      break;
+                    }
+                    if (nextSibling.tagName === 'DT') {
+                      // Hit another DT, no folder content found
+                      break;
+                    }
+                    nextSibling = nextSibling.nextElementSibling;
+                  }
+                }
+
+                // Process the folder's content DL if found
+                if (folderDL) {
+                  processedDLs.add(folderDL); // Mark as processed
+                  const folderResults = processElement(folderDL, fullPath);
+                  results.push(...folderResults);
+                }
+              } else if (a) {
+                // This is a bookmark link
+                const href = a.getAttribute('HREF') || a.href;
+                const text = a.textContent?.trim();
+
+                if (href) {
+                  if (text && text.length > 0) {
+                    results.push(`${text} | ${href}`);
+                  } else {
+                    const rootName = getRootNameFromUrl(href);
+                    results.push(`${rootName} | ${href}`);
+                  }
+                }
+              }
+            } else if (child.tagName === 'DL') {
+              // Only process this DL if it wasn't already processed as folder content
+              if (!processedDLs.has(child)) {
+                const nestedResults = processElement(child, path);
+                results.push(...nestedResults);
+              }
+            }
+            // Ignore <p> tags and other elements
+          }
+
+          return results;
+        }
+
+        // Process all root DLs
+        const allResults = [];
+        rootDLs.forEach((rootDL) => {
+          const results = processElement(rootDL, []);
+          allResults.push(...results);
+        });
+
+        return allResults.join('\n').trim();
+      } catch (error) {
+        console.error('Error parsing Chrome bookmarks:', error);
+        throw new Error('Failed to parse bookmarks: ' + error.message);
+      }
+    }
+
+    // Apply handler - parse HTML and update schema
+    const handleApply = async () => {
+      if (htmlInput.trim()) {
+        try {
+          const parsedSchema = parseChromeBookmarksFromHTML(htmlInput);
+          if (parsedSchema && parsedSchema.length > 0) {
+            createVersion(parsedSchema);
+            onSetSchema(parsedSchema);
+          } else {
+            await alert('No bookmarks found. Please check the HTML format.');
+            return;
+          }
+        } catch (error) {
+          console.error('Error parsing bookmarks:', error);
+          await alert('Error parsing bookmarks: ' + error.message);
+          return;
+        }
+      }
+      onSetViewMode('read');
+    };
+
+    // Cancel handler
+    const handleCancel = () => {
+      onSetViewMode('read');
+    };
+
+    return (
+      <div id='command' className='nav-chrome-bookmark-import'>
+        <div className='title'>Import Chrome Bookmarks</div>
+        <div className='commands'>
+          <button id='applyEdit' type='button' role='button' onClick={() => handleApply()}>
+            Apply
+          </button>
+          <button id='cancelEdit' type='button' role='button' onClick={() => handleCancel()}>
+            Cancel
+          </button>
+        </div>
+
+        <SchemaEditor
+          id='input'
+          type='html'
+          wrap='soft'
+          spellcheck='false'
+          autoFocus
+          value={htmlInput}
+          onInput={(e) => setHtmlInput(e.target.value)}
+        />
+      </div>
+    );
+  }
+
+  function NavChromeBookmarkExport(props) {
+    const { schema, onSetViewMode } = props;
+
+    const [htmlOutput, setHtmlOutput] = useState('');
+
+    // Generate the Chrome bookmark HTML on mount
+    useEffect(() => {
+      const chromeBookmarkHtml = parseNavGeneratorToChromeBookmark(schema);
+      setHtmlOutput(chromeBookmarkHtml);
+    }, [schema]);
+
+    // Download handler
+    const handleDownload = () => {
+      // Generate filename with timestamp
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const filename = `bookmark-${year}-${month}-${day}-${hours}-${minutes}-${seconds}.html`;
+
+      // Create a blob and download link
+      const blob = new Blob([htmlOutput], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Close the view
+      onSetViewMode('read');
+    };
+
+    // Cancel handler
+    const handleCancel = () => {
+      onSetViewMode('read');
+    };
+
+    return (
+      <div id='command' className='nav-chrome-bookmark-export'>
+        <div className='title'>Export Chrome Bookmarks</div>
+        <div className='commands'>
+          <button
+            id='downloadBookmark'
+            type='button'
+            role='button'
+            onClick={() => handleDownload()}>
+            Download
+          </button>
+          <button id='cancelExport' type='button' role='button' onClick={() => handleCancel()}>
+            Cancel
+          </button>
+        </div>
+
+        <SchemaEditor
+          id='output'
+          type='html'
+          wrap='soft'
+          spellcheck='false'
+          autoFocus={false}
+          value={htmlOutput}
+          readOnly={true}
+        />
       </div>
     );
   }
