@@ -210,35 +210,45 @@ body {
 button,
 a {
   cursor: pointer;
-  text-transform: uppercase;
-  font-weight: var(--fontWeightSemiBold);
-  color: var(--colorTextLink);
-  border: var(--borderSize1) solid var(--colorBorderSecondary);
-  display: block;
-  text-decoration: none;
   user-select: none;
-  padding: var(--spaceSize2);
+  text-decoration: none;
   outline: none;
-  background: var(--colorBgMain);
-  font-size: 1rem;
-  font-family: var(--fontFamilyMain);
-  word-break: break-all;
-  border-radius: 5px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  padding: var(--spaceSize2);
+  border-radius: 6px;
+  border: var(--borderSize1) solid var(--colorBorderSecondary);
+  background: var(--colorBgMain);
+  color: var(--colorTextLink);
+  font-family: var(--fontFamilyMain);
+  font-size: 1rem;
+  font-weight: var(--fontWeightSemiBold);
+  text-transform: uppercase;
 
-  &:hover {
-    background: var(--colorBgSecondary) !important;
+  transition:
+    opacity 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover,
+  &:focus,
+  &:focus-visible {
+    opacity: 0.85;
+    box-shadow: 0 0 0 2px rgba(10, 91, 215, 0.25);
+    /* soft focus ring */
   }
 
-  &:focus {
-    background: var(--colorBgHover) !important;
+  &.primary {
+    background: var(--colorTextLink);
+    color: var(--colorBgMain);
+    border-color: transparent;
   }
 
   img {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
   }
 }
 
@@ -596,44 +606,9 @@ load {
       border-radius: 6px;
       transition: all 0.2s ease;
 
-      &.modalBtnPrimary {
-        color: var(--colorBgMain);
-        background: var(--colorBorderMain);
-        border-color: var(--colorBorderMain);
-
-        &:hover {
-          opacity: 0.9;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px var(--colorShadow);
-        }
-
-        &:focus {
-          outline: 3px solid var(--colorWhite);
-          outline-offset: 2px;
-          box-shadow:
-            0 0 0 6px var(--colorBorderMain),
-            0 2px 8px var(--colorShadow);
-        }
-
-        &:hover,
-        &:focus {
-          color: var(--colorBgMain);
-          background: var(--colorBorderMain);
-          border-color: var(--colorBorderMain);
-        }
-      }
-
-      &.modalBtnSecondary {
-        &:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px var(--colorShadow);
-        }
-
-        &:focus {
-          outline: 3px solid var(--colorBorderMain);
-          outline-offset: 2px;
-          box-shadow: 0 2px 8px var(--colorShadow);
-        }
+      button{
+        text-align: center;
+        justify-content: center;
       }
     }
   }
@@ -715,33 +690,6 @@ textarea {
     outline: none;
     border-color: var(--colorTextLink);
     box-shadow: 0 0 0 2px rgba(42, 92, 171, 0.25);
-  }
-}
-
-.buttons {
-  display: flex;
-  gap: 8px;
-
-  button {
-    background-color: var(--colorBgSecondary);
-    color: var(--colorTextMain);
-    border: 1px solid var(--colorBorderMain);
-    border-radius: 4px;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition:
-      background-color 0.2s,
-      border-color 0.2s;
-
-    &:hover {
-      background-color: var(--colorBgHover);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--colorTextLink);
-      box-shadow: 0 0 0 2px rgba(42, 92, 171, 0.25);
-    }
   }
 }
 
