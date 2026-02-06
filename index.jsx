@@ -1092,6 +1092,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
                 <DropdownButtons>
                   <button className='dropdown-trigger'>Settings</button>
                   <ThemeToggle />
+                  <ColumnLayoutToggle />
                 </DropdownButtons>
               );
             }
@@ -2553,6 +2554,75 @@ window.prompt = (message, initialValue = '', callback = null) => {
     };
 
     return <button onClick={toggleTheme}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</button>;
+  }
+
+  const COLUMN_LAYOUT_KEY = 'column-layout';
+  const COLUMN_LAYOUTS = {
+    1: 'calc(100% - var(--gridGapWidth))',
+    2: 'calc(50% - var(--gridGapWidth)) calc(50% - var(--gridGapWidth))',
+    3: '30% 30% 30%',
+    4: '22% 22% 22% 22%',
+  };
+
+  function applyColumnLayout(columns) {
+    if (columns && COLUMN_LAYOUTS[columns]) {
+      document.documentElement.style.setProperty('--gridColumnLayout', COLUMN_LAYOUTS[columns]);
+    } else {
+      document.documentElement.style.removeProperty('--gridColumnLayout');
+    }
+  }
+
+  function setColumnLayout(columns) {
+    applyColumnLayout(columns);
+    _setLocalValue(COLUMN_LAYOUT_KEY, columns);
+  }
+
+  function clearColumnLayout() {
+    document.documentElement.style.removeProperty('--gridColumnLayout');
+    _setLocalValue(COLUMN_LAYOUT_KEY, '');
+  }
+
+  function getInitialColumnLayout() {
+    try {
+      return _getLocalValue(COLUMN_LAYOUT_KEY);
+    } catch (err) {
+      return null;
+    }
+  }
+
+  // Apply column layout immediately on page load
+  (function initColumnLayout() {
+    const savedLayout = getInitialColumnLayout();
+    if (savedLayout) {
+      applyColumnLayout(savedLayout);
+    }
+  })();
+
+  function ColumnLayoutToggle() {
+    const [layout, setLayoutState] = useState(getInitialColumnLayout);
+
+    useLayoutEffect(() => {
+      if (layout) {
+        setColumnLayout(layout);
+      } else {
+        clearColumnLayout();
+      }
+    }, [layout]);
+
+    const getLayoutLabel = () => {
+      if (!layout) return 'Responsive';
+      return `${layout} Column${layout !== '1' ? 's' : ''}`;
+    };
+
+    return (
+      <>
+        <button onClick={() => setLayoutState('1')}>1 Column</button>
+        <button onClick={() => setLayoutState('2')}>2 Columns</button>
+        <button onClick={() => setLayoutState('3')}>3 Columns</button>
+        <button onClick={() => setLayoutState('4')}>4 Columns</button>
+        <button onClick={() => setLayoutState(null)}>Responsive</button>
+      </>
+    );
   }
 
   function VersionHistoryButton({ onSetViewMode }) {
