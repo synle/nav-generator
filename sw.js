@@ -2,7 +2,10 @@
 const CACHE_VERSION = '1770399909232';
 const CACHE_NAME = `nav-generator-cache-${CACHE_VERSION}`;
 const urlsToCache = [
-  '//synle.github.io/nav-generator/index.html',
+  './',
+  './index.html',
+  './index.js',
+  './index.css',
   '//synle.github.io/nav-generator/index.js',
   '//synle.github.io/nav-generator/index.css',
 ];
@@ -57,8 +60,17 @@ self.addEventListener('fetch', (event) => {
       const fetchRequest = event.request.clone();
 
       return fetch(fetchRequest).then((response) => {
-        // Check if valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+        // Check if this is a favicon request
+        const url = event.request.url;
+        const isFavicon = url.includes('favicon') || url.endsWith('.ico') || url.includes('/icon');
+
+        // For favicons, cache if response exists (even cross-origin/opaque responses)
+        // For other resources, only cache successful same-origin responses
+        const shouldCache = isFavicon
+          ? response && response.status === 200
+          : response && response.status === 200 && response.type === 'basic';
+
+        if (!shouldCache) {
           return response;
         }
 
