@@ -2,10 +2,7 @@
 const CACHE_VERSION = '1770399909232';
 const CACHE_NAME = `nav-generator-cache-${CACHE_VERSION}`;
 const urlsToCache = [
-  './',
-  './index.html',
-  './index.js',
-  './index.css',
+  '//synle.github.io/nav-generator/index.html',
   '//synle.github.io/nav-generator/index.js',
   '//synle.github.io/nav-generator/index.css',
 ];
