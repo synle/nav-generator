@@ -30,6 +30,7 @@ export default defineConfig({
   build: {
     outDir: '.',
     emptyOutDir: false,
+    sourcemap: true,
     lib: {
       entry: 'index.jsx',
       formats: ['iife'],
@@ -40,6 +41,7 @@ export default defineConfig({
       output: {
         extend: true,
         assetFileNames: 'index.css',
+        sourcemap: true,
       },
     },
     minify: true,
