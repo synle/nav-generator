@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
 import fs from 'fs';
+import { defineConfig } from 'vite';
 
 // Plugin to update service worker with build timestamp
 const updateServiceWorker = () => ({
@@ -41,7 +41,6 @@ export default defineConfig({
       output: {
         extend: true,
         assetFileNames: 'index.css',
-        sourcemap: true,
       },
     },
     minify: true,

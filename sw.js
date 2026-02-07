@@ -5,6 +5,7 @@ const urlsToCache = [
   './',
   './index.html',
   './index.js',
+  './fav.js',
   './index.css',
   '//synle.github.io/nav-generator/index.js',
   '//synle.github.io/nav-generator/index.css',
@@ -31,7 +32,7 @@ self.addEventListener('install', (event) => {
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
+              self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
