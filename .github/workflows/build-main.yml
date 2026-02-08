@@ -10,6 +10,7 @@ concurrency:
 
 jobs:
   build:
+    # https://github.com/synle/nav-generator/blob/main/.github/workflows/build-main.yml
     uses: synle/gha-workflow/.github/workflows/build-and-commit-sh.yml@main
     permissions:
       contents: write

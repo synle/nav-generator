@@ -2656,15 +2656,6 @@ function getLayoutBreakpoint() {
   return Math.round(document.body.clientWidth / COLUMN_BREAKPOINT_STEP);
 }
 
-
-  // Apply column layout immediately on page load
-  (function initColumnLayout() {
-    const savedLayout = getInitialColumnLayout();
-    if (savedLayout) {
-      applyColumnLayout(savedLayout);
-    }
-  })();
-
   function ColumnLayoutToggle() {
     const [layout, setLayoutState] = useState(getInitialColumnLayout);
 
