@@ -2466,6 +2466,13 @@ window.prompt = (message, initialValue = '', callback = null) => {
         }
       };
       window.addEventListener('message', _onHandlePostMessageEvent);
+    } else if (document.querySelector('[type=schema]')) {
+      // use the schema script instead here...
+      try {
+        inputSchema = document.querySelector('[type=schema]').innerText.trim();
+      } catch (err) {}
+
+      _render(); // rerender the dom
     } else if (
       location.search.includes('newNav') ||
       (!isRenderedInDataUrl && !location.href.includes('index.html'))
@@ -2485,13 +2492,6 @@ window.prompt = (message, initialValue = '', callback = null) => {
     ) {
       // if this flag is set, then continue
       // will proceed with loading from session storage
-      _render(); // rerender the dom
-    } else if (document.querySelector('[type=schema]')) {
-      // use the schema script instead here...
-      try {
-        inputSchema = document.querySelector('[type=schema]').innerText.trim();
-      } catch (err) {}
-
       _render(); // rerender the dom
     }
   } else {
