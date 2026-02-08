@@ -170,10 +170,6 @@ $gridColumnWidth: 330px;
   --borderSize3: 5px;
   --borderSize4: 0.5rem;
 
-  --gridColumnLayout: calc(25% - (3 * var(--gridGapWidth) / 4))
-    calc(25% - (3 * var(--gridGapWidth) / 4)) calc(25% - (3 * var(--gridGapWidth) / 4))
-    calc(25% - (3 * var(--gridGapWidth) / 4));
-
   --maxBodyWidth: 100vw;
 }
 
@@ -701,8 +697,7 @@ textarea {
 
 @media only screen and (max-width: $gridColumnWidth * 4) {
   :root {
-    --gridColumnLayout: calc(33.333% - (2 * var(--gridGapWidth) / 3))
-      calc(33.333% - (2 * var(--gridGapWidth) / 3)) calc(33.333% - (2 * var(--gridGapWidth) / 3));
+
   }
 }
 
@@ -710,7 +705,6 @@ textarea {
   :root {
     --gridGapHeight: 0.4rem;
     --gridGapWidth: 0.5rem;
-    --gridColumnLayout: calc(50% - (var(--gridGapWidth) / 2)) calc(50% - (var(--gridGapWidth) / 2));
   }
 }
 
@@ -724,7 +718,6 @@ textarea {
 
     --gridGapHeight: 0.2rem;
     --gridGapWidth: 0.25rem;
-    --gridColumnLayout: calc(100% - var(--gridGapWidth));
   }
 
   button,
