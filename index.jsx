@@ -16,6 +16,39 @@ const APP_BASE_URL =
 const APP_INDEX_URL = `${APP_BASE_URL}/index.html`;
 const NEW_NAV_URL = `${APP_INDEX_URL}?newNav`;
 
+const COLUMN_LAYOUT_KEY = 'column-layout';
+const DEFAULT_COLUMN_LAYOUT = '1';
+  const COLUMN_BREAKPOINT_STEP = 200
+const COLUMN_LAYOUTS = {
+    1: 'calc(100% - var(--gridGapWidth))',
+
+    2: `
+    calc(50% - (var(--gridGapWidth) / 2))
+    calc(50% - (var(--gridGapWidth) / 2))
+  `,
+
+    3: `
+    calc(33.333% - (2 * var(--gridGapWidth) / 3))
+    calc(33.333% - (2 * var(--gridGapWidth) / 3))
+    calc(33.333% - (2 * var(--gridGapWidth) / 3))
+  `,
+
+    4: `
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+    calc(25% - (3 * var(--gridGapWidth) / 4))
+  `,
+
+    5: `
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+    calc(20% - (4 * var(--gridGapWidth) / 5))
+  `,
+  };
+
 // custom events
 window.copyToClipboard = async (text) => {
   text = (text || '').trim();
@@ -1763,6 +1796,29 @@ window.prompt = (message, initialValue = '', callback = null) => {
       }
     }, [viewMode]);
 
+
+    useLayoutEffect(() => {
+    // Function to apply the layout
+    const handleResize = () => {
+      const savedLayout = getInitialColumnLayout();
+      applyColumnLayout(savedLayout);
+    };
+
+    // Initial call
+    handleResize();
+
+    // Add event listeners
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
+
+
     // render the proper views
     const allProps = { schema, onSetSchema, onSetViewMode };
     switch (viewMode) {
@@ -2554,62 +2610,52 @@ window.prompt = (message, initialValue = '', callback = null) => {
     return <button onClick={toggleTheme}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</button>;
   }
 
-  const COLUMN_LAYOUT_KEY = 'column-layout';
-  const COLUMN_LAYOUTS = {
-    1: 'calc(100% - var(--gridGapWidth))',
-
-    2: `
-    calc(50% - (var(--gridGapWidth) / 2))
-    calc(50% - (var(--gridGapWidth) / 2))
-  `,
-
-    3: `
-    calc(33.333% - (2 * var(--gridGapWidth) / 3))
-    calc(33.333% - (2 * var(--gridGapWidth) / 3))
-    calc(33.333% - (2 * var(--gridGapWidth) / 3))
-  `,
-
-    4: `
-    calc(25% - (3 * var(--gridGapWidth) / 4))
-    calc(25% - (3 * var(--gridGapWidth) / 4))
-    calc(25% - (3 * var(--gridGapWidth) / 4))
-    calc(25% - (3 * var(--gridGapWidth) / 4))
-  `,
-
-    5: `
-    calc(20% - (4 * var(--gridGapWidth) / 5))
-    calc(20% - (4 * var(--gridGapWidth) / 5))
-    calc(20% - (4 * var(--gridGapWidth) / 5))
-    calc(20% - (4 * var(--gridGapWidth) / 5))
-    calc(20% - (4 * var(--gridGapWidth) / 5))
-  `,
-  };
-
-  function applyColumnLayout(columns) {
-    if (columns && COLUMN_LAYOUTS[columns]) {
-      document.documentElement.style.setProperty('--gridColumnLayout', COLUMN_LAYOUTS[columns]);
-    } else {
-      document.documentElement.style.removeProperty('--gridColumnLayout');
-    }
-  }
-
   function setColumnLayout(columns) {
-    applyColumnLayout(columns);
-    _setLocalValue(COLUMN_LAYOUT_KEY, columns);
-  }
+  const layoutBreakpoint = getLayoutBreakpoint();
+  applyColumnLayout(columns);
+  _setLocalValue(`${COLUMN_LAYOUT_KEY}_${layoutBreakpoint}`, columns);
+}
 
-  function clearColumnLayout() {
+function applyColumnLayout(columns) {
+  if (columns && COLUMN_LAYOUTS[columns]) {
+    document.documentElement.style.setProperty('--gridColumnLayout', COLUMN_LAYOUTS[columns]);
+  } else {
     document.documentElement.style.removeProperty('--gridColumnLayout');
-    _setLocalValue(COLUMN_LAYOUT_KEY, '');
   }
+}
 
-  function getInitialColumnLayout() {
-    try {
-      return _getLocalValue(COLUMN_LAYOUT_KEY);
-    } catch (err) {
-      return null;
+function clearColumnLayout() {
+  // Clear the CSS variable
+  document.documentElement.style.removeProperty('--gridColumnLayout');
+
+  // Clear all COLUMN_LAYOUT_KEY_<breakpoint> keys
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(COLUMN_LAYOUT_KEY + '_')) {
+        localStorage.removeItem(key);
+        i--; // adjust index after removal
+      }
     }
+  } catch (err) {
+    console.error('Error clearing column layouts:', err);
   }
+}
+
+function getInitialColumnLayout() {
+  try {
+    const layoutBreakpoint = getLayoutBreakpoint();
+    const saved = _getLocalValue(`${COLUMN_LAYOUT_KEY}_${layoutBreakpoint}`);
+    return saved || DEFAULT_COLUMN_LAYOUT;
+  } catch (err) {
+    return DEFAULT_COLUMN_LAYOUT;
+  }
+}
+
+function getLayoutBreakpoint() {
+  return Math.round(document.body.clientWidth / COLUMN_BREAKPOINT_STEP);
+}
+
 
   // Apply column layout immediately on page load
   (function initColumnLayout() {
@@ -2622,13 +2668,14 @@ window.prompt = (message, initialValue = '', callback = null) => {
   function ColumnLayoutToggle() {
     const [layout, setLayoutState] = useState(getInitialColumnLayout);
 
+    const layoutBreakpoint = getLayoutBreakpoint()
     useLayoutEffect(() => {
       if (layout) {
-        setColumnLayout(layout);
+        setColumnLayout(layout, layoutBreakpoint);
       } else {
         clearColumnLayout();
       }
-    }, [layout]);
+    }, [layout, layoutBreakpoint]);
 
     const getLayoutLabel = () => {
       if (!layout) return 'Responsive';
