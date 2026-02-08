@@ -7,6 +7,7 @@ const urlsToCache = [
   './index.js',
   './fav.js',
   './index.css',
+  '//synle.github.io/fav/',
   '//synle.github.io/nav-generator/index.js',
   '//synle.github.io/nav-generator/index.css',
 ];

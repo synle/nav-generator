@@ -8,9 +8,10 @@ window.hasCustomNavBeforeLoad = params.get('hasCustomNavBeforeLoad') === '1';
 
 const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
 
+const APP_UPSTREAM_DEFAULT_BASE_URL = 'https://synle.github.io/nav-generator';
 const APP_BASE_URL =
   isRenderedInDataUrl || window.hasCustomNavBeforeLoad
-    ? 'https://synle.github.io/nav-generator'
+    ? APP_UPSTREAM_DEFAULT_BASE_URL
     : location.href.substr(0, location.href.lastIndexOf('/')); // this is the base url
 const APP_INDEX_URL = `${APP_BASE_URL}/index.html`;
 const NEW_NAV_URL = `${APP_INDEX_URL}?newNav`;
@@ -379,11 +380,11 @@ window.prompt = (message, initialValue = '', callback = null) => {
   <head>
     <meta charset="UTF-8" />
     <title>Loading...</title>
-    <link rel="stylesheet" href="${APP_BASE_URL}/index.css" />
+    <link rel="stylesheet" href="${APP_UPSTREAM_DEFAULT_BASE_URL}/index.css" />
   </head>
   <body>
     <js_script type='schema'>${input}</js_script>
-    <js_script src="${APP_BASE_URL}/index.js"></js_script>
+    <js_script src="${APP_UPSTREAM_DEFAULT_BASE_URL}/index.js"></js_script>
   </body>
 </html>
     `
@@ -2443,12 +2444,16 @@ window.prompt = (message, initialValue = '', callback = null) => {
   await Promise.all([]);
 
   // find and parse the schema from script
-  let inputSchema = _getPersistedBufferSchema() || '';
+  let inputSchema =
+    document.querySelector('[type=schema]')?.innerText?.trim() || _getPersistedBufferSchema() || '';
   let viewMode = 'read';
 
   document.innerHTML = `<div style="text-align: center; margin: 20px; font-size: 20px;">Loading...</div>`;
 
-  if (!window.hasCustomNavBeforeLoad) {
+  if (document.querySelector('[type=schema]')) {
+    // if schema tag is present let's render it as read
+    _render(); // rerender the dom
+  } else if (!window.hasCustomNavBeforeLoad) {
     if (location.search.includes('loadNav')) {
       // will wait for postmessage to populate this
       window.history.pushState('', '', APP_INDEX_URL);
@@ -2466,13 +2471,6 @@ window.prompt = (message, initialValue = '', callback = null) => {
         }
       };
       window.addEventListener('message', _onHandlePostMessageEvent);
-    } else if (document.querySelector('[type=schema]')) {
-      // use the schema script instead here...
-      try {
-        inputSchema = document.querySelector('[type=schema]').innerText.trim();
-      } catch (err) {}
-
-      _render(); // rerender the dom
     } else if (
       location.search.includes('newNav') ||
       (!isRenderedInDataUrl && !location.href.includes('index.html'))
