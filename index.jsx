@@ -1,26 +1,26 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
-import './index.scss';
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
+import "./index.scss";
 
 // Set global flag if script URL has ?hasCustomNavBeforeLoad=1
-const params = new URLSearchParams(document.currentScript?.src.split('?')[1]);
-window.hasCustomNavBeforeLoad = params.get('hasCustomNavBeforeLoad') === '1';
+const params = new URLSearchParams(document.currentScript?.src.split("?")[1]);
+window.hasCustomNavBeforeLoad = params.get("hasCustomNavBeforeLoad") === "1";
 
-const isRenderedInDataUrl = location.href.indexOf('data:') === 0;
+const isRenderedInDataUrl = location.href.indexOf("data:") === 0;
 
-const APP_UPSTREAM_DEFAULT_BASE_URL = 'https://synle.github.io/nav-generator';
+const APP_UPSTREAM_DEFAULT_BASE_URL = "https://synle.github.io/nav-generator";
 const APP_BASE_URL =
   isRenderedInDataUrl || window.hasCustomNavBeforeLoad
     ? APP_UPSTREAM_DEFAULT_BASE_URL
-    : location.href.substr(0, location.href.lastIndexOf('/')); // this is the base url
+    : location.href.substr(0, location.href.lastIndexOf("/")); // this is the base url
 const APP_INDEX_URL = `${APP_BASE_URL}/index.html`;
 const NEW_NAV_URL = `${APP_INDEX_URL}?newNav`;
 
-const COLUMN_LAYOUT_KEY = 'column-layout';
-const DEFAULT_COLUMN_LAYOUT = '1';
+const COLUMN_LAYOUT_KEY = "column-layout";
+const DEFAULT_COLUMN_LAYOUT = "1";
 const COLUMN_BREAKPOINT_STEP = 200;
 const COLUMN_LAYOUTS = {
-  1: 'calc(100% - var(--gridGapWidth))',
+  1: "calc(100% - var(--gridGapWidth))",
 
   2: `
     calc(50% - (var(--gridGapWidth) / 2))
@@ -51,17 +51,19 @@ const COLUMN_LAYOUTS = {
 
 // custom events
 window.copyToClipboard = async (text) => {
-  text = (text || '').trim();
+  text = (text || "").trim();
   if (text) {
     try {
       await navigator.clipboard.writeText(text);
-      await alert('Copied to clipboard!');
+      await alert("Copied to clipboard!");
     } catch (err) {
-      await prompt('Clipboard', text);
+      await prompt("Clipboard", text);
     }
   }
 };
-document.addEventListener('AppCopyTextToClipboard', (e) => window.copyToClipboard(e.text));
+document.addEventListener("AppCopyTextToClipboard", (e) =>
+  window.copyToClipboard(e.text),
+);
 
 // Modal component for alerts, prompts, and confirms
 function Modal(props) {
@@ -72,7 +74,7 @@ function Modal(props) {
     if (!isOpen) return;
 
     const handleEscape = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
@@ -83,27 +85,27 @@ function Modal(props) {
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
-    <div className='modal' ref={modalRef}>
-      <div className='modalContent'>{children}</div>
+    <div className="modal" ref={modalRef}>
+      <div className="modalContent">{children}</div>
     </div>,
     document.body,
   );
 }
 
 function AlertModal(props) {
-  const { message, onClose, type = 'alert' } = props;
+  const { message, onClose, type = "alert" } = props;
   const primaryButtonRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -112,23 +114,25 @@ function AlertModal(props) {
     }
   }, []);
 
-  if (type === 'confirm') {
+  if (type === "confirm") {
     return (
       <Modal isOpen={true} onClose={() => onClose(false)}>
-        <div className='modalBody'>
-          <div className='modalMessage'>{message}</div>
-          <footer className='modalFooter'>
+        <div className="modalBody">
+          <div className="modalMessage">{message}</div>
+          <footer className="modalFooter">
             <button
               ref={primaryButtonRef}
-              type='button'
-              className='modalBtn primary'
-              onClick={() => onClose(true)}>
+              type="button"
+              className="modalBtn primary"
+              onClick={() => onClose(true)}
+            >
               Yes
             </button>
             <button
-              type='button'
-              className='modalBtn modalBtnSecondary'
-              onClick={() => onClose(false)}>
+              type="button"
+              className="modalBtn modalBtnSecondary"
+              onClick={() => onClose(false)}
+            >
               No
             </button>
           </footer>
@@ -139,14 +143,15 @@ function AlertModal(props) {
 
   return (
     <Modal isOpen={true} onClose={() => onClose()}>
-      <div className='modalBody'>
-        <div className='modalMessage'>{message}</div>
-        <footer className='modalFooter'>
+      <div className="modalBody">
+        <div className="modalMessage">{message}</div>
+        <footer className="modalFooter">
           <button
             ref={primaryButtonRef}
-            type='button'
-            className='modalBtn primary'
-            onClick={() => onClose()}>
+            type="button"
+            className="modalBtn primary"
+            onClick={() => onClose()}
+          >
             OK
           </button>
         </footer>
@@ -156,7 +161,7 @@ function AlertModal(props) {
 }
 
 function PromptModal(props) {
-  const { message, initialValue = '', onClose, hasCallback = false } = props;
+  const { message, initialValue = "", onClose, hasCallback = false } = props;
   const [value, setValue] = useState(initialValue);
   const textareaRef = useRef(null);
   const primaryButtonRef = useRef(null);
@@ -169,7 +174,7 @@ function PromptModal(props) {
       }
 
       // Calculate rows based on actual line count + buffer
-      const lines = initialValue.split('\n');
+      const lines = initialValue.split("\n");
       const lineCount = lines.length;
 
       // Add 2-3 extra rows for editing comfort
@@ -181,7 +186,11 @@ function PromptModal(props) {
       const maxViewportRows = Math.floor((window.innerHeight * 0.6) / 20);
 
       // Set rows: minimum 5, maximum based on viewport, with our calculated value in between
-      textareaRef.current.rows = Math.min(Math.max(calculatedRows, 5), maxViewportRows, 30);
+      textareaRef.current.rows = Math.min(
+        Math.max(calculatedRows, 5),
+        maxViewportRows,
+        30,
+      );
     }
   }, [initialValue, hasCallback]);
 
@@ -196,23 +205,28 @@ function PromptModal(props) {
   if (hasCallback) {
     return (
       <Modal isOpen={true} onClose={handleCancel}>
-        <div className='modalBody'>
-          <div className='modalMessage'>{message}</div>
+        <div className="modalBody">
+          <div className="modalMessage">{message}</div>
           <textarea
             ref={textareaRef}
-            className='modalTextarea'
+            className="modalTextarea"
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />
-          <footer className='modalFooter'>
+          <footer className="modalFooter">
             <button
               ref={primaryButtonRef}
-              type='button'
-              className='modalBtn primary'
-              onClick={handleOk}>
+              type="button"
+              className="modalBtn primary"
+              onClick={handleOk}
+            >
               OK
             </button>
-            <button type='button' className='modalBtn modalBtnSecondary' onClick={handleCancel}>
+            <button
+              type="button"
+              className="modalBtn modalBtnSecondary"
+              onClick={handleCancel}
+            >
               Cancel
             </button>
           </footer>
@@ -223,20 +237,21 @@ function PromptModal(props) {
 
   return (
     <Modal isOpen={true} onClose={handleOk}>
-      <div className='modalBody'>
-        <div className='modalMessage'>{message}</div>
+      <div className="modalBody">
+        <div className="modalMessage">{message}</div>
         <textarea
           ref={textareaRef}
-          className='modalTextarea modalTextarea--readonly'
+          className="modalTextarea modalTextarea--readonly"
           value={value}
           readOnly
         />
-        <footer className='modalFooter'>
+        <footer className="modalFooter">
           <button
             ref={primaryButtonRef}
-            type='button'
-            className='modalBtn primary'
-            onClick={handleOk}>
+            type="button"
+            className="modalBtn primary"
+            onClick={handleOk}
+          >
             OK
           </button>
         </footer>
@@ -251,8 +266,8 @@ const modalManager = {
 
   init() {
     if (!this.container) {
-      this.container = document.createElement('div');
-      this.container.id = 'modal-root';
+      this.container = document.createElement("div");
+      this.container.id = "modal-root";
       document.body.appendChild(this.container);
     }
   },
@@ -275,7 +290,7 @@ window.alert = (message) => {
     modalManager.render(
       <AlertModal
         message={message}
-        type='alert'
+        type="alert"
         onClose={() => {
           modalManager.unmount();
           resolve();
@@ -290,7 +305,7 @@ window.confirm = (message) => {
     modalManager.render(
       <AlertModal
         message={message}
-        type='confirm'
+        type="confirm"
         onClose={(confirmed) => {
           modalManager.unmount();
           if (confirmed) {
@@ -304,9 +319,9 @@ window.confirm = (message) => {
   });
 };
 
-window.prompt = (message, initialValue = '', callback = null) => {
+window.prompt = (message, initialValue = "", callback = null) => {
   return new Promise((resolve) => {
-    const hasCallback = typeof callback === 'function';
+    const hasCallback = typeof callback === "function";
 
     modalManager.render(
       <PromptModal
@@ -331,15 +346,15 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
 // component rendering code starts here
 (async () => {
-  const SAME_TAB_LINK_SPLIT = '|';
-  const NEW_TAB_LINK_SPLIT = '|||';
-  const HEADER_SPLIT = '#';
-  const TITLE_SPLIT = '!';
-  const CODE_BLOCK_SPLIT = '```';
-  const HTML_BLOCK_SPLIT = '---';
-  const TAB_SPLIT = '>>>';
-  const TAB_TITLE_SPLIT = '|';
-  const FAV_ICON_SPLIT = '@';
+  const SAME_TAB_LINK_SPLIT = "|";
+  const NEW_TAB_LINK_SPLIT = "|||";
+  const HEADER_SPLIT = "#";
+  const TITLE_SPLIT = "!";
+  const CODE_BLOCK_SPLIT = "```";
+  const HTML_BLOCK_SPLIT = "---";
+  const TAB_SPLIT = ">>>";
+  const TAB_TITLE_SPLIT = "|";
+  const FAV_ICON_SPLIT = "@";
 
   let cacheId = parseInt(Date.now());
 
@@ -376,19 +391,19 @@ window.prompt = (message, initialValue = '', callback = null) => {
     <u><b>sample html</b></u> blockId2
     ---
   `
-    .split('\n')
+    .split("\n")
     .map((s) => s.trim())
-    .join('\n');
+    .join("\n");
 
   // private methods
   async function _navigateToDataUrl(base64URL, forceOpenWindow) {
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(
-        decodeURIComponent(base64URL.replace('data:text/html,', '')),
-        'text/html',
+        decodeURIComponent(base64URL.replace("data:text/html,", "")),
+        "text/html",
       );
-      const schema = doc.querySelector('[type=schema]').innerText.trim();
+      const schema = doc.querySelector("[type=schema]").innerText.trim();
       const childWindow = window.open(`${APP_INDEX_URL}?loadNav`);
 
       // post message to redirect the data url accordingly
@@ -396,11 +411,11 @@ window.prompt = (message, initialValue = '', callback = null) => {
       setTimeout(() => clearInterval(intervalTryPostingMessage), 5000);
 
       function _doPostMessage() {
-        childWindow.postMessage({ type: 'onViewLinks', schema }, '*');
+        childWindow.postMessage({ type: "onViewLinks", schema }, "*");
       }
     } catch (err) {
       // show it in the prompt
-      await prompt('Data URL (Copy to clipboard):', base64URL);
+      await prompt("Data URL (Copy to clipboard):", base64URL);
     }
   }
 
@@ -422,13 +437,13 @@ window.prompt = (message, initialValue = '', callback = null) => {
 </html>
     `
       .trim()
-      .replace(/js_script/g, 'script');
+      .replace(/js_script/g, "script");
 
-    return 'data:text/html,' + encodeURIComponent(rawOutput);
+    return "data:text/html," + encodeURIComponent(rawOutput);
   }
 
   function _dispatchEvent(target, evName, evExtra = {}) {
-    const evType = 'MouseEvents';
+    const evType = "MouseEvents";
     const evObj = document.createEvent(evType);
     evObj.initEvent(evName, true, false);
 
@@ -463,9 +478,9 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   function _getSessionValue(key) {
     try {
-      return sessionStorage[key] || '';
+      return sessionStorage[key] || "";
     } catch (err) {
-      return '';
+      return "";
     }
   }
 
@@ -479,36 +494,36 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   function _getLocalValue(key) {
     try {
-      return localStorage[key] || '';
+      return localStorage[key] || "";
     } catch (err) {
-      return '';
+      return "";
     }
   }
 
   function _persistBufferSchema(value) {
-    _setSessionValue('schemaData', value);
+    _setSessionValue("schemaData", value);
   }
 
   function _getPersistedBufferSchema() {
-    return _getSessionValue('schemaData');
+    return _getSessionValue("schemaData");
   }
 
   function _onCopyToClipboard(text) {
-    _dispatchCustomEvent(document, 'AppCopyTextToClipboard', { text });
+    _dispatchCustomEvent(document, "AppCopyTextToClipboard", { text });
   }
 
   function _addScript(src) {
     return new Promise((resolve) => {
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = src;
       script.onload = resolve;
       document.head.appendChild(script);
     });
   }
 
-  function _addStyle(src, rel = 'stylesheet/less') {
+  function _addStyle(src, rel = "stylesheet/less") {
     return new Promise((resolve) => {
-      const link = document.createElement('link');
+      const link = document.createElement("link");
       link.rel = rel;
       link.href = src;
       document.head.appendChild(link);
@@ -535,21 +550,21 @@ window.prompt = (message, initialValue = '', callback = null) => {
     // parse lines and generate views
     const lines = schema
       .trim()
-      .split('\n')
-      .filter((r) => r.indexOf('//') !== 0)
+      .split("\n")
+      .filter((r) => r.indexOf("//") !== 0)
       .map((r) => r.trimEnd());
 
-    if (lines[0][0] !== '!') {
+    if (lines[0][0] !== "!") {
       const headerSchemaSampleCode = `${TITLE_SPLIT} Unnamed Navigation - ${new Date().toLocaleString()}`;
       lines.unshift(headerSchemaSampleCode);
     }
 
     let blockBuffer = [];
     let isInABlock = false;
-    let blockType = ''; // code or html
-    let currentHeaderName = '';
-    let blockId = '';
-    let pageFavIcon = '📑';
+    let blockType = ""; // code or html
+    let currentHeaderName = "";
+    let blockId = "";
+    let pageFavIcon = "📑";
 
     let blockIdMap = {};
 
@@ -570,38 +585,38 @@ window.prompt = (message, initialValue = '', callback = null) => {
     lines.forEach((link) => {
       const newCacheId = ++cacheId;
       if (isInABlock) {
-        let valueToUse = '';
+        let valueToUse = "";
 
         // attempt to format it as html
-        valueToUse = blockBuffer.join('\n');
+        valueToUse = blockBuffer.join("\n");
         try {
           valueToUse = JSON.stringify(JSON.parse(valueToUse), null, 2);
         } catch (err) {}
 
-        if (blockType === 'code' && link.trim() === CODE_BLOCK_SPLIT) {
+        if (blockType === "code" && link.trim() === CODE_BLOCK_SPLIT) {
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
             value: valueToUse,
-            type: 'code_block',
+            type: "code_block",
           });
           isInABlock = false;
           blockBuffer = [];
-          blockType = '';
-          currentHeaderName = '';
-          blockId = '';
-        } else if (blockType === 'html' && link.trim() === HTML_BLOCK_SPLIT) {
+          blockType = "";
+          currentHeaderName = "";
+          blockId = "";
+        } else if (blockType === "html" && link.trim() === HTML_BLOCK_SPLIT) {
           serializedSchema.push({
             key: newCacheId,
             id: _upsertBlockId(blockId),
             value: valueToUse,
-            type: 'html_block',
+            type: "html_block",
           });
           isInABlock = false;
           blockBuffer = [];
-          blockType = '';
-          currentHeaderName = '';
-          blockId = '';
+          blockType = "";
+          currentHeaderName = "";
+          blockId = "";
         } else {
           blockBuffer.push(link);
         }
@@ -609,40 +624,44 @@ window.prompt = (message, initialValue = '', callback = null) => {
       }
 
       if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
-        pageFavIcon = link.replace(/^[@]+/, '').trim();
+        pageFavIcon = link.replace(/^[@]+/, "").trim();
         serializedSchema.push({
           key: newCacheId,
           value: pageFavIcon,
-          type: 'favIcon',
+          type: "favIcon",
         });
       } else if (link.trim().indexOf(TITLE_SPLIT) === 0) {
-        const headerText = link.replace(TITLE_SPLIT, '').trim();
+        const headerText = link.replace(TITLE_SPLIT, "").trim();
         serializedSchema.push({
           key: newCacheId,
           value: headerText,
-          type: 'title',
+          type: "title",
         });
       } else if (link.trim().indexOf(HEADER_SPLIT) === 0) {
-        const headerText = link.replace(HEADER_SPLIT, '').trim();
+        const headerText = link.replace(HEADER_SPLIT, "").trim();
         serializedSchema.push({
           key: newCacheId,
           value: headerText,
-          type: 'header',
+          type: "header",
         });
 
         currentHeaderName = headerText;
       } else if (link.trim().indexOf(CODE_BLOCK_SPLIT) === 0) {
         isInABlock = true;
-        blockType = 'code';
+        blockType = "code";
         if (link.length > CODE_BLOCK_SPLIT.length) {
-          blockId = link.substr(blockId.indexOf(CODE_BLOCK_SPLIT) + CODE_BLOCK_SPLIT.length + 1);
+          blockId = link.substr(
+            blockId.indexOf(CODE_BLOCK_SPLIT) + CODE_BLOCK_SPLIT.length + 1,
+          );
           _upsertBlockId(blockId);
         }
       } else if (link.trim().indexOf(HTML_BLOCK_SPLIT) === 0) {
         isInABlock = true;
-        blockType = 'html';
+        blockType = "html";
         if (link.length > HTML_BLOCK_SPLIT.length) {
-          blockId = link.substr(blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1);
+          blockId = link.substr(
+            blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1,
+          );
           _upsertBlockId(blockId);
         }
       } else if (link.trim().indexOf(TAB_SPLIT) === 0) {
@@ -663,7 +682,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
         serializedSchema.push({
           key: newCacheId,
-          type: 'tabs',
+          type: "tabs",
           tabContent: tabContent,
         });
       } else if (link.trim().length > 0) {
@@ -674,71 +693,83 @@ window.prompt = (message, initialValue = '', callback = null) => {
           // try parse as new tab link
           if (
             link.indexOf(NEW_TAB_LINK_SPLIT) !== -1 &&
-            link.indexOf(NEW_TAB_LINK_SPLIT) <= link.indexOf(SAME_TAB_LINK_SPLIT)
+            link.indexOf(NEW_TAB_LINK_SPLIT) <=
+              link.indexOf(SAME_TAB_LINK_SPLIT)
           ) {
             linkText = link.substr(0, link.indexOf(NEW_TAB_LINK_SPLIT)).trim();
             linkUrl = link
-              .substr(link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length)
+              .substr(
+                link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length,
+              )
               .trim();
-            linkType = 'newTabLink';
+            linkType = "newTabLink";
           }
         } catch (err) {}
 
         if (!linkType) {
           try {
-            if (link.length > 0 && SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)) {
-              linkText = link.substr(0, link.indexOf(SAME_TAB_LINK_SPLIT)).trim();
-              linkUrl = link
-                .substr(link.indexOf(SAME_TAB_LINK_SPLIT) + SAME_TAB_LINK_SPLIT.length)
+            if (
+              link.length > 0 &&
+              SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)
+            ) {
+              linkText = link
+                .substr(0, link.indexOf(SAME_TAB_LINK_SPLIT))
                 .trim();
-              linkType = 'sameTabLink';
+              linkUrl = link
+                .substr(
+                  link.indexOf(SAME_TAB_LINK_SPLIT) +
+                    SAME_TAB_LINK_SPLIT.length,
+                )
+                .trim();
+              linkType = "sameTabLink";
             }
           } catch (err) {}
         }
         if (linkType) {
-          if (linkUrl.indexOf('/') === 0) {
+          if (linkUrl.indexOf("/") === 0) {
             linkUrl = `${location.origin}${linkUrl}`;
           } else if (
-            linkUrl.indexOf('http://') !== 0 &&
-            linkUrl.indexOf('https://') !== 0 &&
-            linkUrl.indexOf('javascript://') !== 0 &&
-            linkUrl.indexOf('data:') !== 0
+            linkUrl.indexOf("http://") !== 0 &&
+            linkUrl.indexOf("https://") !== 0 &&
+            linkUrl.indexOf("javascript://") !== 0 &&
+            linkUrl.indexOf("data:") !== 0
           ) {
             linkUrl = `https://${linkUrl}`;
           }
 
-          if (linkUrl.indexOf('javascript://') === 0) {
-            linkType = 'jsLink';
-            linkUrl = linkUrl.replace('javascript://', '');
+          if (linkUrl.indexOf("javascript://") === 0) {
+            linkType = "jsLink";
+            linkUrl = linkUrl.replace("javascript://", "");
             linkUrl = `(async() => {${linkUrl}})()`;
-          } else if (linkUrl.indexOf('data:') === 0) {
-            linkType = 'dataLink';
+          } else if (linkUrl.indexOf("data:") === 0) {
+            linkType = "dataLink";
           }
 
           if (!linkText) {
             // Generate linkText from domain if not provided
             try {
-              if (linkType === 'jsLink') {
-                linkText = 'JS Link';
-              } else if (linkType === 'dataLink') {
-                linkText = 'Data URL Link';
+              if (linkType === "jsLink") {
+                linkText = "JS Link";
+              } else if (linkType === "dataLink") {
+                linkText = "Data URL Link";
               } else {
                 // Generate linkText from domain for regular URLs only
                 const url = new URL(linkUrl);
-                let hostname = url.hostname.replace(/^www\./, '');
-                const parts = hostname.split('.');
+                let hostname = url.hostname.replace(/^www\./, "");
+                const parts = hostname.split(".");
                 // Get root domain name (second-to-last part before TLD)
-                linkText = parts.length >= 2 ? parts[parts.length - 2] : hostname;
+                linkText =
+                  parts.length >= 2 ? parts[parts.length - 2] : hostname;
               }
             } catch (e) {
               // If URL parsing fails, use the raw linkUrl
-              linkText = linkUrl.substr(0, 20) + '...';
+              linkText = linkUrl.substr(0, 20) + "...";
             }
           }
 
           serializedSchema.push({
             key: newCacheId,
-            type: 'link',
+            type: "link",
             linkUrl,
             linkText,
             linkType,
@@ -757,12 +788,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
     return (
       <input
-        id='search'
-        list='autocompleteSearches'
+        id="search"
+        list="autocompleteSearches"
         onInput={(e) => onSearch(e.target.value)}
-        placeholder='🔍 Search for bookmark'
-        autoComplete='off'
-        spellCheck='false'
+        placeholder="🔍 Search for bookmark"
+        autoComplete="off"
+        spellCheck="false"
         autoFocus={false}
         required
       />
@@ -771,12 +802,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   function PageRead(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
-    const [searchText, setSearchText] = useState('');
+    const [searchText, setSearchText] = useState("");
     const refContainer = useRef();
 
     // events
     const onEdit = useCallback(() => {
-      onSetViewMode('edit');
+      onSetViewMode("edit");
     }, []);
 
     const onSearch = useCallback((newSearchText) => {
@@ -791,11 +822,11 @@ window.prompt = (message, initialValue = '', callback = null) => {
           const doc = refContainer.current;
 
           const [firstSearchChar, ...searchWord] = searchText;
-          if (firstSearchChar === '?') {
-            location.href = `https://www.google.com/search?q=${searchWord.join('')}`;
+          if (firstSearchChar === "?") {
+            location.href = `https://www.google.com/search?q=${searchWord.join("")}`;
           }
 
-          const links = [...doc.querySelectorAll('.link:not(.hidden)')];
+          const links = [...doc.querySelectorAll(".link:not(.hidden)")];
 
           // focus on the first link
           if (links.length > 0) {
@@ -819,80 +850,94 @@ window.prompt = (message, initialValue = '', callback = null) => {
         const doc = refContainer.current;
 
         if (searchText.length === 0) {
-          for (const elem of doc.querySelectorAll('.link')) {
-            elem.classList.remove('hidden');
+          for (const elem of doc.querySelectorAll(".link")) {
+            elem.classList.remove("hidden");
           }
           return;
         }
 
         // remove all non alphanumeric
-        let exactMatchregex = new RegExp((searchText.match(/[a-z0-9]/gi) || []).join(''), 'i');
+        let exactMatchregex = new RegExp(
+          (searchText.match(/[a-z0-9]/gi) || []).join(""),
+          "i",
+        );
         let matchRegex = exactMatchregex;
 
         const [firstSearchChar] = searchText;
-        if (firstSearchChar === '/') {
+        if (firstSearchChar === "/") {
           // fuzzy match
           const cleanedSearchText = searchText
-            .replace(/[\W_]+/gi, ' ')
-            .replace(/[ ][ ]+/, ' ')
+            .replace(/[\W_]+/gi, " ")
+            .replace(/[ ][ ]+/, " ")
             .trim();
 
-          matchRegex = new RegExp('[ ]*' + cleanedSearchText.split('').join('[a-z0-9 -_]*'), 'i');
+          matchRegex = new RegExp(
+            "[ ]*" + cleanedSearchText.split("").join("[a-z0-9 -_]*"),
+            "i",
+          );
         }
 
         // show or hide
-        for (const elem of doc.querySelectorAll('.link')) {
+        for (const elem of doc.querySelectorAll(".link")) {
           let isHidden = true;
 
-          const link = (elem.href || '')
-            .replace(/http[s]/gi, '')
-            .replace(/www/gi, '')
-            .replace(/html/gi, '')
-            .replace(/index/gi, '')
-            .replace(/[/.]/gi, '');
+          const link = (elem.href || "")
+            .replace(/http[s]/gi, "")
+            .replace(/www/gi, "")
+            .replace(/html/gi, "")
+            .replace(/index/gi, "")
+            .replace(/[/.]/gi, "");
 
-          const text = elem.innerText || '';
+          const text = elem.innerText || "";
 
           if (text.match(matchRegex)) {
             isHidden = false;
-          } else if (elem.dataset.section && elem.dataset.section.match(exactMatchregex)) {
+          } else if (
+            elem.dataset.section &&
+            elem.dataset.section.match(exactMatchregex)
+          ) {
             isHidden = false;
           } else if (link.match(exactMatchregex)) {
             isHidden = false;
           }
 
-          elem.classList.toggle('hidden', isHidden);
+          elem.classList.toggle("hidden", isHidden);
         }
       }
     }, [searchText, refContainer.current]);
 
     return (
-      <div id='fav' ref={refContainer}>
+      <div id="fav" ref={refContainer}>
         <SchemaRender schema={schema} refContainer={refContainer} />
-        <form id='searchForm' onSubmit={(e) => onSubmitNavigationSearch(e)}>
+        <form id="searchForm" onSubmit={(e) => onSubmitNavigationSearch(e)}>
           <SearchBox onSearch={onSearch} />
         </form>
-        <div className='commands'>
-          <button id='edit' onClick={onEdit} role='button'>
+        <div className="commands">
+          <button id="edit" onClick={onEdit} role="button">
             Edit
           </button>
-          <DropdownButtons type='pullUp'>
-            <button className='dropdown-trigger'>Actions</button>
-            <a target='_blank' href={NEW_NAV_URL}>
+          <DropdownButtons type="pullUp">
+            <button className="dropdown-trigger">Actions</button>
+            <a target="_blank" href={NEW_NAV_URL}>
               New Nav
             </a>
             <button
-              className='copyBookmarkToClipboard'
-              onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}>
+              className="copyBookmarkToClipboard"
+              onClick={() =>
+                _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))
+              }
+            >
               Copy Bookmark
             </button>
-            <button onClick={() => onSetViewMode('bookmark_import_chrome')}>
+            <button onClick={() => onSetViewMode("bookmark_import_chrome")}>
               Import Chrome Bookmarks
             </button>
-            <button onClick={() => onSetViewMode('bookmark_export_chrome')}>
+            <button onClick={() => onSetViewMode("bookmark_export_chrome")}>
               Export Chrome Bookmarks
             </button>
-            <button onClick={() => onSetViewMode('backup_download')}>Backup Download</button>
+            <button onClick={() => onSetViewMode("backup_download")}>
+              Backup Download
+            </button>
           </DropdownButtons>
           <VersionHistoryButton key={Date.now()} {...props} />
         </div>
@@ -904,14 +949,14 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [bufferSchema, setBufferSchema] = useState(schema.trim());
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
-    const [bookmark, setBookmark] = useState('');
+    const [bookmark, setBookmark] = useState("");
 
     const urlDownloadSchema = _getUrlDownloadSchema(schema);
 
     // events
     const onApply = useCallback(() => {
       onSetSchema(bufferSchema); // update schema
-      onSetViewMode('read');
+      onSetViewMode("read");
 
       //update the cache in the session storage
       _persistBufferSchema(bufferSchema); // commit the changes
@@ -921,14 +966,14 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const onCancel = useCallback(async () => {
       if (hasPendingChanges) {
         try {
-          await confirm('You have unsaved changes. Discard unsaved changes?');
+          await confirm("You have unsaved changes. Discard unsaved changes?");
         } catch (err) {
           // user cancel, then stop...
           return;
         }
       }
 
-      onSetViewMode('read');
+      onSetViewMode("read");
     }, []);
 
     const onTest = useCallback(() => {
@@ -942,12 +987,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, []);
 
     function onSortSchemaBySectionNameAndTitle(schema) {
-      const rows = schema.split('\n');
+      const rows = schema.split("\n");
       let sections = [];
       let sectionIdx = 0;
 
       for (const row of rows) {
-        if (row[0] === '#') {
+        if (row[0] === "#") {
           sectionIdx++;
         }
         sections[sectionIdx] = sections[sectionIdx] || [];
@@ -957,14 +1002,14 @@ window.prompt = (message, initialValue = '', callback = null) => {
       sections = sections
         .filter((s) => !!s && s.length > 0)
         .map((s) => {
-          if (s[s.length - 1] !== '') {
-            s.push('');
+          if (s[s.length - 1] !== "") {
+            s.push("");
           }
           return s;
         })
         .sort(_schemaSectionNameOnlySorter);
 
-      const newBufferSchema = sections.map((s) => s.join('\n')).join('\n');
+      const newBufferSchema = sections.map((s) => s.join("\n")).join("\n");
       setBufferSchema(newBufferSchema);
     }
 
@@ -984,7 +1029,8 @@ window.prompt = (message, initialValue = '', callback = null) => {
       if (hasPendingChanges) {
         window.onbeforeunload = function (e) {
           e.preventDefault();
-          return (e.returnValue = 'You have unsaved changes. Do you want to continue with exit?');
+          return (e.returnValue =
+            "You have unsaved changes. Do you want to continue with exit?");
         };
       }
     }, [hasPendingChanges]);
@@ -996,63 +1042,93 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
     // generate the view
     return (
-      <div id='command'>
-        <div className='title'>Edit Navigation</div>
-        <div className='commands'>
-          <button id='applyEdit' type='button' role='button' onClick={() => onApply()}>
+      <div id="command">
+        <div className="title">Edit Navigation</div>
+        <div className="commands">
+          <button
+            id="applyEdit"
+            type="button"
+            role="button"
+            onClick={() => onApply()}
+          >
             Apply
           </button>
-          <button id='cancelEdit' type='button' role='button' onClick={() => onCancel()}>
+          <button
+            id="cancelEdit"
+            type="button"
+            role="button"
+            onClick={() => onCancel()}
+          >
             Cancel
           </button>
           <DropdownButtons>
-            <button className='dropdown-trigger' type='button'>
+            <button className="dropdown-trigger" type="button">
               Actions
             </button>
-            <a target='_blank' href={NEW_NAV_URL}>
+            <a target="_blank" href={NEW_NAV_URL}>
               New Nav
             </a>
-            <button onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}>
+            <button
+              onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}
+            >
               Sort Schema
             </button>
             <button
-              className='copyBookmarkToClipboard'
-              onClick={() => _onCopyToClipboard(bookmark)}>
+              className="copyBookmarkToClipboard"
+              onClick={() => _onCopyToClipboard(bookmark)}
+            >
               Copy Bookmark
             </button>
-            <button onClick={() => _onCopyToClipboard(bufferSchema)}>Copy Schema</button>
-            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.jsx'>
+            <button onClick={() => _onCopyToClipboard(bufferSchema)}>
+              Copy Schema
+            </button>
+            <a
+              target="_blank"
+              href="https://github.com/synle/nav-generator/blob/main/index.jsx"
+            >
               JS Code
             </a>
-            <a target='_blank' href='https://github.com/synle/nav-generator/blob/main/index.less'>
+            <a
+              target="_blank"
+              href="https://github.com/synle/nav-generator/blob/main/index.less"
+            >
               CSS Code
             </a>
-            <button type='button' onClick={onTest}>
+            <button type="button" onClick={onTest}>
               Test
             </button>
-            <a href={urlDownloadSchema} download={`schema.${new Date().getTime()}.txt`}>
+            <a
+              href={urlDownloadSchema}
+              download={`schema.${new Date().getTime()}.txt`}
+            >
               Download Schema
             </a>
-            <a href={bookmark} download={`bookmark.${new Date().getTime()}.html`}>
+            <a
+              href={bookmark}
+              download={`bookmark.${new Date().getTime()}.html`}
+            >
               Download Bookmark
             </a>
           </DropdownButtons>
         </div>
         <SchemaEditor
-          id='input'
-          wrap='soft'
-          spellcheck='false'
+          id="input"
+          wrap="soft"
+          spellcheck="false"
           autoFocus
           value={bufferSchema}
           onInput={(e) => onSetBufferSchema(e.target.value)}
-          onBlur={(e) => onSetBufferSchema(e.target.value)}></SchemaEditor>
+          onBlur={(e) => onSetBufferSchema(e.target.value)}
+        ></SchemaEditor>
       </div>
     );
   }
 
   function _getFaviconUrl(url) {
     // Extract domain from URL
-    let domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im)[1];
+    let domain = url.match(
+      /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im,
+    )[1];
 
     // Add "/favicon.ico" to the domain
     return `${domain}/favicon.ico`;
@@ -1065,12 +1141,15 @@ window.prompt = (message, initialValue = '', callback = null) => {
     if (!error) {
       switch (linkType) {
         default:
-          if (linkUrl.indexOf('http://') === 0 || linkUrl.indexOf('https://') === 0) {
+          if (
+            linkUrl.indexOf("http://") === 0 ||
+            linkUrl.indexOf("https://") === 0
+          ) {
             let favIconUrl = `http://${_getFaviconUrl(linkUrl)}`;
             return (
               <img
                 src={favIconUrl}
-                alt='Fav'
+                alt="Fav"
                 onError={(e) => {
                   setError(true);
                 }}
@@ -1095,13 +1174,13 @@ window.prompt = (message, initialValue = '', callback = null) => {
       if (refContainer && refContainer.current) {
         const doc = refContainer.current;
 
-        const tabsList = [...doc.querySelectorAll('tabs')];
+        const tabsList = [...doc.querySelectorAll("tabs")];
 
         for (const tabs of tabsList) {
-          const tabChildren = [...tabs.querySelectorAll('tab')];
+          const tabChildren = [...tabs.querySelectorAll("tab")];
 
           // trigger first tab selection
-          _dispatchEvent(tabChildren[0], 'click');
+          _dispatchEvent(tabChildren[0], "click");
         }
       }
     }, [doms, refContainer.current]);
@@ -1115,7 +1194,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
       const newDoms = serializedSchema.map((schemaComponent) => {
         switch (schemaComponent.type) {
-          case 'title':
+          case "title":
             // set the page title
             document.title = schemaComponent.value;
 
@@ -1124,7 +1203,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
               renderedSettingButtonOnTitle = true;
               domSettings = (
                 <DropdownButtons>
-                  <button className='dropdown-trigger'>Settings</button>
+                  <button className="dropdown-trigger">Settings</button>
                   <ThemeToggle />
                   <ColumnLayoutToggle />
                 </DropdownButtons>
@@ -1135,17 +1214,22 @@ window.prompt = (message, initialValue = '', callback = null) => {
               <div
                 id={schemaComponent.id}
                 key={schemaComponent.key}
-                className='title'
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                className="title"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 {schemaComponent.value}
                 {domSettings}
               </div>
             );
-          case 'favIcon':
+          case "favIcon":
             // insert the fav icon
             const pageFavIcon = schemaComponent.value;
-            document.querySelector('#pageFavIcon') &&
-              document.querySelector('#pageFavIcon').remove();
+            document.querySelector("#pageFavIcon") &&
+              document.querySelector("#pageFavIcon").remove();
             const favIconEncoded =
               encodeURIComponent(
                 `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='0' y='14'>`,
@@ -1153,96 +1237,112 @@ window.prompt = (message, initialValue = '', callback = null) => {
               pageFavIcon +
               encodeURIComponent(`</text></svg>`);
             document.head.insertAdjacentHTML(
-              'beforeend',
+              "beforeend",
               `<link id='pageFavIcon' data-fav-icon="${pageFavIcon}" rel="icon" href="data:image/svg+xml,${favIconEncoded}" />`,
             );
             break;
-          case 'header':
-            return (
-              <div id={schemaComponent.id} key={schemaComponent.key} className='header'>
-                {schemaComponent.value}
-              </div>
-            );
-          case 'code_block':
-            return (
-              <pre
-                id={schemaComponent.id}
-                key={schemaComponent.key}
-                className='block codeBlock'
-                onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}>
-                {schemaComponent.value}
-              </pre>
-            );
-          case 'html_block':
+          case "header":
             return (
               <div
                 id={schemaComponent.id}
                 key={schemaComponent.key}
-                className='block htmlBlock'
-                dangerouslySetInnerHTML={{ __html: schemaComponent.value }}></div>
+                className="header"
+              >
+                {schemaComponent.value}
+              </div>
             );
-          case 'tabs':
+          case "code_block":
+            return (
+              <pre
+                id={schemaComponent.id}
+                key={schemaComponent.key}
+                className="block codeBlock"
+                onDoubleClick={(e) =>
+                  _onCopyToClipboard(e.target.innerText.trim())
+                }
+              >
+                {schemaComponent.value}
+              </pre>
+            );
+          case "html_block":
+            return (
+              <div
+                id={schemaComponent.id}
+                key={schemaComponent.key}
+                className="block htmlBlock"
+                dangerouslySetInnerHTML={{ __html: schemaComponent.value }}
+              ></div>
+            );
+          case "tabs":
             const tabContent = [];
             for (const tab of schemaComponent.tabContent) {
               tabContent.push(
-                <tab className='tab' tabIndex='0' data-tab-id={tab.tabId}>
+                <tab className="tab" tabIndex="0" data-tab-id={tab.tabId}>
                   {tab.tabName}
                 </tab>,
               );
             }
             return (
-              <tabs id={schemaComponent.id} key={schemaComponent.key} className='tabs'>
+              <tabs
+                id={schemaComponent.id}
+                key={schemaComponent.key}
+                className="tabs"
+              >
                 {tabContent}
               </tabs>
             );
-          case 'link':
+          case "link":
             newAutocompleteSearches.add(schemaComponent.linkText);
 
             switch (schemaComponent.linkType) {
-              case 'newTabLink':
+              case "newTabLink":
                 return (
                   <a
                     id={schemaComponent.id}
                     key={schemaComponent.key}
-                    className='link newTabLink'
-                    target='_blank'
+                    className="link newTabLink"
+                    target="_blank"
                     href={schemaComponent.linkUrl}
-                    data-section={schemaComponent.headerName}>
+                    data-section={schemaComponent.headerName}
+                  >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
                 );
-              case 'sameTabLink':
+              case "sameTabLink":
                 return (
                   <a
                     id={schemaComponent.id}
                     key={schemaComponent.key}
-                    className='link sameTabLink'
+                    className="link sameTabLink"
                     href={schemaComponent.linkUrl}
-                    data-section={schemaComponent.headerName}>
+                    data-section={schemaComponent.headerName}
+                  >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
                 );
-              case 'jsLink':
+              case "jsLink":
                 return (
                   <button
                     id={schemaComponent.id}
                     key={schemaComponent.key}
-                    className='link jsLink'
-                    type='button'
+                    className="link jsLink"
+                    type="button"
                     onClick={() => eval(schemaComponent.linkUrl)}
-                    data-section={schemaComponent.headerName}>
+                    data-section={schemaComponent.headerName}
+                  >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </button>
                 );
-              case 'dataLink':
+              case "dataLink":
                 return (
                   <button
                     id={schemaComponent.id}
                     key={schemaComponent.key}
-                    className='link dataLink'
-                    type='button'
+                    className="link dataLink"
+                    type="button"
                     onClick={() => _navigateToDataUrl(schemaComponent.linkUrl)}
-                    data-section={schemaComponent.headerName}>
+                    data-section={schemaComponent.headerName}
+                  >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </button>
                 );
@@ -1260,8 +1360,9 @@ window.prompt = (message, initialValue = '', callback = null) => {
       <>
         {doms}
         <datalist
-          id='autocompleteSearches'
-          style={{ maxHeight: '50%', overflow: 'auto !important' }}>
+          id="autocompleteSearches"
+          style={{ maxHeight: "50%", overflow: "auto !important" }}
+        >
           {autocompleteSearches.map((search) => (
             <option key={search}>{search}</option>
           ))}
@@ -1278,7 +1379,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
       onBlur,
       autoFocus,
       id,
-      type = 'nav-generator',
+      type = "nav-generator",
       readOnly = false,
       ...restProps
     } = props;
@@ -1293,7 +1394,9 @@ window.prompt = (message, initialValue = '', callback = null) => {
       // Set fallback timeout
       fallbackTimeoutRef.current = setTimeout(() => {
         if (!monacoRef.current) {
-          console.warn('Monaco Editor failed to load within timeout, using fallback textarea');
+          console.warn(
+            "Monaco Editor failed to load within timeout, using fallback textarea",
+          );
           setUseFallback(true);
           setIsLoading(false);
         }
@@ -1303,20 +1406,23 @@ window.prompt = (message, initialValue = '', callback = null) => {
       if (!window.monaco && !window.monacoLoading) {
         window.monacoLoading = true;
 
-        const loader = document.createElement('script');
-        loader.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js';
+        const loader = document.createElement("script");
+        loader.src =
+          "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js";
         loader.onload = () => {
           window.require.config({
-            paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' },
+            paths: {
+              vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs",
+            },
           });
-          window.require(['vs/editor/editor.main'], () => {
+          window.require(["vs/editor/editor.main"], () => {
             window.monacoLoaded = true;
             window.monacoLoading = false;
             initMonaco();
           });
         };
         loader.onerror = () => {
-          console.error('Failed to load Monaco Editor');
+          console.error("Failed to load Monaco Editor");
           clearTimeout(fallbackTimeoutRef.current);
           setUseFallback(true);
           setIsLoading(false);
@@ -1340,100 +1446,189 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
         try {
           // Register nav-generator language
-          if (!window.monaco.languages.getLanguages().some((lang) => lang.id === 'nav-generator')) {
-            window.monaco.languages.register({ id: 'nav-generator' });
+          if (
+            !window.monaco.languages
+              .getLanguages()
+              .some((lang) => lang.id === "nav-generator")
+          ) {
+            window.monaco.languages.register({ id: "nav-generator" });
 
             // Define syntax highlighting rules
-            window.monaco.languages.setMonarchTokensProvider('nav-generator', {
+            window.monaco.languages.setMonarchTokensProvider("nav-generator", {
               tokenizer: {
                 root: [
                   // Page title (starts with !)
-                  [/^!\s+.*$/, 'page-title'],
+                  [/^!\s+.*$/, "page-title"],
 
                   // Section headers (starts with #)
-                  [/^#+\s+.*$/, 'section-header'],
+                  [/^#+\s+.*$/, "section-header"],
 
                   // Tab definitions (starts with >>>)
-                  [/^>>>.*$/, 'tab-definition'],
+                  [/^>>>.*$/, "tab-definition"],
 
                   // HTML block delimiters (---blockId)
-                  [/^(---)([\w]*)$/, ['html-delimiter', 'block-id']],
+                  [/^(---)([\w]*)$/, ["html-delimiter", "block-id"]],
 
                   // Code block markers (```blockId)
-                  [/^(```)([\w]*)$/, ['code-fence', 'block-id']],
+                  [/^(```)([\w]*)$/, ["code-fence", "block-id"]],
 
                   // Link with label and new tab separator (|||)
-                  [/^(.+?)(\s*\|\|\|\s*)(.+)$/, ['link-label', 'separator-new-tab', 'url']],
+                  [
+                    /^(.+?)(\s*\|\|\|\s*)(.+)$/,
+                    ["link-label", "separator-new-tab", "url"],
+                  ],
 
                   // Link with label and same tab separator (|) - must come after |||
-                  [/^(.+?)(\s*\|\s*)(.+)$/, ['link-label', 'separator-same-tab', 'url']],
+                  [
+                    /^(.+?)(\s*\|\s*)(.+)$/,
+                    ["link-label", "separator-same-tab", "url"],
+                  ],
 
                   // Standalone URLs (no label, no separator)
-                  [/^https?:\/\/[^\s]+$/, 'url'],
-                  [/^www\.[^\s]+$/, 'url'],
-                  [/^[a-zA-Z0-9.-]+\.(com|org|net|io|dev|app|co)[^\s]*$/, 'url'],
+                  [/^https?:\/\/[^\s]+$/, "url"],
+                  [/^www\.[^\s]+$/, "url"],
+                  [
+                    /^[a-zA-Z0-9.-]+\.(com|org|net|io|dev|app|co)[^\s]*$/,
+                    "url",
+                  ],
                 ],
               },
             });
 
             // Define theme colors
-            window.monaco.editor.defineTheme('nav-generator-light', {
-              base: 'vs',
+            window.monaco.editor.defineTheme("nav-generator-light", {
+              base: "vs",
               inherit: true,
               rules: [
-                { token: 'page-title', foreground: '0066cc', fontStyle: 'bold' },
-                { token: 'section-header', foreground: '267f99', fontStyle: 'bold' },
-                { token: 'tab-definition', foreground: '7f3b9f', fontStyle: 'bold' },
-                { token: 'html-delimiter', foreground: 'e91e63', fontStyle: 'bold' },
-                { token: 'code-fence', foreground: '00897b', fontStyle: 'bold' },
-                { token: 'block-id', foreground: '996600', fontStyle: 'italic' },
-                { token: 'link-label', foreground: '283593', fontStyle: 'bold' },
-                { token: 'separator-new-tab', foreground: 'ff6600', fontStyle: 'bold' },
-                { token: 'separator-same-tab', foreground: '008800', fontStyle: 'bold' },
-                { token: 'url', foreground: '0000ff', fontStyle: 'underline' },
+                {
+                  token: "page-title",
+                  foreground: "0066cc",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "section-header",
+                  foreground: "267f99",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "tab-definition",
+                  foreground: "7f3b9f",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "html-delimiter",
+                  foreground: "e91e63",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "code-fence",
+                  foreground: "00897b",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "block-id",
+                  foreground: "996600",
+                  fontStyle: "italic",
+                },
+                {
+                  token: "link-label",
+                  foreground: "283593",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "separator-new-tab",
+                  foreground: "ff6600",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "separator-same-tab",
+                  foreground: "008800",
+                  fontStyle: "bold",
+                },
+                { token: "url", foreground: "0000ff", fontStyle: "underline" },
               ],
               colors: {},
             });
 
-            window.monaco.editor.defineTheme('nav-generator-dark', {
-              base: 'vs-dark',
+            window.monaco.editor.defineTheme("nav-generator-dark", {
+              base: "vs-dark",
               inherit: true,
               rules: [
-                { token: 'page-title', foreground: '4fc3f7', fontStyle: 'bold' },
-                { token: 'section-header', foreground: '81c784', fontStyle: 'bold' },
-                { token: 'tab-definition', foreground: 'ba68c8', fontStyle: 'bold' },
-                { token: 'html-delimiter', foreground: 'ff1744', fontStyle: 'bold' },
-                { token: 'code-fence', foreground: '26c6da', fontStyle: 'bold' },
-                { token: 'block-id', foreground: 'ffb74d', fontStyle: 'italic' },
-                { token: 'link-label', foreground: '9fa8da', fontStyle: 'bold' },
-                { token: 'separator-new-tab', foreground: 'ff9800', fontStyle: 'bold' },
-                { token: 'separator-same-tab', foreground: '66bb6a', fontStyle: 'bold' },
-                { token: 'url', foreground: '64b5f6', fontStyle: 'underline' },
+                {
+                  token: "page-title",
+                  foreground: "4fc3f7",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "section-header",
+                  foreground: "81c784",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "tab-definition",
+                  foreground: "ba68c8",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "html-delimiter",
+                  foreground: "ff1744",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "code-fence",
+                  foreground: "26c6da",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "block-id",
+                  foreground: "ffb74d",
+                  fontStyle: "italic",
+                },
+                {
+                  token: "link-label",
+                  foreground: "9fa8da",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "separator-new-tab",
+                  foreground: "ff9800",
+                  fontStyle: "bold",
+                },
+                {
+                  token: "separator-same-tab",
+                  foreground: "66bb6a",
+                  fontStyle: "bold",
+                },
+                { token: "url", foreground: "64b5f6", fontStyle: "underline" },
               ],
               colors: {},
             });
           }
 
-          const currentTheme = document.documentElement.getAttribute('data-theme');
-          const theme = currentTheme === 'light' ? 'nav-generator-light' : 'nav-generator-dark';
+          const currentTheme =
+            document.documentElement.getAttribute("data-theme");
+          const theme =
+            currentTheme === "light"
+              ? "nav-generator-light"
+              : "nav-generator-dark";
 
           // Determine language based on type prop
-          const language = type === 'html' ? 'html' : 'nav-generator';
+          const language = type === "html" ? "html" : "nav-generator";
 
           const editor = window.monaco.editor.create(containerRef.current, {
-            value: value || '',
+            value: value || "",
             language: language,
             theme: theme,
             automaticLayout: true,
             minimap: { enabled: true },
-            lineNumbers: 'on',
+            lineNumbers: "on",
             scrollBeyondLastLine: false,
-            wordWrap: 'off',
+            wordWrap: "off",
             fontSize: 14,
             fontFamily: 'Menlo, Monaco, "Courier New", monospace',
             tabSize: 2,
             insertSpaces: true,
-            renderWhitespace: 'selection',
+            renderWhitespace: "selection",
             contextmenu: true,
             folding: true,
             lineDecorationsWidth: 10,
@@ -1470,7 +1665,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
             setTimeout(() => editor.focus(), 100);
           }
         } catch (err) {
-          console.error('Error initializing Monaco Editor:', err);
+          console.error("Error initializing Monaco Editor:", err);
           clearTimeout(fallbackTimeoutRef.current);
           setUseFallback(true);
           setIsLoading(false);
@@ -1490,7 +1685,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     useLayoutEffect(() => {
       if (monacoRef.current && monacoRef.current.getValue() !== value) {
         const position = monacoRef.current.getPosition();
-        monacoRef.current.setValue(value || '');
+        monacoRef.current.setValue(value || "");
         if (position) {
           monacoRef.current.setPosition(position);
         }
@@ -1500,7 +1695,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     // Update language when type prop changes
     useLayoutEffect(() => {
       if (monacoRef.current && window.monaco) {
-        const language = type === 'html' ? 'html' : 'nav-generator';
+        const language = type === "html" ? "html" : "nav-generator";
         const model = monacoRef.current.getModel();
         if (model) {
           window.monaco.editor.setModelLanguage(model, language);
@@ -1512,15 +1707,19 @@ window.prompt = (message, initialValue = '', callback = null) => {
     useLayoutEffect(() => {
       const observer = new MutationObserver(() => {
         if (window.monaco && monacoRef.current) {
-          const currentTheme = document.documentElement.getAttribute('data-theme');
-          const theme = currentTheme === 'light' ? 'nav-generator-light' : 'nav-generator-dark';
+          const currentTheme =
+            document.documentElement.getAttribute("data-theme");
+          const theme =
+            currentTheme === "light"
+              ? "nav-generator-light"
+              : "nav-generator-dark";
           window.monaco.editor.setTheme(theme);
         }
       });
 
       observer.observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ['data-theme'],
+        attributeFilter: ["data-theme"],
       });
 
       return () => observer.disconnect();
@@ -1542,33 +1741,44 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }
 
     return (
-      <div id={id} style={{ height: '100%', width: '100%', position: 'relative' }}>
+      <div
+        id={id}
+        style={{ height: "100%", width: "100%", position: "relative" }}
+      >
         {isLoading && (
           <div
             style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              color: 'var(--colorTextMain)',
-            }}>
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              color: "var(--colorTextMain)",
+            }}
+          >
             Loading Monaco Editor...
           </div>
         )}
-        <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
+        <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
       </div>
     );
   }
 
   // Basic textarea fallback with keyboard shortcuts
   function BasicTextarea(props) {
-    const { value, onInput, onBlur, type, readOnly = false, ...restProps } = props;
+    const {
+      value,
+      onInput,
+      onBlur,
+      type,
+      readOnly = false,
+      ...restProps
+    } = props;
 
     const onInputKeyDown = useCallback(
       (e) => {
-        const TAB_INDENT = '  ';
+        const TAB_INDENT = "  ";
         switch (e.key) {
-          case 'Tab':
+          case "Tab":
             e.preventDefault();
             if (e.shiftKey === true) {
               _deleteIndentAtCursor(e.target, TAB_INDENT.length);
@@ -1576,7 +1786,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
               _insertIndentAtCursor(e.target, TAB_INDENT);
             }
             break;
-          case 'Enter':
+          case "Enter":
             e.preventDefault();
             _persistTabIndent(e.target);
             break;
@@ -1588,12 +1798,21 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
           if (startPos === endPos) {
             myField.value =
-              myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
-            myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
+              myField.value.substring(0, startPos) +
+              myValue +
+              myField.value.substring(endPos);
+            myField.setSelectionRange(
+              startPos + myValue.length,
+              endPos + myValue.length,
+            );
           } else {
-            const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+            const [lineStart, lineEnd] = _getLineStartEnd(
+              myField,
+              startPos,
+              endPos,
+            );
             const [res, newStartPos, newEndPos] = _iterateOverRows(
-              myField.value.split('\n'),
+              myField.value.split("\n"),
               lineStart,
               lineEnd,
               (row) => myValue + row,
@@ -1610,17 +1829,22 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
           if (startPos === endPos) {
             myField.value =
-              myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
+              myField.value.substring(0, startPos - 2) +
+              myField.value.substring(endPos);
             myField.setSelectionRange(startPos - length, endPos - length);
           } else {
-            const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+            const [lineStart, lineEnd] = _getLineStartEnd(
+              myField,
+              startPos,
+              endPos,
+            );
             const [res, newStartPos, newEndPos] = _iterateOverRows(
-              myField.value.split('\n'),
+              myField.value.split("\n"),
               lineStart,
               lineEnd,
               (row) => {
                 for (let i = 0; i < row.length; i++) {
-                  if (row[i] !== ' ' || i === length) {
+                  if (row[i] !== " " || i === length) {
                     return row.substr(i);
                   }
                 }
@@ -1635,12 +1859,14 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
         function _persistTabIndent(myField) {
           try {
-            const rows = myField.value.substr(0, myField.selectionStart).split('\n');
+            const rows = myField.value
+              .substr(0, myField.selectionStart)
+              .split("\n");
             const lastRow = rows[rows.length - 1];
             const lastRowIndent = lastRow.match(/^[ ]+/)[0];
-            _insertIndentAtCursor(e.target, '\n' + lastRowIndent);
+            _insertIndentAtCursor(e.target, "\n" + lastRowIndent);
           } catch (err) {
-            _insertIndentAtCursor(e.target, '\n');
+            _insertIndentAtCursor(e.target, "\n");
           }
         }
 
@@ -1658,7 +1884,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
             curCharCount += row.length + 1;
             res.push(row);
           }
-          return [res.join('\n'), newStartPos, newEndPos];
+          return [res.join("\n"), newStartPos, newEndPos];
         }
 
         function _getLineStartEnd(myField, startPos, endPos) {
@@ -1683,12 +1909,13 @@ window.prompt = (message, initialValue = '', callback = null) => {
         onInput={onInput}
         onBlur={onBlur}
         readOnly={readOnly}
-        {...restProps}></textarea>
+        {...restProps}
+      ></textarea>
     );
   }
 
   function DropdownButtons(props) {
-    const { type = '', children } = props;
+    const { type = "", children } = props;
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const [triggerButton, ...buttonsElems] = children;
@@ -1704,23 +1931,26 @@ window.prompt = (message, initialValue = '', callback = null) => {
     // Close dropdown when clicking outside
     useLayoutEffect(() => {
       const handleClickOutside = (event) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target)
+        ) {
           closeDropdown();
         }
       };
 
       const handleEscape = (event) => {
-        if (event.key === 'Escape' && isOpen) {
+        if (event.key === "Escape" && isOpen) {
           closeDropdown();
         }
       };
 
       if (isOpen) {
-        document.addEventListener('mousedown', handleClickOutside);
-        document.addEventListener('keydown', handleEscape);
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("keydown", handleEscape);
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
-          document.removeEventListener('keydown', handleEscape);
+          document.removeEventListener("mousedown", handleClickOutside);
+          document.removeEventListener("keydown", handleEscape);
         };
       }
     }, [isOpen, closeDropdown]);
@@ -1735,8 +1965,8 @@ window.prompt = (message, initialValue = '', callback = null) => {
           triggerButton.props.onClick(e);
         }
       },
-      'aria-expanded': isOpen,
-      'aria-haspopup': 'true',
+      "aria-expanded": isOpen,
+      "aria-haspopup": "true",
     });
 
     // Wrap buttons to close dropdown on click
@@ -1754,9 +1984,13 @@ window.prompt = (message, initialValue = '', callback = null) => {
     });
 
     return (
-      <div className='dropdown' ref={dropdownRef}>
+      <div className="dropdown" ref={dropdownRef}>
         {enhancedTrigger}
-        {isOpen && <div className={`dropdown-content ${type}`.trim()}>{enhancedButtons}</div>}
+        {isOpen && (
+          <div className={`dropdown-content ${type}`.trim()}>
+            {enhancedButtons}
+          </div>
+        )}
       </div>
     );
   }
@@ -1778,20 +2012,20 @@ window.prompt = (message, initialValue = '', callback = null) => {
     // effect
     useLayoutEffect(() => {
       switch (viewMode) {
-        case 'edit':
-          document.title = 'Edit Navigation';
+        case "edit":
+          document.title = "Edit Navigation";
           break;
-        case 'create':
-          document.title = 'New Navigation';
+        case "create":
+          document.title = "New Navigation";
           break;
-        case 'bookmark_import_chrome':
-          document.title = 'Import Chrome Bookmarks';
+        case "bookmark_import_chrome":
+          document.title = "Import Chrome Bookmarks";
           break;
-        case 'bookmark_export_chrome':
-          document.title = 'Export Chrome Bookmarks';
+        case "bookmark_export_chrome":
+          document.title = "Export Chrome Bookmarks";
           break;
-        case 'backup_download':
-          document.title = 'Backup Download';
+        case "backup_download":
+          document.title = "Backup Download";
           break;
       }
     }, [viewMode]);
@@ -1807,32 +2041,32 @@ window.prompt = (message, initialValue = '', callback = null) => {
       handleResize();
 
       // Add event listeners
-      window.addEventListener('resize', handleResize);
-      window.addEventListener('orientationchange', handleResize);
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("orientationchange", handleResize);
 
       // Cleanup
       return () => {
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('orientationchange', handleResize);
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("orientationchange", handleResize);
       };
     }, []);
 
     // render the proper views
     const allProps = { schema, onSetSchema, onSetViewMode };
     switch (viewMode) {
-      case 'read':
+      case "read":
         return <PageRead {...allProps} />;
-      case 'edit':
+      case "edit":
         return <PageEdit {...allProps} />;
-      case 'create':
+      case "create":
         return <PageCreate {...allProps} />;
-      case 'version_history':
+      case "version_history":
         return <PageVersionHistory {...allProps} />;
-      case 'bookmark_import_chrome':
+      case "bookmark_import_chrome":
         return <PageChromeBookmarkImport {...allProps} />;
-      case 'bookmark_export_chrome':
+      case "bookmark_export_chrome":
         return <PageChromeBookmarkExport {...allProps} />;
-      case 'backup_download':
+      case "backup_download":
         return <PageBackupDownload {...allProps} />;
     }
   }
@@ -1841,8 +2075,8 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const { schema, onSetViewMode, onSetSchema } = props;
 
     const [versions, setVersions] = useState([]);
-    const [selectedDate, setSelectedDate] = useState('');
-    const [selectedValue, setSelectedValue] = useState('');
+    const [selectedDate, setSelectedDate] = useState("");
+    const [selectedValue, setSelectedValue] = useState("");
 
     // Load versions on mount
     useLayoutEffect(() => {
@@ -1859,7 +2093,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
             setVersions(sorted);
           }
         } catch (err) {
-          console.error('Failed to load versions:', err);
+          console.error("Failed to load versions:", err);
         }
       }
 
@@ -1876,7 +2110,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
       setSelectedDate(date);
 
       const version = versions.find((v) => v.created_at === date);
-      setSelectedValue(version ? version.value : '');
+      setSelectedValue(version ? version.value : "");
     };
 
     // Apply / Cancel handlers
@@ -1884,25 +2118,35 @@ window.prompt = (message, initialValue = '', callback = null) => {
       if (selectedValue) {
         onSetSchema(selectedValue); // update schema
       }
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     const handleCancel = () => {
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     return (
-      <div id='command' className='nav-version-history'>
-        <div className='title'>Version History</div>
-        <div className='commands'>
-          <button id='applyEdit' type='button' role='button' onClick={() => handleApply()}>
+      <div id="command" className="nav-version-history">
+        <div className="title">Version History</div>
+        <div className="commands">
+          <button
+            id="applyEdit"
+            type="button"
+            role="button"
+            onClick={() => handleApply()}
+          >
             Apply
           </button>
-          <button id='cancelEdit' type='button' role='button' onClick={() => handleCancel()}>
+          <button
+            id="cancelEdit"
+            type="button"
+            role="button"
+            onClick={() => handleCancel()}
+          >
             Cancel
           </button>
           <select value={selectedDate} onChange={handleSelectChange}>
-            <option value=''>Select a Version</option>
+            <option value="">Select a Version</option>
             {versions.map((v) => (
               <option key={v.created_at} value={v.created_at}>
                 {new Date(v.created_at).toLocaleString()}
@@ -1912,20 +2156,21 @@ window.prompt = (message, initialValue = '', callback = null) => {
         </div>
 
         <SchemaEditor
-          id='input'
-          wrap='soft'
-          spellcheck='false'
+          id="input"
+          wrap="soft"
+          spellcheck="false"
           autoFocus
           value={selectedValue}
-          readOnly={true}></SchemaEditor>
+          readOnly={true}
+        ></SchemaEditor>
       </div>
     );
   }
 
   function parseNavGeneratorToChromeBookmark(schema) {
     // Safety check for empty schema
-    if (!schema || typeof schema !== 'string' || schema.trim().length === 0) {
-      return '<!-- No bookmarks to export -->';
+    if (!schema || typeof schema !== "string" || schema.trim().length === 0) {
+      return "<!-- No bookmarks to export -->";
     }
 
     // Parse the schema to get structured data
@@ -1933,23 +2178,24 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
     // Filter for only title, header, and link types
     const relevantItems = serializedSchema.filter(
-      (item) => item.type === 'title' || item.type === 'header' || item.type === 'link',
+      (item) =>
+        item.type === "title" || item.type === "header" || item.type === "link",
     );
 
     if (relevantItems.length === 0) {
-      return '<!-- No bookmarks to export -->';
+      return "<!-- No bookmarks to export -->";
     }
 
     // Find the title (page title)
-    const titleItem = relevantItems.find((item) => item.type === 'title');
-    const pageTitle = titleItem ? titleItem.value : 'Bookmarks';
+    const titleItem = relevantItems.find((item) => item.type === "title");
+    const pageTitle = titleItem ? titleItem.value : "Bookmarks";
 
     // Group links under headers
     const groups = [];
     let currentGroup = null;
 
     for (const item of relevantItems) {
-      if (item.type === 'header') {
+      if (item.type === "header") {
         // Start a new group
         if (currentGroup && currentGroup.links.length > 0) {
           groups.push(currentGroup);
@@ -1958,11 +2204,11 @@ window.prompt = (message, initialValue = '', callback = null) => {
           name: item.value,
           links: [],
         };
-      } else if (item.type === 'link') {
+      } else if (item.type === "link") {
         // Add link to current group or create default group
         if (!currentGroup) {
           currentGroup = {
-            name: 'Bookmarks',
+            name: "Bookmarks",
             links: [],
           };
         }
@@ -2011,7 +2257,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
   function PageChromeBookmarkImport(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
 
-    const [htmlInput, setHtmlInput] = useState('');
+    const [htmlInput, setHtmlInput] = useState("");
 
     // Helper function to parse Chrome bookmarks
     function parseChromeBookmarksFromHTML(htmlString) {
@@ -2019,32 +2265,36 @@ window.prompt = (message, initialValue = '', callback = null) => {
         // ---- Parse HTML string into DOM ----
         // Clean up common HTML issues from Chrome bookmarks
         let cleanedHtml = htmlString
-          .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
-          .replace(/<p>/gi, '') // Remove opening <p> tags
-          .replace(/<\/p>/gi, ''); // Remove closing </p> tags
+          .replace(/<!--[\s\S]*?-->/g, "") // Remove HTML comments
+          .replace(/<p>/gi, "") // Remove opening <p> tags
+          .replace(/<\/p>/gi, ""); // Remove closing </p> tags
 
         const parser = new DOMParser();
-        const doc = parser.parseFromString(cleanedHtml, 'text/html');
+        const doc = parser.parseFromString(cleanedHtml, "text/html");
 
         // Check for parse errors
-        const parserError = doc.querySelector('parsererror');
+        const parserError = doc.querySelector("parsererror");
         if (parserError) {
-          console.warn('HTML parsing warning:', parserError.textContent);
+          console.warn("HTML parsing warning:", parserError.textContent);
           // Try to continue anyway - the DOM might still have usable content
         }
 
         // Find all top-level DL elements
-        const allDLs = doc.querySelectorAll('DL');
+        const allDLs = doc.querySelectorAll("DL");
         if (allDLs.length === 0) {
-          console.error('No DL elements found in HTML');
-          return '';
+          console.error("No DL elements found in HTML");
+          return "";
         }
 
         const rootDLs = Array.from(allDLs).filter((dl) => {
           // Find DLs that are not nested inside another DL
           let parent = dl.parentElement;
-          while (parent && parent !== doc.body && parent !== doc.documentElement) {
-            if (parent.tagName === 'DL') {
+          while (
+            parent &&
+            parent !== doc.body &&
+            parent !== doc.documentElement
+          ) {
+            if (parent.tagName === "DL") {
               return false; // This DL is nested, skip it
             }
             parent = parent.parentElement;
@@ -2053,8 +2303,8 @@ window.prompt = (message, initialValue = '', callback = null) => {
         });
 
         if (rootDLs.length === 0) {
-          console.error('No root DL elements found');
-          return '';
+          console.error("No root DL elements found");
+          return "";
         }
 
         // Helper function to extract domain name from URL
@@ -2062,24 +2312,24 @@ window.prompt = (message, initialValue = '', callback = null) => {
           try {
             // normalize missing protocol
             if (!/^https?:\/\//i.test(url)) {
-              url = 'http://' + url;
+              url = "http://" + url;
             }
 
             const u = new URL(url);
             let host = u.hostname.toLowerCase();
 
             // remove common subdomains
-            host = host.replace(/^www\./, '');
+            host = host.replace(/^www\./, "");
 
             // extract base domain
-            const parts = host.split('.');
+            const parts = host.split(".");
             if (parts.length >= 2) {
               return parts[parts.length - 2]; // abc.com -> abc
             }
 
             return parts[0];
           } catch {
-            return 'link';
+            return "link";
           }
         }
 
@@ -2092,10 +2342,10 @@ window.prompt = (message, initialValue = '', callback = null) => {
           for (let i = 0; i < children.length; i++) {
             const child = children[i];
 
-            if (child.tagName === 'DT') {
+            if (child.tagName === "DT") {
               // Check if this DT contains a folder (H3) or a link (A)
-              const h3 = child.querySelector(':scope > H3');
-              const a = child.querySelector(':scope > A');
+              const h3 = child.querySelector(":scope > H3");
+              const a = child.querySelector(":scope > A");
 
               if (h3) {
                 // This is a folder
@@ -2103,7 +2353,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
                 const fullPath = [...path, folderName];
 
                 // Add folder header
-                results.push(`\n# ${fullPath.join(' > ')}`);
+                results.push(`\n# ${fullPath.join(" > ")}`);
 
                 // Look for the folder's content DL in two possible locations:
                 // 1. As a child of this DT (browser may have moved it here during parsing)
@@ -2112,18 +2362,18 @@ window.prompt = (message, initialValue = '', callback = null) => {
                 let folderDL = null;
 
                 // First, check if DL is a direct child of this DT
-                const childDL = child.querySelector(':scope > DL');
+                const childDL = child.querySelector(":scope > DL");
                 if (childDL) {
                   folderDL = childDL;
                 } else {
                   // If not a child, look for it as a sibling
                   let nextSibling = child.nextElementSibling;
                   while (nextSibling) {
-                    if (nextSibling.tagName === 'DL') {
+                    if (nextSibling.tagName === "DL") {
                       folderDL = nextSibling;
                       break;
                     }
-                    if (nextSibling.tagName === 'DT') {
+                    if (nextSibling.tagName === "DT") {
                       // Hit another DT, no folder content found
                       break;
                     }
@@ -2139,7 +2389,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
                 }
               } else if (a) {
                 // This is a bookmark link
-                const href = a.getAttribute('HREF') || a.href;
+                const href = a.getAttribute("HREF") || a.href;
                 const text = a.textContent?.trim();
 
                 if (href) {
@@ -2151,7 +2401,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
                   }
                 }
               }
-            } else if (child.tagName === 'DL') {
+            } else if (child.tagName === "DL") {
               // Only process this DL if it wasn't already processed as folder content
               if (!processedDLs.has(child)) {
                 const nestedResults = processElement(child, path);
@@ -2171,10 +2421,10 @@ window.prompt = (message, initialValue = '', callback = null) => {
           allResults.push(...results);
         });
 
-        return allResults.join('\n').trim();
+        return allResults.join("\n").trim();
       } catch (error) {
-        console.error('Error parsing Chrome bookmarks:', error);
-        throw new Error('Failed to parse bookmarks: ' + error.message);
+        console.error("Error parsing Chrome bookmarks:", error);
+        throw new Error("Failed to parse bookmarks: " + error.message);
       }
     }
 
@@ -2187,40 +2437,50 @@ window.prompt = (message, initialValue = '', callback = null) => {
             createVersion(parsedSchema);
             onSetSchema(parsedSchema);
           } else {
-            await alert('No bookmarks found. Please check the HTML format.');
+            await alert("No bookmarks found. Please check the HTML format.");
             return;
           }
         } catch (error) {
-          console.error('Error parsing bookmarks:', error);
-          await alert('Error parsing bookmarks: ' + error.message);
+          console.error("Error parsing bookmarks:", error);
+          await alert("Error parsing bookmarks: " + error.message);
           return;
         }
       }
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     // Cancel handler
     const handleCancel = () => {
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     return (
-      <div id='command' className='nav-chrome-bookmark-import'>
-        <div className='title'>Import Chrome Bookmarks</div>
-        <div className='commands'>
-          <button id='applyEdit' type='button' role='button' onClick={() => handleApply()}>
+      <div id="command" className="nav-chrome-bookmark-import">
+        <div className="title">Import Chrome Bookmarks</div>
+        <div className="commands">
+          <button
+            id="applyEdit"
+            type="button"
+            role="button"
+            onClick={() => handleApply()}
+          >
             Apply
           </button>
-          <button id='cancelEdit' type='button' role='button' onClick={() => handleCancel()}>
+          <button
+            id="cancelEdit"
+            type="button"
+            role="button"
+            onClick={() => handleCancel()}
+          >
             Cancel
           </button>
         </div>
 
         <SchemaEditor
-          id='input'
-          type='html'
-          wrap='soft'
-          spellcheck='false'
+          id="input"
+          type="html"
+          wrap="soft"
+          spellcheck="false"
           autoFocus
           value={htmlInput}
           onInput={(e) => setHtmlInput(e.target.value)}
@@ -2232,7 +2492,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
   function PageChromeBookmarkExport(props) {
     const { schema, onSetViewMode } = props;
 
-    const [htmlOutput, setHtmlOutput] = useState('');
+    const [htmlOutput, setHtmlOutput] = useState("");
 
     // Generate the Chrome bookmark HTML on mount
     useLayoutEffect(() => {
@@ -2245,17 +2505,17 @@ window.prompt = (message, initialValue = '', callback = null) => {
       // Generate filename with timestamp
       const now = new Date();
       const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
       const filename = `bookmark-${year}-${month}-${day}-${hours}-${minutes}-${seconds}.html`;
 
       // Create a blob and download link
-      const blob = new Blob([htmlOutput], { type: 'text/html' });
+      const blob = new Blob([htmlOutput], { type: "text/html" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -2264,35 +2524,41 @@ window.prompt = (message, initialValue = '', callback = null) => {
       URL.revokeObjectURL(url);
 
       // Close the view
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     // Cancel handler
     const handleCancel = () => {
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     return (
-      <div id='command' className='nav-chrome-bookmark-export'>
-        <div className='title'>Export Chrome Bookmarks</div>
-        <div className='commands'>
+      <div id="command" className="nav-chrome-bookmark-export">
+        <div className="title">Export Chrome Bookmarks</div>
+        <div className="commands">
           <button
-            id='downloadBookmark'
-            type='button'
-            role='button'
-            onClick={() => handleDownload()}>
+            id="downloadBookmark"
+            type="button"
+            role="button"
+            onClick={() => handleDownload()}
+          >
             Download
           </button>
-          <button id='cancelExport' type='button' role='button' onClick={() => handleCancel()}>
+          <button
+            id="cancelExport"
+            type="button"
+            role="button"
+            onClick={() => handleCancel()}
+          >
             Cancel
           </button>
         </div>
 
         <SchemaEditor
-          id='output'
-          type='html'
-          wrap='soft'
-          spellcheck='false'
+          id="output"
+          type="html"
+          wrap="soft"
+          spellcheck="false"
           autoFocus={false}
           value={htmlOutput}
           readOnly={true}
@@ -2309,14 +2575,14 @@ window.prompt = (message, initialValue = '', callback = null) => {
       // Generate filename with timestamp
       const now = new Date();
       const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
       const filename = `nav-generator-${year}-${month}-${day}.md`;
 
       // Create a blob and download link
-      const blob = new Blob([schema], { type: 'text/markdown' });
+      const blob = new Blob([schema], { type: "text/markdown" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -2325,31 +2591,41 @@ window.prompt = (message, initialValue = '', callback = null) => {
       URL.revokeObjectURL(url);
 
       // Close the view
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     // Cancel handler
     const handleCancel = () => {
-      onSetViewMode('read');
+      onSetViewMode("read");
     };
 
     return (
-      <div id='command' className='nav-backup-download'>
-        <div className='title'>Backup Download</div>
-        <div className='commands'>
-          <button id='downloadBackup' type='button' role='button' onClick={() => handleDownload()}>
+      <div id="command" className="nav-backup-download">
+        <div className="title">Backup Download</div>
+        <div className="commands">
+          <button
+            id="downloadBackup"
+            type="button"
+            role="button"
+            onClick={() => handleDownload()}
+          >
             Download
           </button>
-          <button id='cancelBackup' type='button' role='button' onClick={() => handleCancel()}>
+          <button
+            id="cancelBackup"
+            type="button"
+            role="button"
+            onClick={() => handleCancel()}
+          >
             Cancel
           </button>
         </div>
 
         <SchemaEditor
-          id='backupOutput'
-          type='text'
-          wrap='soft'
-          spellcheck='false'
+          id="backupOutput"
+          type="text"
+          wrap="soft"
+          spellcheck="false"
           autoFocus={false}
           value={schema}
           readOnly={true}
@@ -2361,7 +2637,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
   // initialization
   // hooking up extra meta data
   document.head.insertAdjacentHTML(
-    'beforeend',
+    "beforeend",
     `
       <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
       <meta name="format-detection" content="telephone=no" />
@@ -2374,72 +2650,75 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   // app level events
   document.addEventListener(
-    'keydown',
+    "keydown",
     (e) => {
       // handling enter and spacebar on focusable div
       const { key } = e;
       const target = e.target;
       const focusedElement = document.activeElement;
 
-      if (e.target.id === 'search') {
+      if (e.target.id === "search") {
         if (e.ctrlKey || e.metaKey || e.shiftKey) {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             // with alt enter, triggers google search
             location.href = `https://www.google.com/search?q=${encodeURIComponent(e.target.value)}`;
             return;
           }
         }
       }
-      if (key === 'Enter' || key === ' ') {
+      if (key === "Enter" || key === " ") {
         if (
           parseInt(target.tabIndex) === 0 &&
-          target.tagName !== 'TEXTAREA' &&
-          target.tagName !== 'INPUT' &&
-          target.tagName !== 'SELECT'
+          target.tagName !== "TEXTAREA" &&
+          target.tagName !== "INPUT" &&
+          target.tagName !== "SELECT"
         ) {
-          _dispatchEvent(target, 'click');
+          _dispatchEvent(target, "click");
 
           e.preventDefault();
           e.stopPropagation();
           return;
         }
-      } else if (key === 'Escape') {
-        if (document.querySelector('#input')) {
-          if (document.querySelector('#input') === document.activeElement) {
-            document.querySelector('#input').blur();
+      } else if (key === "Escape") {
+        if (document.querySelector("#input")) {
+          if (document.querySelector("#input") === document.activeElement) {
+            document.querySelector("#input").blur();
           }
         }
-        if (document.querySelector('#search')) {
-          if (document.querySelector('#search') === document.activeElement) {
-            document.querySelector('#search').blur();
+        if (document.querySelector("#search")) {
+          if (document.querySelector("#search") === document.activeElement) {
+            document.querySelector("#search").blur();
           }
         }
       } else if (
-        document.querySelector('#search') &&
-        document.querySelector('#search') !== focusedElement &&
-        document.querySelectorAll('.modal').length === 0
+        document.querySelector("#search") &&
+        document.querySelector("#search") !== focusedElement &&
+        document.querySelectorAll(".modal").length === 0
       ) {
         // special handling to focus on searchbox
-        const searchBox = document.querySelector('#search');
+        const searchBox = document.querySelector("#search");
 
         switch (key) {
-          case 'f':
-          case '?':
-          case '/':
-          case 't':
+          case "f":
+          case "?":
+          case "/":
+          case "t":
             if (!e.ctrlKey && !e.altKey && !e.metaKey) {
               searchBox.focus();
               e.preventDefault();
             }
             break;
-          case 'e':
-          case 'i':
-            _dispatchEvent(document.querySelector('#edit'), 'click');
+          case "e":
+          case "i":
+            _dispatchEvent(document.querySelector("#edit"), "click");
             e.preventDefault();
             break;
-          case 'c':
+          case "c":
             if (!e.ctrlKey && !e.altKey && !e.metaKey) {
-              _dispatchEvent(document.querySelectorAll('.copyBookmarkToClipboard')[0], 'click');
+              _dispatchEvent(
+                document.querySelectorAll(".copyBookmarkToClipboard")[0],
+                "click",
+              );
               e.preventDefault();
             }
             break;
@@ -2451,37 +2730,39 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   // click handling for tab selection
   document.addEventListener(
-    'click',
+    "click",
     (e) => {
       const target = e.target;
-      if (target.classList.contains('tab')) {
+      if (target.classList.contains("tab")) {
         const tab = target;
-        const tabChildren = [...tab.parentElement.querySelectorAll('tab')];
+        const tabChildren = [...tab.parentElement.querySelectorAll("tab")];
 
         for (const targetTab of tabChildren) {
-  const targetTabId = targetTab.dataset?.tabId;
-  const contentEl = targetTabId ? document.getElementById(targetTabId) : null;
+          const targetTabId = targetTab.dataset?.tabId;
+          const contentEl = targetTabId
+            ? document.getElementById(targetTabId)
+            : null;
 
-  if (tab === targetTab) {
-    // Show and select target tab
-    if (contentEl) {
-      contentEl.style.display = 'block';
+          if (tab === targetTab) {
+            // Show and select target tab
+            if (contentEl) {
+              contentEl.style.display = "block";
 
-      // If already selected, toggle expansion
-      if (tab.classList.contains('selected')) {
-        contentEl.classList.add('expanded');
-      }
-    }
-    tab.classList.add('selected');
-  } else {
-    // Hide and deselect others
-    if (contentEl) {
-      contentEl.style.display = 'none';
-      contentEl.classList.remove('expanded'); // Optional: reset expansion on hide
-    }
-    targetTab.classList.remove('selected');
-  }
-}
+              // If already selected, toggle expansion
+              if (tab.classList.contains("selected")) {
+                contentEl.classList.add("expanded");
+              }
+            }
+            tab.classList.add("selected");
+          } else {
+            // Hide and deselect others
+            if (contentEl) {
+              contentEl.style.display = "none";
+              contentEl.classList.remove("expanded"); // Optional: reset expansion on hide
+            }
+            targetTab.classList.remove("selected");
+          }
+        }
         e.preventDefault();
         e.stopPropagation();
       }
@@ -2490,13 +2771,13 @@ window.prompt = (message, initialValue = '', callback = null) => {
   );
 
   document.addEventListener(
-    'mousedown',
+    "mousedown",
     (e) => {
       if (e.button == 1) {
         // middle click on button to trigger click
         const target = e.target;
-        if (target.tagName === 'BUTTON') {
-          _dispatchEvent(target, 'click');
+        if (target.tagName === "BUTTON") {
+          _dispatchEvent(target, "click");
           e.preventDefault();
         }
       }
@@ -2509,24 +2790,26 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   // find and parse the schema from script
   let inputSchema =
-    document.querySelector('[type=schema]')?.innerText?.trim() || _getPersistedBufferSchema() || '';
-  let viewMode = 'read';
+    document.querySelector("[type=schema]")?.innerText?.trim() ||
+    _getPersistedBufferSchema() ||
+    "";
+  let viewMode = "read";
 
   document.innerHTML = `<div style="text-align: center; margin: 20px; font-size: 20px;">Loading...</div>`;
 
-  if (document.querySelector('[type=schema]')) {
+  if (document.querySelector("[type=schema]")) {
     // if schema tag is present let's render it as read
     _render(); // rerender the dom
   } else if (!window.hasCustomNavBeforeLoad) {
-    if (location.search.includes('loadNav')) {
+    if (location.search.includes("loadNav")) {
       // will wait for postmessage to populate this
-      window.history.pushState('', '', APP_INDEX_URL);
-      _setSessionValue('loadNavFromSessionStorage', '1');
+      window.history.pushState("", "", APP_INDEX_URL);
+      _setSessionValue("loadNavFromSessionStorage", "1");
 
       const _onHandlePostMessageEvent = (event) => {
         const { type } = event.data;
         const newSchema = event.data.schema;
-        if (type === 'onViewLinks') {
+        if (type === "onViewLinks") {
           try {
             _persistBufferSchema(newSchema);
             inputSchema = newSchema;
@@ -2534,22 +2817,22 @@ window.prompt = (message, initialValue = '', callback = null) => {
           } catch (err) {}
         }
       };
-      window.addEventListener('message', _onHandlePostMessageEvent);
+      window.addEventListener("message", _onHandlePostMessageEvent);
     } else if (
-      location.search.includes('newNav') ||
-      (!isRenderedInDataUrl && !location.href.includes('index.html'))
+      location.search.includes("newNav") ||
+      (!isRenderedInDataUrl && !location.href.includes("index.html"))
     ) {
       // render as edit mode for newNav
-      window.history.replaceState('', '', APP_INDEX_URL);
+      window.history.replaceState("", "", APP_INDEX_URL);
       _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
-      _setSessionValue('loadNavFromSessionStorage', '1');
+      _setSessionValue("loadNavFromSessionStorage", "1");
 
       inputSchema = DEFAULT_SCHEMA_TO_RENDER;
-      viewMode = 'edit';
+      viewMode = "edit";
 
       _render(); // rerender the dom
     } else if (
-      _getSessionValue('loadNavFromSessionStorage') === '1' &&
+      _getSessionValue("loadNavFromSessionStorage") === "1" &&
       location.href.includes(APP_INDEX_URL)
     ) {
       // if this flag is set, then continue
@@ -2559,8 +2842,8 @@ window.prompt = (message, initialValue = '', callback = null) => {
   } else {
     // else if no schema script or anything other way then we need
     // to listen to the app
-    document.addEventListener('DOMContentLoaded', () => {
-      _dispatchCustomEvent(document, 'NavBeforeLoad', {
+    document.addEventListener("DOMContentLoaded", () => {
+      _dispatchCustomEvent(document, "NavBeforeLoad", {
         renderSchema: (newSchema) => {
           inputSchema = newSchema;
           _render();
@@ -2569,9 +2852,9 @@ window.prompt = (message, initialValue = '', callback = null) => {
     });
   }
 
-  const THEME_KEY = 'theme-mode';
+  const THEME_KEY = "theme-mode";
   function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
   }
 
   function setTheme(theme) {
@@ -2580,8 +2863,8 @@ window.prompt = (message, initialValue = '', callback = null) => {
   }
 
   function clearTheme() {
-    document.documentElement.removeAttribute('data-theme');
-    _setLocalValue(THEME_KEY, '');
+    document.documentElement.removeAttribute("data-theme");
+    _setLocalValue(THEME_KEY, "");
   }
 
   function getInitialTheme() {
@@ -2595,7 +2878,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
   // Apply theme immediately on page load to prevent flash
   (function initTheme() {
     const savedTheme = getInitialTheme();
-    if (savedTheme === 'dark' || savedTheme === 'light') {
+    if (savedTheme === "dark" || savedTheme === "light") {
       applyTheme(savedTheme);
     }
   })();
@@ -2604,7 +2887,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
     const [theme, setThemeState] = useState(getInitialTheme);
 
     useLayoutEffect(() => {
-      if (theme === 'dark' || theme === 'light') {
+      if (theme === "dark" || theme === "light") {
         setTheme(theme);
       } else {
         clearTheme();
@@ -2612,10 +2895,14 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, [theme]);
 
     const toggleTheme = () => {
-      setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+      setThemeState((prev) => (prev === "dark" ? "light" : "dark"));
     };
 
-    return <button onClick={toggleTheme}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</button>;
+    return (
+      <button onClick={toggleTheme}>
+        {theme === "dark" ? "Light Mode" : "Dark Mode"}
+      </button>
+    );
   }
 
   function setColumnLayout(columns) {
@@ -2626,27 +2913,30 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
   function applyColumnLayout(columns) {
     if (columns && COLUMN_LAYOUTS[columns]) {
-      document.documentElement.style.setProperty('--gridColumnLayout', COLUMN_LAYOUTS[columns]);
+      document.documentElement.style.setProperty(
+        "--gridColumnLayout",
+        COLUMN_LAYOUTS[columns],
+      );
     } else {
-      document.documentElement.style.removeProperty('--gridColumnLayout');
+      document.documentElement.style.removeProperty("--gridColumnLayout");
     }
   }
 
   function clearColumnLayout() {
     // Clear the CSS variable
-    document.documentElement.style.removeProperty('--gridColumnLayout');
+    document.documentElement.style.removeProperty("--gridColumnLayout");
 
     // Clear all COLUMN_LAYOUT_KEY_<breakpoint> keys
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith(COLUMN_LAYOUT_KEY + '_')) {
+        if (key && key.startsWith(COLUMN_LAYOUT_KEY + "_")) {
           localStorage.removeItem(key);
           i--; // adjust index after removal
         }
       }
     } catch (err) {
-      console.error('Error clearing column layouts:', err);
+      console.error("Error clearing column layouts:", err);
     }
   }
 
@@ -2677,18 +2967,18 @@ window.prompt = (message, initialValue = '', callback = null) => {
     }, [layout, layoutBreakpoint]);
 
     const getLayoutLabel = () => {
-      if (!layout) return 'Responsive';
-      return `${layout} Column${layout !== '1' ? 's' : ''}`;
+      if (!layout) return "Responsive";
+      return `${layout} Column${layout !== "1" ? "s" : ""}`;
     };
 
     return (
       <>
         <button onClick={() => setLayoutState(null)}>Responsive</button>
-        <button onClick={() => setLayoutState('1')}>1 Column</button>
-        <button onClick={() => setLayoutState('2')}>2 Columns</button>
-        <button onClick={() => setLayoutState('3')}>3 Columns</button>
-        <button onClick={() => setLayoutState('4')}>4 Columns</button>
-        <button onClick={() => setLayoutState('5')}>5 Columns</button>
+        <button onClick={() => setLayoutState("1")}>1 Column</button>
+        <button onClick={() => setLayoutState("2")}>2 Columns</button>
+        <button onClick={() => setLayoutState("3")}>3 Columns</button>
+        <button onClick={() => setLayoutState("4")}>4 Columns</button>
+        <button onClick={() => setLayoutState("5")}>5 Columns</button>
       </>
     );
   }
@@ -2706,7 +2996,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
             setHasVersions(versions.length > 0);
           }
         } catch (err) {
-          console.error('Failed to check versions:', err);
+          console.error("Failed to check versions:", err);
         }
       }
 
@@ -2716,15 +3006,19 @@ window.prompt = (message, initialValue = '', callback = null) => {
     if (!hasVersions) return null;
 
     return (
-      <button onClick={() => onSetViewMode('version_history')} type='button' role='button'>
+      <button
+        onClick={() => onSetViewMode("version_history")}
+        type="button"
+        role="button"
+      >
         Version History
       </button>
     );
   }
 
   // IndexedDB setup
-  const DB_NAME = 'VersionsDB';
-  const STORE_NAME = 'versions';
+  const DB_NAME = "VersionsDB";
+  const STORE_NAME = "versions";
   const DB_VERSION = 1;
 
   let db;
@@ -2738,7 +3032,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
         request.onupgradeneeded = function (event) {
           db = event.target.result;
           if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: 'created_at' });
+            db.createObjectStore(STORE_NAME, { keyPath: "created_at" });
           }
         };
 
@@ -2748,11 +3042,11 @@ window.prompt = (message, initialValue = '', callback = null) => {
         };
 
         request.onerror = function (event) {
-          console.error('IndexedDB error:', event.target.error);
+          console.error("IndexedDB error:", event.target.error);
           reject(event.target.error);
         };
       } catch (err) {
-        console.error('Init DB failed:', err);
+        console.error("Init DB failed:", err);
         reject(err);
       }
     });
@@ -2766,7 +3060,7 @@ window.prompt = (message, initialValue = '', callback = null) => {
       // Trim input
       const finalValue = value.trim();
       if (!finalValue) {
-        console.log('Empty value, skipping insert.');
+        console.log("Empty value, skipping insert.");
         return null;
       }
 
@@ -2774,12 +3068,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
       const existingVersions = await getVersions();
       const isDuplicate = existingVersions.some((v) => v.value === finalValue);
       if (isDuplicate) {
-        console.log('Duplicate value detected, skipping insert.');
+        console.log("Duplicate value detected, skipping insert.");
         return null;
       }
 
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const tx = db.transaction(STORE_NAME, "readwrite");
         const store = tx.objectStore(STORE_NAME);
 
         const version = {
@@ -2791,12 +3085,12 @@ window.prompt = (message, initialValue = '', callback = null) => {
 
         request.onsuccess = () => resolve(version);
         request.onerror = (e) => {
-          console.error('Add version failed:', e.target.error);
+          console.error("Add version failed:", e.target.error);
           reject(e.target.error);
         };
       });
     } catch (err) {
-      console.error('createVersion failed:', err);
+      console.error("createVersion failed:", err);
       throw err;
     }
   }
@@ -2807,18 +3101,18 @@ window.prompt = (message, initialValue = '', callback = null) => {
       if (!db) await initDB();
 
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readonly');
+        const tx = db.transaction(STORE_NAME, "readonly");
         const store = tx.objectStore(STORE_NAME);
         const request = store.getAll();
 
         request.onsuccess = () => resolve(request.result);
         request.onerror = (e) => {
-          console.error('Get versions failed:', e.target.error);
+          console.error("Get versions failed:", e.target.error);
           reject(e.target.error);
         };
       });
     } catch (err) {
-      console.error('getVersions failed:', err);
+      console.error("getVersions failed:", err);
       throw err;
     }
   }
