@@ -372,9 +372,8 @@ textarea {
       display: flex;
 
       tab {
-        flex-grow: 1;
         border-bottom: var(--borderSize2) solid var(--colorBorderSecondary);
-        padding: var(--spaceSize2) var(--spaceSize3);
+        padding: var(--spaceSize2) var(--spaceSize4);
         user-select: none;
         cursor: pointer;
         text-transform: uppercase;
