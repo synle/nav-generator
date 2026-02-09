@@ -1,14 +1,14 @@
-import react from '@vitejs/plugin-react';
-import fs from 'fs';
-import { defineConfig } from 'vite';
+import react from "@vitejs/plugin-react";
+import fs from "fs";
+import { defineConfig } from "vite";
 
 // Plugin to update service worker with build timestamp
 const updateServiceWorker = () => ({
-  name: 'update-service-worker',
+  name: "update-service-worker",
   closeBundle() {
-    const swPath = './sw.js';
+    const swPath = "./sw.js";
     if (fs.existsSync(swPath)) {
-      let content = fs.readFileSync(swPath, 'utf-8');
+      let content = fs.readFileSync(swPath, "utf-8");
       const timestamp = Date.now();
       content = content.replace(/__BUILD_TIMESTAMP__/g, timestamp);
       fs.writeFileSync(swPath, content);
@@ -20,7 +20,9 @@ const updateServiceWorker = () => ({
 export default defineConfig({
   plugins: [react(), updateServiceWorker()],
   define: {
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    "process.env.NODE_ENV": JSON.stringify(
+      process.env.NODE_ENV || "development",
+    ),
   },
   css: {
     preprocessorOptions: {
@@ -28,19 +30,19 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '.',
+    outDir: ".",
     emptyOutDir: false,
     sourcemap: true,
     lib: {
-      entry: 'index.jsx',
-      formats: ['iife'],
-      name: 'App',
-      fileName: () => 'index.js',
+      entry: "index.jsx",
+      formats: ["iife"],
+      name: "App",
+      fileName: () => "index.js",
     },
     rollupOptions: {
       output: {
         extend: true,
-        assetFileNames: 'index.css',
+        assetFileNames: "index.css",
       },
     },
     minify: true,
