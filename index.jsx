@@ -2459,19 +2459,29 @@ window.prompt = (message, initialValue = '', callback = null) => {
         const tabChildren = [...tab.parentElement.querySelectorAll('tab')];
 
         for (const targetTab of tabChildren) {
-          const targetTabId = targetTab.dataset.tabId;
-          if (tab === targetTab) {
-            document.querySelector(`#${tab.dataset.tabId}`).style.display = 'block';
-            if (tab.classList.contains('selected')) {
-              // select the same tab twice will trigger expansion of the content
-              document.querySelector(`#${tab.dataset.tabId}`).classList.toggle('expanded', true);
-            }
-            tab.classList.add('selected');
-          } else {
-            document.querySelector(`#${targetTabId}`).style.display = 'none';
-            targetTab.classList.remove('selected');
-          }
-        }
+  const targetTabId = targetTab.dataset?.tabId;
+  const contentEl = targetTabId ? document.getElementById(targetTabId) : null;
+
+  if (tab === targetTab) {
+    // Show and select target tab
+    if (contentEl) {
+      contentEl.style.display = 'block';
+
+      // If already selected, toggle expansion
+      if (tab.classList.contains('selected')) {
+        contentEl.classList.add('expanded');
+      }
+    }
+    tab.classList.add('selected');
+  } else {
+    // Hide and deselect others
+    if (contentEl) {
+      contentEl.style.display = 'none';
+      contentEl.classList.remove('expanded'); // Optional: reset expansion on hide
+    }
+    targetTab.classList.remove('selected');
+  }
+}
         e.preventDefault();
         e.stopPropagation();
       }
