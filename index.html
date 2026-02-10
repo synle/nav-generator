@@ -10,8 +10,11 @@
     <load></load>
     <script src="./index.js"></script>
     <script>
-      // Register service worker for offline support
-      if ("serviceWorker" in navigator) {
+      // Register service worker for offline support (skip on localhost:8080)
+      if (
+        "serviceWorker" in navigator &&
+        window.location.host !== "localhost:8080"
+      ) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
             .register("./sw.js")
