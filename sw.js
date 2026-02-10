@@ -74,7 +74,7 @@ function shouldCacheUrl(url) {
     // Code/Styles
     '.js', '.jsx', '.css',
     // Data/Text
-    '.txt', '.json', '.md'
+    '.txt', '.json', '.md', '.sh', 'hosts'
   ];
   return cachableExtensions.some(ext => pathname.endsWith(ext));
 }
