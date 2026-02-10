@@ -1,7 +1,7 @@
 // 1770399909232 will be replaced during build
 const CACHE_VERSION = '1770399909232';
 const CACHE_NAME = `nav-generator-cache-${CACHE_VERSION}`;
-const CACHE_TTL = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
 
 // Listen for skip waiting message
 self.addEventListener('message', (event) => {
@@ -74,7 +74,7 @@ function shouldCacheUrl(url) {
     // Code/Styles
     '.js', '.jsx', '.css',
     // Data/Text
-    '.txt', '.json', '.md', '.sh', 'hosts'
+    '.txt', '.json', '.md', '.sh'
   ];
   return cachableExtensions.some(ext => pathname.endsWith(ext));
 }
@@ -103,7 +103,7 @@ async function addTimestampToResponse(response) {
   });
 }
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - stale-while-revalidate strategy
 self.addEventListener('fetch', (event) => {
   // Only intercept requests we want to cache
   if (!shouldCacheUrl(event.request.url)) {
@@ -111,51 +111,47 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then(async (cachedResponse) => {
-      // Check if cache exists and is still valid
-      if (cachedResponse && !isCacheExpired(cachedResponse)) {
-        // Cache hit and still valid - refresh TTL and return
-        console.log('Service Worker: Serving from cache and refreshing TTL:', event.request.url);
+    caches.match(event.request).then((cachedResponse) => {
+      // Fetch from network in background to update cache
+      const fetchPromise = fetch(event.request.clone())
+        .then(async (networkResponse) => {
+          // Only cache successful responses
+          if (networkResponse && networkResponse.status === 200) {
+            // Add timestamp and cache the response
+            const responseWithTimestamp = await addTimestampToResponse(networkResponse.clone());
 
-        // Update timestamp to extend TTL (sliding window)
-        const refreshedResponse = await addTimestampToResponse(cachedResponse.clone());
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, refreshedResponse.clone());
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseWithTimestamp);
+              console.log('Service Worker: Updated cache in background:', event.request.url);
+            });
+          }
+          return networkResponse;
+        })
+        .catch((error) => {
+          console.log('Service Worker: Background fetch failed:', event.request.url, error);
+          return null;
         });
+
+      // If we have a cached response (even if expired), return it immediately
+      // while the network request updates the cache in the background
+      if (cachedResponse) {
+        console.log('Service Worker: Serving from cache (revalidating in background):', event.request.url);
+
+        // If cache is still valid, refresh the TTL in background
+        if (!isCacheExpired(cachedResponse)) {
+          addTimestampToResponse(cachedResponse.clone()).then((refreshedResponse) => {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, refreshedResponse);
+            });
+          });
+        }
 
         return cachedResponse;
       }
 
-      // Cache miss or expired - fetch from network
-      console.log('Service Worker: Fetching from network:', event.request.url);
-
-      const fetchRequest = event.request.clone();
-
-      return fetch(fetchRequest).then(async (response) => {
-        // Only cache successful responses
-        if (!response || response.status !== 200) {
-          return response;
-        }
-
-        // Add timestamp and cache the response
-        const responseWithTimestamp = await addTimestampToResponse(response.clone());
-
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseWithTimestamp);
-        });
-
-        return response;
-      }).catch((error) => {
-        console.log('Service Worker: Fetch failed', error);
-
-        // If fetch fails but we have expired cache, return it anyway
-        if (cachedResponse) {
-          console.log('Service Worker: Returning expired cache as fallback');
-          return cachedResponse;
-        }
-
-        throw error;
-      });
+      // No cache - wait for network response
+      console.log('Service Worker: No cache, waiting for network:', event.request.url);
+      return fetchPromise;
     }),
   );
 });
