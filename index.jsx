@@ -1586,7 +1586,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             language: language,
             theme: theme,
             automaticLayout: true,
-            minimap: { enabled: true },
+            minimap: { enabled: false },
             lineNumbers: "on",
             scrollBeyondLastLine: false,
             wordWrap: "off",
