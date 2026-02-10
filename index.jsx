@@ -16,7 +16,6 @@ const APP_BASE_URL =
 const APP_INDEX_URL = `${APP_BASE_URL}/index.html`;
 const NEW_NAV_URL = `${APP_INDEX_URL}?newNav`;
 
-
 // custom events
 window.copyToClipboard = async (text) => {
   text = (text || "").trim();
@@ -2850,7 +2849,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
       </button>
     );
   }
-
 
   function VersionHistoryButton({ onSetViewMode }) {
     const [hasVersions, setHasVersions] = useState(false);
