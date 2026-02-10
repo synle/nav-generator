@@ -171,6 +171,44 @@ $gridColumnWidth: 330px;
   --borderSize4: 0.5rem;
 
   --maxBodyWidth: 100vw;
+
+  // Default: 1 column
+  --gridColumnLayout: 1fr;
+}
+
+// 2 columns
+@media only screen and (min-width: $gridColumnWidth * 2) {
+  :root {
+    --gridColumnLayout: repeat(2, 1fr);
+  }
+}
+
+// 3 columns
+@media only screen and (min-width: $gridColumnWidth * 3) {
+  :root {
+    --gridColumnLayout: repeat(3, 1fr);
+  }
+}
+
+// 4 columns
+@media only screen and (min-width: $gridColumnWidth * 4) {
+  :root {
+    --gridColumnLayout: repeat(4, 1fr);
+  }
+}
+
+// 5 columns
+@media only screen and (min-width: $gridColumnWidth * 5) {
+  :root {
+    --gridColumnLayout: repeat(5, 1fr);
+  }
+}
+
+// 6 columns
+@media only screen and (min-width: $gridColumnWidth * 6) {
+  :root {
+    --gridColumnLayout: repeat(6, 1fr);
+  }
 }
 
 *,
@@ -334,7 +372,6 @@ textarea {
     display: grid;
     grid-template-columns: var(--gridColumnLayout);
     grid-gap: var(--spaceSize3) var(--gridGapWidth);
-    justify-content: center;
 
     .header {
       position: sticky;
@@ -693,11 +730,6 @@ textarea {
 
 .hidden {
   display: none;
-}
-
-@media only screen and (max-width: $gridColumnWidth * 4) {
-  :root {
-  }
 }
 
 @media only screen and (max-width: $gridColumnWidth * 3) {
