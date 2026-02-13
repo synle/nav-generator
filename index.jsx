@@ -794,12 +794,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
         // Create fuzzy regex pattern
         const fuzzyPattern = new RegExp(
           "[ ]*" + cleanedSearchText.split("").join("[a-z0-9 -_]*"),
-          "i"
+          "i",
         );
 
-        filtered = suggestions
-          .filter((s) => fuzzyPattern.test(s))
-          .slice(0, 10); // Limit to 10 suggestions
+        filtered = suggestions.filter((s) => fuzzyPattern.test(s)).slice(0, 10); // Limit to 10 suggestions
       } else {
         // Normal substring search
         const searchLower = searchText.toLowerCase();
@@ -867,16 +865,23 @@ window.prompt = (message, initialValue = "", callback = null) => {
           // Find the next occurrence of this character
           while (textIndex < text.length) {
             if (text[textIndex].toLowerCase() === charLower) {
-              if (result.length > 0 && typeof result[result.length - 1] === 'string') {
+              if (
+                result.length > 0 &&
+                typeof result[result.length - 1] === "string"
+              ) {
                 // Add any non-highlighted text before this character
-                const nonHighlighted = text.substring(result[result.length - 1].length, textIndex);
+                const nonHighlighted = text.substring(
+                  result[result.length - 1].length,
+                  textIndex,
+                );
                 if (nonHighlighted) {
-                  result[result.length - 1] = result[result.length - 1] + nonHighlighted;
+                  result[result.length - 1] =
+                    result[result.length - 1] + nonHighlighted;
                 }
               } else {
                 // Add any non-highlighted text before this character
                 const prevLength = result.reduce((acc, item) => {
-                  if (typeof item === 'string') return acc + item.length;
+                  if (typeof item === "string") return acc + item.length;
                   return acc + item.props.children.length;
                 }, 0);
                 const nonHighlighted = text.substring(prevLength, textIndex);
@@ -889,7 +894,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               result.push(
                 <mark key={textIndex} className="autocomplete-highlight">
                   {text[textIndex]}
-                </mark>
+                </mark>,
               );
               textIndex++;
               break;
