@@ -766,21 +766,47 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     // Filter suggestions based on search text
     useLayoutEffect(() => {
-      if (
-        !searchText ||
-        searchText.startsWith("/") ||
-        searchText.startsWith("?")
-      ) {
+      if (!searchText || searchText.startsWith("?")) {
         setFilteredSuggestions([]);
         setShowAutocomplete(false);
         setSelectedIndex(-1);
         return;
       }
 
-      const searchLower = searchText.toLowerCase();
-      const filtered = suggestions
-        .filter((s) => s.toLowerCase().includes(searchLower))
-        .slice(0, 10); // Limit to 10 suggestions
+      let filtered;
+
+      // Check if fuzzy search is active
+      if (searchText.startsWith("/")) {
+        // Fuzzy search logic
+        const cleanedSearchText = searchText
+          .slice(1) // Remove leading "/"
+          .replace(/[\W_]+/gi, " ")
+          .replace(/[ ][ ]+/, " ")
+          .trim();
+
+        if (!cleanedSearchText) {
+          setFilteredSuggestions([]);
+          setShowAutocomplete(false);
+          setSelectedIndex(-1);
+          return;
+        }
+
+        // Create fuzzy regex pattern
+        const fuzzyPattern = new RegExp(
+          "[ ]*" + cleanedSearchText.split("").join("[a-z0-9 -_]*"),
+          "i"
+        );
+
+        filtered = suggestions
+          .filter((s) => fuzzyPattern.test(s))
+          .slice(0, 10); // Limit to 10 suggestions
+      } else {
+        // Normal substring search
+        const searchLower = searchText.toLowerCase();
+        filtered = suggestions
+          .filter((s) => s.toLowerCase().includes(searchLower))
+          .slice(0, 10); // Limit to 10 suggestions
+      }
 
       setFilteredSuggestions(filtered);
       setShowAutocomplete(filtered.length > 0);
@@ -820,6 +846,67 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const highlightMatch = (text, query) => {
       if (!query) return text;
 
+      // Handle fuzzy search highlighting
+      if (query.startsWith("/")) {
+        const cleanedQuery = query
+          .slice(1)
+          .replace(/[\W_]+/gi, " ")
+          .replace(/[ ][ ]+/, " ")
+          .trim();
+
+        if (!cleanedQuery) return text;
+
+        const chars = cleanedQuery.split("");
+        const result = [];
+        let textIndex = 0;
+
+        for (let i = 0; i < chars.length; i++) {
+          const char = chars[i];
+          const charLower = char.toLowerCase();
+
+          // Find the next occurrence of this character
+          while (textIndex < text.length) {
+            if (text[textIndex].toLowerCase() === charLower) {
+              if (result.length > 0 && typeof result[result.length - 1] === 'string') {
+                // Add any non-highlighted text before this character
+                const nonHighlighted = text.substring(result[result.length - 1].length, textIndex);
+                if (nonHighlighted) {
+                  result[result.length - 1] = result[result.length - 1] + nonHighlighted;
+                }
+              } else {
+                // Add any non-highlighted text before this character
+                const prevLength = result.reduce((acc, item) => {
+                  if (typeof item === 'string') return acc + item.length;
+                  return acc + item.props.children.length;
+                }, 0);
+                const nonHighlighted = text.substring(prevLength, textIndex);
+                if (nonHighlighted) {
+                  result.push(nonHighlighted);
+                }
+              }
+
+              // Add the highlighted character
+              result.push(
+                <mark key={textIndex} className="autocomplete-highlight">
+                  {text[textIndex]}
+                </mark>
+              );
+              textIndex++;
+              break;
+            }
+            textIndex++;
+          }
+        }
+
+        // Add any remaining text
+        if (textIndex < text.length) {
+          result.push(text.substring(textIndex));
+        }
+
+        return result.length > 0 ? result : text;
+      }
+
+      // Normal substring highlighting
       const index = text.toLowerCase().indexOf(query.toLowerCase());
       if (index === -1) return text;
 
