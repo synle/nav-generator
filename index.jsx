@@ -1119,19 +1119,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
       let visibleCount = 0;
 
       links.forEach((elem) => {
-        const link = (elem.href || "")
-          .replace(/https?/gi, "")
-          .replace(/www/gi, "")
-          .replace(/html|index/gi, "")
-          .replace(/[/.]/g, "");
-
         const text = elem.innerText || "";
         const section = elem.dataset.section || "";
 
-        const isMatch =
-          matchRegex.test(text) ||
-          matchRegex.test(section) ||
-          matchRegex.test(link);
+        const isMatch = matchRegex.test(text) || matchRegex.test(section);
 
         elem.classList.toggle("hidden", !isMatch);
 
