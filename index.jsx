@@ -1078,72 +1078,67 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     // handling search
     useLayoutEffect(() => {
-      if (refContainer && refContainer.current) {
-        const doc = refContainer.current;
+      if (!refContainer?.current) return;
 
-        if (searchText.length === 0) {
-          for (const elem of doc.querySelectorAll(".link")) {
-            elem.classList.remove("hidden");
-          }
-          const totalLinks = doc.querySelectorAll(".link").length;
-          setResultCount(totalLinks);
-          return;
-        }
+      const doc = refContainer.current;
+      const links = doc.querySelectorAll(".link");
 
-        // remove all non alphanumeric
-        let exactMatchregex = new RegExp(
-          (searchText.match(/[a-z0-9]/gi) || []).join(""),
-          "i",
-        );
-        let matchRegex = exactMatchregex;
-
-        const [firstSearchChar] = searchText;
-        if (firstSearchChar === "/") {
-          // fuzzy match
-          const cleanedSearchText = searchText
-            .replace(/[\W_]+/gi, " ")
-            .replace(/[ ][ ]+/, " ")
-            .trim();
-
-          matchRegex = new RegExp(
-            "[ ]*" + cleanedSearchText.split("").join("[a-z0-9 -_]*"),
-            "i",
-          );
-        }
-
-        // show or hide and count results
-        let visibleCount = 0;
-        for (const elem of doc.querySelectorAll(".link")) {
-          let isHidden = true;
-
-          const link = (elem.href || "")
-            .replace(/http[s]/gi, "")
-            .replace(/www/gi, "")
-            .replace(/html/gi, "")
-            .replace(/index/gi, "")
-            .replace(/[/.]/gi, "");
-
-          const text = elem.innerText || "";
-
-          if (text.match(matchRegex)) {
-            isHidden = false;
-          } else if (
-            elem.dataset.section &&
-            elem.dataset.section.match(exactMatchregex)
-          ) {
-            isHidden = false;
-          } else if (link.match(exactMatchregex)) {
-            isHidden = false;
-          }
-
-          if (!isHidden) {
-            visibleCount++;
-          }
-
-          elem.classList.toggle("hidden", isHidden);
-        }
-        setResultCount(visibleCount);
+      // Reset case
+      if (!searchText.trim()) {
+        links.forEach((elem) => elem.classList.remove("hidden"));
+        setResultCount(links.length);
+        return;
       }
+
+      function escapeRegex(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }
+
+      const isFuzzy = searchText.startsWith("/");
+
+      // Build regex ONCE
+      let matchRegex;
+
+      if (isFuzzy) {
+        const cleaned = searchText
+          .slice(1)
+          .replace(/[\W_]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        const pattern = cleaned
+          .split("")
+          .map((c) => escapeRegex(c))
+          .join(".*?");
+
+        matchRegex = new RegExp(pattern, "i");
+      } else {
+        matchRegex = new RegExp(escapeRegex(searchText), "i");
+      }
+
+      let visibleCount = 0;
+
+      links.forEach((elem) => {
+        const link = (elem.href || "")
+          .replace(/https?/gi, "")
+          .replace(/www/gi, "")
+          .replace(/html|index/gi, "")
+          .replace(/[/.]/g, "");
+
+        const text = elem.innerText || "";
+        const section = elem.dataset.section || "";
+
+        const isMatch =
+          matchRegex.test(text) ||
+          matchRegex.test(section) ||
+          matchRegex.test(link);
+
+        elem.classList.toggle("hidden", !isMatch);
+
+        if (isMatch) visibleCount++;
+      });
+
+      setResultCount(visibleCount);
     }, [searchText, refContainer.current]);
 
     return (
