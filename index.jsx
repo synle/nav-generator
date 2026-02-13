@@ -1137,7 +1137,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
       headers.forEach((header) => {
         const parentBlock = header.closest(".block");
         if (parentBlock) {
-          const visibleLinks = parentBlock.querySelectorAll(".link:not(.hidden)");
+          const visibleLinks =
+            parentBlock.querySelectorAll(".link:not(.hidden)");
           header.classList.toggle("hidden", visibleLinks.length === 0);
         }
       });
