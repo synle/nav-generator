@@ -300,6 +300,57 @@ body {
         font-weight: var(--fontWeightBold);
       }
 
+      .search-autocomplete-popup {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        background: var(--colorBgSecondary);
+        border: var(--borderSize1) solid var(--colorBorderMain);
+        border-radius: 8px;
+        box-shadow:
+          0 4px 12px var(--colorShadow),
+          0 8px 24px var(--colorShadow);
+        animation: slideUp 0.2s ease-out;
+        z-index: 10;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .search-autocomplete-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .search-autocomplete-item {
+        padding: var(--spaceSize2) var(--spaceSize3);
+        cursor: pointer;
+        font-size: var(--fontSize4);
+        transition: all 0.1s ease;
+        border-radius: 4px;
+        margin: 2px var(--spaceSize2);
+        word-break: break-word;
+        line-height: 1.4;
+
+        &:hover,
+        &.selected {
+          background: var(--colorBgHover);
+        }
+
+        &.selected {
+          border-left: 3px solid var(--colorTextLink);
+          padding-left: calc(var(--spaceSize3) - 3px);
+        }
+
+        mark.autocomplete-highlight {
+          background: var(--colorTextLink);
+          color: var(--colorBgMain);
+          padding: 1px 2px;
+          border-radius: 2px;
+          font-weight: var(--fontWeightBold);
+        }
+      }
+
       .search-help-popup {
         position: absolute;
         bottom: calc(100% + 8px);
@@ -412,89 +463,6 @@ body {
 button[role="button"] {
   text-align: center;
   display: inline-block !important;
-}
-
-.dropdown {
-  position: relative;
-  display: inline-block;
-  padding: 0 !important;
-  min-width: 120px;
-  text-align: center;
-
-  button,
-  a {
-    text-align: center;
-    width: 100%;
-    display: block;
-  }
-
-  .dropdown-content {
-    position: absolute;
-    background: var(--colorBgMain);
-    border: var(--borderSize1) solid var(--colorBorderSecondary);
-    border-radius: 5px;
-    box-shadow:
-      0 2px 4px var(--colorShadow),
-      0 4px 8px var(--colorShadow);
-    z-index: 1000;
-    left: 0;
-    width: max-content;
-    min-width: 100%;
-    margin-top: 2px;
-
-    &.pullUp {
-      bottom: calc(100% + 2px);
-      margin-top: 0;
-      margin-bottom: 2px;
-    }
-
-    button,
-    a {
-      border: none;
-      border-radius: 0;
-      border-bottom: 1px solid var(--colorBorderSecondary);
-      white-space: nowrap;
-      word-break: normal;
-      text-align: left;
-      justify-content: flex-start;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      &:first-child {
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
-      }
-
-      &:last-child {
-        border-bottom-left-radius: 5px;
-        border-bottom-right-radius: 5px;
-      }
-    }
-  }
-
-  .dropdown-trigger {
-    width: 100%;
-    display: block;
-    padding: var(--spaceSize2);
-    position: relative;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    &::after {
-      content: "▼";
-      margin-left: 0.5rem;
-      font-size: 0.7rem;
-      display: inline-block;
-      transition: transform 0.2s ease;
-    }
-
-    &[aria-expanded="true"]::after {
-      transform: rotate(180deg);
-    }
-  }
 }
 
 load {

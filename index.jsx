@@ -751,17 +751,109 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   // react components
   function SearchBox(props) {
-    const { onSearch, searchText, onClear, resultCount } = props;
+    const {
+      onSearch,
+      searchText,
+      onClear,
+      resultCount,
+      suggestions = [],
+    } = props;
     const [showHelp, setShowHelp] = useState(false);
+    const [showAutocomplete, setShowAutocomplete] = useState(false);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+    const inputRef = useRef(null);
+
+    // Filter suggestions based on search text
+    useLayoutEffect(() => {
+      if (
+        !searchText ||
+        searchText.startsWith("/") ||
+        searchText.startsWith("?")
+      ) {
+        setFilteredSuggestions([]);
+        setShowAutocomplete(false);
+        setSelectedIndex(-1);
+        return;
+      }
+
+      const searchLower = searchText.toLowerCase();
+      const filtered = suggestions
+        .filter((s) => s.toLowerCase().includes(searchLower))
+        .slice(0, 10); // Limit to 10 suggestions
+
+      setFilteredSuggestions(filtered);
+      setShowAutocomplete(filtered.length > 0);
+      setSelectedIndex(-1);
+    }, [searchText, suggestions]);
+
+    // Handle keyboard navigation
+    const handleKeyDown = (e) => {
+      if (!showAutocomplete || filteredSuggestions.length === 0) return;
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setSelectedIndex((prev) =>
+            prev < filteredSuggestions.length - 1 ? prev + 1 : prev,
+          );
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+          break;
+        case "Enter":
+          if (selectedIndex >= 0) {
+            e.preventDefault();
+            onSearch(filteredSuggestions[selectedIndex]);
+            setShowAutocomplete(false);
+          }
+          break;
+        case "Escape":
+          setShowAutocomplete(false);
+          setSelectedIndex(-1);
+          break;
+      }
+    };
+
+    // Highlight matching text
+    const highlightMatch = (text, query) => {
+      if (!query) return text;
+
+      const index = text.toLowerCase().indexOf(query.toLowerCase());
+      if (index === -1) return text;
+
+      return (
+        <>
+          {text.substring(0, index)}
+          <mark className="autocomplete-highlight">
+            {text.substring(index, index + query.length)}
+          </mark>
+          {text.substring(index + query.length)}
+        </>
+      );
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+      onSearch(suggestion);
+      setShowAutocomplete(false);
+      inputRef.current?.focus();
+    };
 
     return (
       <div className="search-container">
         <div className="search-input-wrapper">
           <span className="search-icon">🔍</span>
           <input
+            ref={inputRef}
             id="search"
-            list="autocompleteSearches"
             onInput={(e) => onSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (filteredSuggestions.length > 0) {
+                setShowAutocomplete(true);
+              }
+            }}
             placeholder="Search bookmarks..."
             autoComplete="off"
             spellCheck="false"
@@ -792,6 +884,22 @@ window.prompt = (message, initialValue = "", callback = null) => {
             ?
           </button>
         </div>
+        {showAutocomplete && filteredSuggestions.length > 0 && (
+          <div className="search-autocomplete-popup">
+            <div className="search-autocomplete-content">
+              {filteredSuggestions.map((suggestion, index) => (
+                <div
+                  key={suggestion}
+                  className={`search-autocomplete-item ${index === selectedIndex ? "selected" : ""}`}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                >
+                  {highlightMatch(suggestion, searchText)}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {showHelp && (
           <div className="search-help-popup">
             <div className="search-help-header">
@@ -836,6 +944,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [searchText, setSearchText] = useState("");
     const [resultCount, setResultCount] = useState(0);
+    const [suggestions, setSuggestions] = useState([]);
     const refContainer = useRef();
 
     // events
@@ -955,13 +1064,18 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="fav" ref={refContainer}>
-        <SchemaRender schema={schema} refContainer={refContainer} />
+        <SchemaRender
+          schema={schema}
+          refContainer={refContainer}
+          onSuggestionsChange={setSuggestions}
+        />
         <form id="searchForm" onSubmit={(e) => onSubmitNavigationSearch(e)}>
           <SearchBox
             onSearch={onSearch}
             searchText={searchText}
             onClear={onClearSearch}
             resultCount={resultCount}
+            suggestions={suggestions}
           />
         </form>
         <div className="commands">
@@ -1216,7 +1330,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 
   function SchemaRender(props) {
-    const { schema, refContainer } = props;
+    const { schema, refContainer, onSuggestionsChange } = props;
 
     const [autocompleteSearches, setAutocompleteSearches] = useState([]);
     const [doms, setDoms] = useState(null);
@@ -1404,22 +1518,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       // update the doms
       setDoms(newDoms);
-      setAutocompleteSearches([...newAutocompleteSearches]);
+      const suggestionsArray = [...newAutocompleteSearches];
+      setAutocompleteSearches(suggestionsArray);
+      if (onSuggestionsChange) {
+        onSuggestionsChange(suggestionsArray);
+      }
     }, [schema]);
 
-    return (
-      <>
-        {doms}
-        <datalist
-          id="autocompleteSearches"
-          style={{ maxHeight: "50%", overflow: "auto !important" }}
-        >
-          {autocompleteSearches.map((search) => (
-            <option key={search}>{search}</option>
-          ))}
-        </datalist>
-      </>
-    );
+    return <>{doms}</>;
   }
 
   function SchemaEditor(props) {
