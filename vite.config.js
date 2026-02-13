@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 const updateServiceWorker = () => ({
   name: "update-service-worker",
   closeBundle() {
-    const swPath = "./sw.js";
+    const swPath = "./sw-nav.js";
     if (fs.existsSync(swPath)) {
       let content = fs.readFileSync(swPath, "utf-8");
       const timestamp = Date.now();
