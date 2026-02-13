@@ -751,25 +751,91 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   // react components
   function SearchBox(props) {
-    const { onSearch } = props;
+    const { onSearch, searchText, onClear, resultCount } = props;
+    const [showHelp, setShowHelp] = useState(false);
 
     return (
-      <input
-        id="search"
-        list="autocompleteSearches"
-        onInput={(e) => onSearch(e.target.value)}
-        placeholder="🔍 Search for bookmark"
-        autoComplete="off"
-        spellCheck="false"
-        autoFocus={false}
-        required
-      />
+      <div className="search-container">
+        <div className="search-input-wrapper">
+          <span className="search-icon">🔍</span>
+          <input
+            id="search"
+            list="autocompleteSearches"
+            onInput={(e) => onSearch(e.target.value)}
+            placeholder="Search bookmarks..."
+            autoComplete="off"
+            spellCheck="false"
+            autoFocus={false}
+            value={searchText}
+          />
+          {searchText && (
+            <>
+              <span className="search-result-count">{resultCount} results</span>
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={onClear}
+                aria-label="Clear search"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            className="search-help-btn"
+            onClick={() => setShowHelp(!showHelp)}
+            aria-label="Search help"
+            title="Search shortcuts"
+          >
+            ?
+          </button>
+        </div>
+        {showHelp && (
+          <div className="search-help-popup">
+            <div className="search-help-header">
+              Search Shortcuts
+              <button
+                type="button"
+                className="search-help-close"
+                onClick={() => setShowHelp(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="search-help-content">
+              <div className="search-help-item">
+                <code>/term</code>
+                <span>Fuzzy search (matches scattered letters)</span>
+              </div>
+              <div className="search-help-item">
+                <code>?term</code>
+                <span>Google search on submit</span>
+              </div>
+              <div className="search-help-item">
+                <code>Alt+Enter</code>
+                <span>Google search (any query)</span>
+              </div>
+              <div className="search-help-item">
+                <code>Enter</code>
+                <span>Navigate if single result</span>
+              </div>
+              <div className="search-help-item">
+                <code>Esc</code>
+                <span>Clear search and blur</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     );
   }
 
   function PageRead(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [searchText, setSearchText] = useState("");
+    const [resultCount, setResultCount] = useState(0);
     const refContainer = useRef();
 
     // events
@@ -779,6 +845,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     const onSearch = useCallback((newSearchText) => {
       setSearchText(newSearchText);
+    }, []);
+
+    const onClearSearch = useCallback(() => {
+      setSearchText("");
+      setResultCount(0);
+      document.querySelector("#search")?.focus();
     }, []);
 
     const onSubmitNavigationSearch = useCallback(
@@ -820,6 +892,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
           for (const elem of doc.querySelectorAll(".link")) {
             elem.classList.remove("hidden");
           }
+          const totalLinks = doc.querySelectorAll(".link").length;
+          setResultCount(totalLinks);
           return;
         }
 
@@ -844,7 +918,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
           );
         }
 
-        // show or hide
+        // show or hide and count results
+        let visibleCount = 0;
         for (const elem of doc.querySelectorAll(".link")) {
           let isHidden = true;
 
@@ -868,8 +943,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
             isHidden = false;
           }
 
+          if (!isHidden) {
+            visibleCount++;
+          }
+
           elem.classList.toggle("hidden", isHidden);
         }
+        setResultCount(visibleCount);
       }
     }, [searchText, refContainer.current]);
 
@@ -877,7 +957,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
       <div id="fav" ref={refContainer}>
         <SchemaRender schema={schema} refContainer={refContainer} />
         <form id="searchForm" onSubmit={(e) => onSubmitNavigationSearch(e)}>
-          <SearchBox onSearch={onSearch} />
+          <SearchBox
+            onSearch={onSearch}
+            searchText={searchText}
+            onClear={onClearSearch}
+            resultCount={resultCount}
+          />
         </form>
         <div className="commands">
           <button id="edit" onClick={onEdit} role="button">
@@ -2631,8 +2716,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
           }
         }
         if (document.querySelector("#search")) {
-          if (document.querySelector("#search") === document.activeElement) {
-            document.querySelector("#search").blur();
+          const searchBox = document.querySelector("#search");
+          if (searchBox === document.activeElement) {
+            // Clear search text
+            searchBox.value = "";
+            searchBox.dispatchEvent(new Event("input", { bubbles: true }));
+            searchBox.blur();
           }
         }
       } else if (
