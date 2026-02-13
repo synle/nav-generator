@@ -850,53 +850,35 @@ window.prompt = (message, initialValue = "", callback = null) => {
           .slice(1)
           .replace(/[\W_]+/gi, " ")
           .replace(/[ ][ ]+/, " ")
-          .trim();
+          .trim()
+          .toLowerCase();
 
         if (!cleanedQuery) return text;
 
         const chars = cleanedQuery.split("");
         const result = [];
         let textIndex = 0;
+        let lastMatchEnd = 0;
 
         for (let i = 0; i < chars.length; i++) {
-          const char = chars[i];
-          const charLower = char.toLowerCase();
+          const charLower = chars[i];
 
-          // Find the next occurrence of this character
+          // Find the next occurrence of this character (case-insensitive)
           while (textIndex < text.length) {
             if (text[textIndex].toLowerCase() === charLower) {
-              if (
-                result.length > 0 &&
-                typeof result[result.length - 1] === "string"
-              ) {
-                // Add any non-highlighted text before this character
-                const nonHighlighted = text.substring(
-                  result[result.length - 1].length,
-                  textIndex,
-                );
-                if (nonHighlighted) {
-                  result[result.length - 1] =
-                    result[result.length - 1] + nonHighlighted;
-                }
-              } else {
-                // Add any non-highlighted text before this character
-                const prevLength = result.reduce((acc, item) => {
-                  if (typeof item === "string") return acc + item.length;
-                  return acc + item.props.children.length;
-                }, 0);
-                const nonHighlighted = text.substring(prevLength, textIndex);
-                if (nonHighlighted) {
-                  result.push(nonHighlighted);
-                }
+              // Add any non-highlighted text before this character
+              if (lastMatchEnd < textIndex) {
+                result.push(text.substring(lastMatchEnd, textIndex));
               }
 
-              // Add the highlighted character
+              // Add the highlighted character (preserving original case)
               result.push(
                 <mark key={textIndex} className="autocomplete-highlight">
                   {text[textIndex]}
                 </mark>,
               );
               textIndex++;
+              lastMatchEnd = textIndex;
               break;
             }
             textIndex++;
@@ -904,15 +886,18 @@ window.prompt = (message, initialValue = "", callback = null) => {
         }
 
         // Add any remaining text
-        if (textIndex < text.length) {
-          result.push(text.substring(textIndex));
+        if (lastMatchEnd < text.length) {
+          result.push(text.substring(lastMatchEnd));
         }
 
         return result.length > 0 ? result : text;
       }
 
-      // Normal substring highlighting
-      const index = text.toLowerCase().indexOf(query.toLowerCase());
+      // Normal substring highlighting (case-insensitive, preserves original case)
+      const lowerText = text.toLowerCase();
+      const lowerQuery = query.toLowerCase();
+      const index = lowerText.indexOf(lowerQuery);
+
       if (index === -1) return text;
 
       return (
@@ -945,6 +930,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
               if (filteredSuggestions.length > 0) {
                 setShowAutocomplete(true);
               }
+            }}
+            onBlur={() => {
+              // Delay hiding to allow click events on suggestions to fire
+              setTimeout(() => {
+                setShowAutocomplete(false);
+                setSelectedIndex(-1);
+              }, 150);
             }}
             placeholder="Search bookmarks..."
             autoComplete="off"
