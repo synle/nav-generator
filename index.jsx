@@ -1122,6 +1122,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       let visibleCount = 0;
 
+      // Only consider links for matching
       links.forEach((elem) => {
         const text = elem.innerText || "";
         const section = elem.dataset.section || "";
@@ -1133,21 +1134,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
         if (isMatch) visibleCount++;
       });
 
-      // Hide headers that have no visible links
-      headers.forEach((header) => {
-        const parentBlock = header.closest(".block");
-        if (parentBlock) {
-          const visibleLinks =
-            parentBlock.querySelectorAll(".link:not(.hidden)");
-          header.classList.toggle("hidden", visibleLinks.length === 0);
-        }
-      });
-
-      // Hide blocks that have no visible links
-      blocks.forEach((block) => {
-        const visibleLinks = block.querySelectorAll(".link:not(.hidden)");
-        block.classList.toggle("hidden", visibleLinks.length === 0);
-      });
+      // Hide all non-link elements (headers and blocks) during search
+      headers.forEach((elem) => elem.classList.add("hidden"));
+      blocks.forEach((elem) => elem.classList.add("hidden"));
 
       setResultCount(visibleCount);
     }, [searchText, refContainer.current]);
