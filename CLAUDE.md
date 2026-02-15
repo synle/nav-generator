@@ -11,13 +11,28 @@ Nav Generator is a client-side React application that converts bookmark lists in
 ### Building
 ```bash
 npm run build          # Production build using Vite
-./build.sh            # Alternative build script
+./build.sh            # Full build: installs deps, runs tests with coverage, builds
 ```
 
 The build outputs directly to the root directory:
 - `index.js` - Compiled JavaScript bundle (IIFE format)
 - `index.css` - Compiled styles from SCSS
 - `index.js.map` - Source map
+
+### Testing
+```bash
+npm test               # Run all tests
+npm run test:watch     # Run tests in watch mode
+npm run test:coverage  # Run tests with coverage report (minimum 80% required)
+npm run test:ui        # Open Vitest UI
+```
+
+Test files are in the `test/` directory:
+- `test/utils.test.js` - Unit tests for utility functions
+- `test/search.test.js` - Search functionality tests
+- `test/sw-nav.test.js` - Service worker configuration tests
+
+**Coverage Requirements:** 80% minimum for lines, functions, branches, and statements. Currently tests focus on `utils.js` which contains extracted utility functions.
 
 ### Local Development
 ```bash
@@ -32,9 +47,15 @@ npm run format        # Format HTML, JSX, SCSS, YML, MD, JSON files with Prettie
 
 ## Architecture
 
+### Application Structure
+
+The application consists of:
+- `index.jsx` (~3,300 lines) - Main React application (single file)
+- `utils.js` - Extracted utility functions for testing (schema parsing, search, sorting)
+
 ### Single-File React Application
 
-The entire application is contained in `index.jsx` (~3,300 lines), structured as:
+The main application is in `index.jsx` (~3,300 lines), structured as:
 
 1. **Modal System** (lines 36-252)
    - Custom Modal, AlertModal, PromptModal components
@@ -133,8 +154,9 @@ GitHub Actions workflow (`.github/workflows/build-main.yml`):
 
 ## Important Notes
 
-- **No tests**: This project has no test suite
-- **Single file**: Most application logic is in one large `index.jsx` file, not split into modules
+- **Test Infrastructure**: Uses Vitest 0.34.6 with Happy DOM for testing. Focus is on utility functions in `utils.js` with 99%+ coverage
+- **Node Compatibility**: Tests require Node 16+. Using Vite 4.5.3 and Vitest 0.34.6 for compatibility
+- **Single file**: Most application logic is in one large `index.jsx` file, not split into modules. Core utilities extracted to `utils.js` for testability
 - **Build outputs to root**: Unlike typical projects, build artifacts are committed to the root directory for GitHub Pages deployment
 - **Monaco timeout**: The editor has a 5-second timeout before falling back to textarea
 - **Custom HTML elements**: Uses non-standard elements like `<load>`, `<tabs>`, `<tab>` for styling purposes
