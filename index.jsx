@@ -831,6 +831,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
             e.preventDefault();
             onSearch(filteredSuggestions[selectedIndex]);
             setShowAutocomplete(false);
+            setSelectedIndex(-1);
+            inputRef.current?.blur();
+            // Focus the first visible .link after DOM updates with search results
+            setTimeout(() => {
+              const firstLink = document.querySelector(".link:not(.hidden)");
+              if (firstLink) {
+                firstLink.focus();
+              }
+            }, 100);
           }
           break;
         case "Escape":
@@ -914,7 +923,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const handleSuggestionClick = (suggestion) => {
       onSearch(suggestion);
       setShowAutocomplete(false);
-      inputRef.current?.focus();
+      setSelectedIndex(-1);
+      // Focus the first visible .link after DOM updates with search results
+      setTimeout(() => {
+        const firstLink = document.querySelector(".link:not(.hidden)");
+        if (firstLink) {
+          firstLink.focus();
+        }
+      }, 100);
     };
 
     return (
