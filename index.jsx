@@ -1087,19 +1087,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
       const otherNonLinks = doc.querySelectorAll(
         ":scope > *:not(.form-search-excluded)",
       );
-      const allElems = [...links, ...otherNonLinks]
+      const allElems = [...links, ...otherNonLinks];
 
       // Reset case
       if (!trimmedSearchText) {
         setResultCount(links.length);
-        allElems.forEach((elem) =>
-        elem.classList.toggle("hidden", false),
-      );
+        allElems.forEach((elem) => elem.classList.toggle("hidden", false));
         return;
       } else {
-allElems.forEach((elem) =>
-        elem.classList.toggle("hidden", true),
-      );
+        allElems.forEach((elem) => elem.classList.toggle("hidden", true));
       }
 
       function escapeRegex(str) {
