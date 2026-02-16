@@ -1078,33 +1078,41 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     // handling search
     useLayoutEffect(() => {
+      const trimmedSearchText = (searchText || "").trim();
+
       if (!refContainer?.current) return;
 
       const doc = refContainer.current;
       const links = doc.querySelectorAll(".link");
-      const headers = doc.querySelectorAll(".header");
-      const blocks = doc.querySelectorAll(".block");
+      const otherNonLinks = doc.querySelectorAll(
+        ":scope > *:not(.form-search-excluded)",
+      );
+      const allElems = [...links, ...otherNonLinks]
 
       // Reset case
-      if (!searchText.trim()) {
-        links.forEach((elem) => elem.classList.remove("hidden"));
-        headers.forEach((elem) => elem.classList.remove("hidden"));
-        blocks.forEach((elem) => elem.classList.remove("hidden"));
+      if (!trimmedSearchText) {
         setResultCount(links.length);
+        allElems.forEach((elem) =>
+        elem.classList.toggle("hidden", false),
+      );
         return;
+      } else {
+allElems.forEach((elem) =>
+        elem.classList.toggle("hidden", true),
+      );
       }
 
       function escapeRegex(str) {
         return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       }
 
-      const isFuzzy = searchText.startsWith("/");
+      const isFuzzy = trimmedSearchText.startsWith("/");
 
       // Build regex ONCE
       let matchRegex;
 
       if (isFuzzy) {
-        const cleaned = searchText
+        const cleaned = trimmedSearchText
           .slice(1)
           .replace(/[\W_]+/g, " ")
           .replace(/\s+/g, " ")
@@ -1117,7 +1125,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
         matchRegex = new RegExp(pattern, "i");
       } else {
-        matchRegex = new RegExp(escapeRegex(searchText), "i");
+        matchRegex = new RegExp(escapeRegex(trimmedSearchText), "i");
       }
 
       let visibleCount = 0;
@@ -1134,10 +1142,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
         if (isMatch) visibleCount++;
       });
 
-      // Hide all non-link elements (headers and blocks) during search
-      headers.forEach((elem) => elem.classList.add("hidden"));
-      blocks.forEach((elem) => elem.classList.add("hidden"));
-
       setResultCount(visibleCount);
     }, [searchText, refContainer.current]);
 
@@ -1148,7 +1152,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
           refContainer={refContainer}
           onSuggestionsChange={setSuggestions}
         />
-        <form id="searchForm" onSubmit={(e) => onSubmitNavigationSearch(e)}>
+        <form
+          id="searchForm"
+          className="form-search-excluded"
+          onSubmit={(e) => onSubmitNavigationSearch(e)}
+        >
           <SearchBox
             onSearch={onSearch}
             searchText={searchText}
@@ -1458,7 +1466,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               <div
                 id={schemaComponent.id}
                 key={schemaComponent.key}
-                className="title"
+                className="title form-search-excluded"
                 style={{
                   display: "flex",
                   alignItems: "center",
