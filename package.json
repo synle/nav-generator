@@ -10,6 +10,7 @@
     "react-dom": "^17.0.2"
   },
   "scripts": {
+    "clean": "rm -rf import-map.json .prettier-cache",
     "build": "NODE_ENV=production vite build",
     "format": "prettier --write --ignore-unknown --cache '**/*.{js,jsx,ts,tsx,mjs,cjs,json,html,css,scss,less,md,yml,yaml,graphql,vue,xml}'",
     "start": "npx http-server --cors .",
