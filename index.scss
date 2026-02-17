@@ -304,7 +304,8 @@ body {
         position: absolute;
         bottom: calc(100% + 8px);
         left: 0;
-        right: 0;
+        right: 80%;
+        min-width: 300px;
         background: var(--colorBgSecondary);
         border: var(--borderSize1) solid var(--colorBorderMain);
         border-radius: 8px;
