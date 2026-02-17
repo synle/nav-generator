@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "NODE_ENV=production vite build",
-    "format": "prettier --write --ignore-unknown **/*.{html,jsx,scss,yml,md,json} vite.config.js",
+    "format": "prettier --write --ignore-unknown --cache '**/*.{js,jsx,ts,tsx,mjs,cjs,json,html,css,scss,less,md,yml,yaml,graphql,vue,xml}'",
     "start": "npx http-server --cors .",
     "test": "vitest run",
     "test:watch": "vitest",
