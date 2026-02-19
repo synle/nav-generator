@@ -12,7 +12,7 @@
   "scripts": {
     "clean": "rm -rf import-map.json .prettier-cache",
     "build": "NODE_ENV=production vite build",
-    "format": "prettier --write --print-width 140 --ignore-unknown --no-error-on-unmatched-pattern --cache '**/*.{js,jsx,ts,tsx,mjs,cjs,json,html,css,scss,less,md,yml,yaml,graphql,vue,xml}'",
+    "format": "prettier --write --cache --ignore-unknown --no-error-on-unmatched-pattern --print-width 140 .",
     "start": "npx http-server --cors .",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -36,9 +36,9 @@
     "c8": "^10.1.3",
     "happy-dom": "^20.6.1",
     "jsdom": "^22.1.0",
-    "prettier": "^3.8.1",
     "sass": "^1.70.0",
     "vite": "^4.5.3",
-    "vitest": "^0.34.6"
+    "vitest": "^0.34.6",
+    "prettier": "^3.8.1"
   }
 }
