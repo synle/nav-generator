@@ -1525,6 +1525,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
               </tabs>
             );
           case "link":
+            const _onLinkNavigate = (e) => {
+              const el = e.currentTarget;
+              el.classList.add("navigating");
+              el.setAttribute("data-nav-label", el.textContent.trim());
+              el.setAttribute("data-nav-url", el.href || el.dataset.section || "");
+            };
 
             switch (schemaComponent.linkType) {
               case "newTabLink":
@@ -1536,6 +1542,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     target="_blank"
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
+                    onClick={_onLinkNavigate}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
@@ -1548,6 +1555,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     className="link sameTabLink"
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
+                    onClick={_onLinkNavigate}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
@@ -1559,7 +1567,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     key={schemaComponent.key}
                     className="link jsLink"
                     type="button"
-                    onClick={() => eval(schemaComponent.linkUrl)}
+                    onClick={(e) => { _onLinkNavigate(e); eval(schemaComponent.linkUrl); }}
                     data-section={schemaComponent.headerName}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
@@ -1572,7 +1580,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     key={schemaComponent.key}
                     className="link dataLink"
                     type="button"
-                    onClick={() => _navigateToDataUrl(schemaComponent.linkUrl)}
+                    onClick={(e) => { _onLinkNavigate(e); _navigateToDataUrl(schemaComponent.linkUrl); }}
                     data-section={schemaComponent.headerName}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}

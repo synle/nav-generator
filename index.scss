@@ -396,6 +396,32 @@ body {
       border-radius: 2px;
       font-weight: var(--fontWeightBold);
     }
+
+    .link.navigating {
+      position: relative;
+      opacity: 0.6;
+      pointer-events: none;
+
+      // hide original content
+      > * {
+        visibility: hidden;
+      }
+
+      &::after {
+        content: "Navigating to " attr(data-nav-label) "\A" attr(data-nav-url);
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        padding: var(--spaceSize2);
+        white-space: pre;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: var(--fontSize5);
+        color: var(--colorTextMain);
+        visibility: visible;
+      }
+    }
   }
 
   &#command {
