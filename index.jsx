@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import "./index.scss";
 
@@ -756,204 +756,16 @@ window.prompt = (message, initialValue = "", callback = null) => {
       searchText,
       onClear,
       resultCount,
-      suggestions = [],
     } = props;
     const [showHelp, setShowHelp] = useState(false);
-    const [showAutocomplete, setShowAutocomplete] = useState(false);
-    const [selectedIndex, setSelectedIndex] = useState(-1);
-    const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-    const inputRef = useRef(null);
-
-    // Filter suggestions based on search text
-    useLayoutEffect(() => {
-      if (!searchText || searchText.startsWith("?")) {
-        setFilteredSuggestions([]);
-        setShowAutocomplete(false);
-        setSelectedIndex(-1);
-        return;
-      }
-
-      let filtered;
-
-      // Check if fuzzy search is active
-      if (searchText.startsWith("/")) {
-        // Fuzzy search logic
-        const cleanedSearchText = searchText
-          .slice(1) // Remove leading "/"
-          .replace(/[\W_]+/gi, " ")
-          .replace(/[ ][ ]+/, " ")
-          .trim();
-
-        if (!cleanedSearchText) {
-          setFilteredSuggestions([]);
-          setShowAutocomplete(false);
-          setSelectedIndex(-1);
-          return;
-        }
-
-        // Create fuzzy regex pattern
-        const fuzzyPattern = new RegExp(
-          "[ ]*" + cleanedSearchText.split("").join("[a-z0-9 -_]*"),
-          "i",
-        );
-
-        filtered = suggestions.filter((s) => fuzzyPattern.test(s)).slice(0, 10); // Limit to 10 suggestions
-      } else {
-        // Normal substring search
-        const searchLower = searchText.toLowerCase();
-        filtered = suggestions
-          .filter((s) => s.toLowerCase().includes(searchLower))
-          .slice(0, 10); // Limit to 10 suggestions
-      }
-
-      setFilteredSuggestions(filtered);
-      setShowAutocomplete(filtered.length > 0);
-      setSelectedIndex(-1);
-    }, [searchText, suggestions]);
-
-    // Handle keyboard navigation
-    const handleKeyDown = (e) => {
-      if (!showAutocomplete || filteredSuggestions.length === 0) return;
-
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault();
-          setSelectedIndex((prev) =>
-            prev < filteredSuggestions.length - 1 ? prev + 1 : prev,
-          );
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-          break;
-        case "Enter":
-          if (selectedIndex >= 0) {
-            e.preventDefault();
-            onSearch(filteredSuggestions[selectedIndex]);
-            setShowAutocomplete(false);
-            setSelectedIndex(-1);
-            inputRef.current?.blur();
-            // Focus the first visible .link after DOM updates with search results
-            setTimeout(() => {
-              const firstLink = document.querySelector(".link:not(.hidden)");
-              if (firstLink) {
-                firstLink.focus();
-              }
-            }, 100);
-          }
-          break;
-        case "Escape":
-          setShowAutocomplete(false);
-          setSelectedIndex(-1);
-          break;
-      }
-    };
-
-    // Highlight matching text
-    const highlightMatch = (text, query) => {
-      if (!query) return text;
-
-      // Handle fuzzy search highlighting
-      if (query.startsWith("/")) {
-        const cleanedQuery = query
-          .slice(1)
-          .replace(/[\W_]+/gi, " ")
-          .replace(/[ ][ ]+/, " ")
-          .trim()
-          .toLowerCase();
-
-        if (!cleanedQuery) return text;
-
-        const chars = cleanedQuery.split("");
-        const result = [];
-        let textIndex = 0;
-        let lastMatchEnd = 0;
-
-        for (let i = 0; i < chars.length; i++) {
-          const charLower = chars[i];
-
-          // Find the next occurrence of this character (case-insensitive)
-          while (textIndex < text.length) {
-            if (text[textIndex].toLowerCase() === charLower) {
-              // Add any non-highlighted text before this character
-              if (lastMatchEnd < textIndex) {
-                result.push(text.substring(lastMatchEnd, textIndex));
-              }
-
-              // Add the highlighted character (preserving original case)
-              result.push(
-                <mark key={textIndex} className="autocomplete-highlight">
-                  {text[textIndex]}
-                </mark>,
-              );
-              textIndex++;
-              lastMatchEnd = textIndex;
-              break;
-            }
-            textIndex++;
-          }
-        }
-
-        // Add any remaining text
-        if (lastMatchEnd < text.length) {
-          result.push(text.substring(lastMatchEnd));
-        }
-
-        return result.length > 0 ? result : text;
-      }
-
-      // Normal substring highlighting (case-insensitive, preserves original case)
-      const lowerText = text.toLowerCase();
-      const lowerQuery = query.toLowerCase();
-      const index = lowerText.indexOf(lowerQuery);
-
-      if (index === -1) return text;
-
-      return (
-        <>
-          {text.substring(0, index)}
-          <mark className="autocomplete-highlight">
-            {text.substring(index, index + query.length)}
-          </mark>
-          {text.substring(index + query.length)}
-        </>
-      );
-    };
-
-    const handleSuggestionClick = (suggestion) => {
-      onSearch(suggestion);
-      setShowAutocomplete(false);
-      setSelectedIndex(-1);
-      // Focus the first visible .link after DOM updates with search results
-      setTimeout(() => {
-        const firstLink = document.querySelector(".link:not(.hidden)");
-        if (firstLink) {
-          firstLink.focus();
-        }
-      }, 100);
-    };
 
     return (
       <div className="search-container">
         <div className="search-input-wrapper">
           <span className="search-icon">🔍</span>
           <input
-            ref={inputRef}
             id="search"
             onInput={(e) => onSearch(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              if (filteredSuggestions.length > 0) {
-                setShowAutocomplete(true);
-              }
-            }}
-            onBlur={() => {
-              // Delay hiding to allow click events on suggestions to fire
-              setTimeout(() => {
-                setShowAutocomplete(false);
-                setSelectedIndex(-1);
-              }, 150);
-            }}
             placeholder="Search bookmarks..."
             autoComplete="off"
             spellCheck="false"
@@ -984,22 +796,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
             ?
           </button>
         </div>
-        {showAutocomplete && filteredSuggestions.length > 0 && (
-          <div className="search-autocomplete-popup">
-            <div className="search-autocomplete-content">
-              {filteredSuggestions.map((suggestion, index) => (
-                <div
-                  key={suggestion}
-                  className={`search-autocomplete-item ${index === selectedIndex ? "selected" : ""}`}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                >
-                  {highlightMatch(suggestion, searchText)}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         {showHelp && (
           <div className="search-help-popup">
             <div className="search-help-header">
@@ -1044,7 +840,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [searchText, setSearchText] = useState("");
     const [resultCount, setResultCount] = useState(0);
-    const [suggestions, setSuggestions] = useState([]);
+
     const refContainer = useRef();
 
     // events
@@ -1105,10 +901,20 @@ window.prompt = (message, initialValue = "", callback = null) => {
       );
       const allElems = [...links, ...otherNonLinks];
 
+      // Helper to clear all search highlights from links
+      function clearHighlights() {
+        doc.querySelectorAll(".link mark.search-highlight").forEach((mark) => {
+          const parent = mark.parentNode;
+          parent.replaceChild(document.createTextNode(mark.textContent), mark);
+          parent.normalize();
+        });
+      }
+
       // Reset case
       if (!trimmedSearchText) {
         setResultCount(links.length);
         allElems.forEach((elem) => elem.classList.toggle("hidden", false));
+        clearHighlights();
         return;
       } else {
         allElems.forEach((elem) => elem.classList.toggle("hidden", true));
@@ -1140,7 +946,110 @@ window.prompt = (message, initialValue = "", callback = null) => {
         matchRegex = new RegExp(escapeRegex(trimmedSearchText), "i");
       }
 
+      // Build a highlight regex that captures the matched portion
+      let highlightRegex;
+      if (isFuzzy) {
+        const cleaned = trimmedSearchText
+          .slice(1)
+          .replace(/[\W_]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        const pattern = cleaned
+          .split("")
+          .map((c) => "(" + escapeRegex(c) + ")")
+          .join("(.*?)");
+
+        highlightRegex = new RegExp(pattern, "i");
+      } else {
+        highlightRegex = new RegExp("(" + escapeRegex(trimmedSearchText) + ")", "gi");
+      }
+
+      // Apply highlight markup to a text node
+      function applyHighlightToTextNode(textNode, regex, fuzzy) {
+        const text = textNode.textContent;
+        const match = regex.exec(text);
+        if (!match) return;
+
+        const frag = document.createDocumentFragment();
+
+        if (fuzzy) {
+          // For fuzzy matches, each odd-indexed capture group is a matched char
+          let pos = 0;
+          const fullMatchStart = match.index;
+          const fullMatchEnd = match.index + match[0].length;
+
+          // Text before the full match
+          if (fullMatchStart > 0) {
+            frag.appendChild(document.createTextNode(text.substring(0, fullMatchStart)));
+          }
+
+          // Walk through matched portion character by character
+          let innerPos = fullMatchStart;
+          for (let g = 1; g < match.length; g++) {
+            if (match[g] === undefined) continue;
+            const groupStart = text.indexOf(match[g], innerPos);
+            // For odd groups (the actual matched chars), highlight them
+            if (g % 2 === 1) {
+              const mark = document.createElement("mark");
+              mark.className = "search-highlight";
+              mark.textContent = match[g];
+              frag.appendChild(mark);
+            } else {
+              // Even groups are the in-between text
+              frag.appendChild(document.createTextNode(match[g]));
+            }
+            innerPos += match[g].length;
+          }
+
+          // Text after the full match
+          if (fullMatchEnd < text.length) {
+            frag.appendChild(document.createTextNode(text.substring(fullMatchEnd)));
+          }
+        } else {
+          // Simple substring highlight - highlight all occurrences
+          let lastIndex = 0;
+          const globalRegex = new RegExp("(" + escapeRegex(trimmedSearchText) + ")", "gi");
+          let m;
+          while ((m = globalRegex.exec(text)) !== null) {
+            if (m.index > lastIndex) {
+              frag.appendChild(document.createTextNode(text.substring(lastIndex, m.index)));
+            }
+            const mark = document.createElement("mark");
+            mark.className = "search-highlight";
+            mark.textContent = m[1];
+            frag.appendChild(mark);
+            lastIndex = m.index + m[0].length;
+          }
+          if (lastIndex < text.length) {
+            frag.appendChild(document.createTextNode(text.substring(lastIndex)));
+          }
+          if (lastIndex === 0) return; // no matches found
+        }
+
+        textNode.parentNode.replaceChild(frag, textNode);
+      }
+
+      // Highlight matching text inside a link element
+      function highlightLink(elem) {
+        // Walk text nodes and apply highlights
+        const walker = document.createTreeWalker(elem, NodeFilter.SHOW_TEXT, null);
+        const textNodes = [];
+        let node;
+        while ((node = walker.nextNode())) {
+          textNodes.push(node);
+        }
+        textNodes.forEach((tn) => {
+          applyHighlightToTextNode(tn, isFuzzy ? highlightRegex : highlightRegex, isFuzzy);
+          // Reset lastIndex for regex reuse
+          highlightRegex.lastIndex = 0;
+        });
+      }
+
       let visibleCount = 0;
+
+      // Clear previous highlights before applying new ones
+      clearHighlights();
 
       // Only consider links for matching
       links.forEach((elem) => {
@@ -1151,7 +1060,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
         elem.classList.toggle("hidden", !isMatch);
 
-        if (isMatch) visibleCount++;
+        if (isMatch) {
+          visibleCount++;
+          highlightLink(elem);
+        }
       });
 
       setResultCount(visibleCount);
@@ -1223,7 +1135,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
         <SchemaRender
           schema={schema}
           refContainer={refContainer}
-          onSuggestionsChange={setSuggestions}
+
         />
         <form
           id="searchForm"
@@ -1235,7 +1147,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
             searchText={searchText}
             onClear={onClearSearch}
             resultCount={resultCount}
-            suggestions={suggestions}
           />
         </form>
         <div className="commands">
@@ -1490,9 +1401,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 
   function SchemaRender(props) {
-    const { schema, refContainer, onSuggestionsChange } = props;
-
-    const [autocompleteSearches, setAutocompleteSearches] = useState([]);
+    const { schema, refContainer } = props;
     const [doms, setDoms] = useState(null);
 
     // handling tabs
@@ -1513,7 +1422,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     // generate the view dom
     useLayoutEffect(() => {
-      const newAutocompleteSearches = new Set();
       const serializedSchema = _getSerializedSchema(schema);
 
       let renderedSettingButtonOnTitle = false;
@@ -1617,7 +1525,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
               </tabs>
             );
           case "link":
-            newAutocompleteSearches.add(schemaComponent.linkText);
 
             switch (schemaComponent.linkType) {
               case "newTabLink":
@@ -1678,11 +1585,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       // update the doms
       setDoms(newDoms);
-      const suggestionsArray = [...newAutocompleteSearches];
-      setAutocompleteSearches(suggestionsArray);
-      if (onSuggestionsChange) {
-        onSuggestionsChange(suggestionsArray);
-      }
     }, [schema]);
 
     return <>{doms}</>;
