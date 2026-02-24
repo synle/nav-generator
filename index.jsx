@@ -1130,6 +1130,18 @@ window.prompt = (message, initialValue = "", callback = null) => {
       return () => container.removeEventListener("keydown", handleKeyDown);
     }, [refContainer.current]);
 
+    // Force full reload when user navigates back (bfcache)
+    useEffect(() => {
+      function onPageShow(e) {
+        if (e.persisted) {
+          window.location.reload();
+        }
+      }
+
+      window.addEventListener("pageshow", onPageShow);
+      return () => window.removeEventListener("pageshow", onPageShow);
+    }, []);
+
     return (
       <div id="fav" ref={refContainer}>
         <SchemaRender
@@ -1526,10 +1538,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             );
           case "link":
             const _onLinkNavigate = (e) => {
-              const el = e.currentTarget;
-              el.classList.add("navigating");
-              el.setAttribute("data-nav-label", el.textContent.trim());
-              el.setAttribute("data-nav-url", el.href || el.dataset.section || "");
+              e.currentTarget.classList.add("navigating");
             };
 
             switch (schemaComponent.linkType) {
