@@ -1540,6 +1540,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
             const _onLinkNavigate = (e) => {
               e.currentTarget.classList.add("navigating");
             };
+            const _onLinkBlur = (e) => {
+              e.currentTarget.classList.remove("navigating");
+            };
+
 
             switch (schemaComponent.linkType) {
               case "newTabLink":
