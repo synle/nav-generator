@@ -15,6 +15,7 @@
   --colorBorderMain: #2a5cab;
   --colorBorderSecondary: #cccccc;
   --colorShadow: rgba(0, 0, 0, 0.15);
+  --colorFocusRing: rgba(10, 91, 215, 0.45);
 }
 
 @mixin dark-theme {
@@ -26,6 +27,7 @@
   --colorBorderMain: #3399ff;
   --colorBorderSecondary: #444444;
   --colorShadow: #222222;
+  --colorFocusRing: rgba(80, 160, 255, 0.5);
 }
 
 :root {
@@ -211,9 +213,8 @@ a {
   &:focus,
   &:focus-visible {
     opacity: 0.85;
-    /* Increased the 4th value (spread) to 4px */
-    box-shadow: 0 0 0 4px rgba(10, 91, 215, 0.25);
-    outline: none; /* Recommended to hide the default browser outline when using custom box-shadow focus */
+    box-shadow: 0 0 0 4px var(--colorFocusRing);
+    outline: none;
   }
 
   &.primary {
@@ -281,7 +282,7 @@ select {
   &:focus {
     outline: none;
     border-color: var(--colorTextLink);
-    box-shadow: 0 0 0 2px rgba(42, 92, 171, 0.25);
+    box-shadow: 0 0 0 2px var(--colorFocusRing);
   }
 }
 
@@ -303,7 +304,7 @@ textarea {
   &:focus {
     outline: none;
     border-color: var(--colorTextLink);
-    box-shadow: 0 0 0 2px rgba(42, 92, 171, 0.25);
+    box-shadow: 0 0 0 2px var(--colorFocusRing);
   }
 }
 
