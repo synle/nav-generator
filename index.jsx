@@ -1157,6 +1157,67 @@ window.prompt = (message, initialValue = "", callback = null) => {
       setResultCount(visibleCount);
     }, [searchText, refContainer.current]);
 
+    // Arrow key navigation for links in the grid
+    useEffect(() => {
+      const container = refContainer.current;
+      if (!container) return;
+
+      function handleKeyDown(e) {
+        const focused = document.activeElement;
+        if (!focused || !focused.classList.contains("link")) return;
+        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
+
+        const allLinks = Array.from(container.querySelectorAll(".link:not(.hidden)"));
+        const currentIndex = allLinks.indexOf(focused);
+        if (currentIndex === -1) return;
+
+        let targetIndex = -1;
+
+        if (e.key === "ArrowLeft") {
+          targetIndex = currentIndex - 1;
+        } else if (e.key === "ArrowRight") {
+          targetIndex = currentIndex + 1;
+        } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          // Find the link above/below by comparing visual positions
+          const focusedRect = focused.getBoundingClientRect();
+          const focusCenterX = focusedRect.left + focusedRect.width / 2;
+          let bestMatch = null;
+          let bestDistance = Infinity;
+
+          for (let i = 0; i < allLinks.length; i++) {
+            if (i === currentIndex) continue;
+            const rect = allLinks[i].getBoundingClientRect();
+            const centerY = rect.top + rect.height / 2;
+            const focusCenterY = focusedRect.top + focusedRect.height / 2;
+
+            const isCorrectDirection =
+              e.key === "ArrowDown" ? centerY > focusCenterY + 1 : centerY < focusCenterY - 1;
+            if (!isCorrectDirection) continue;
+
+            const verticalDist = Math.abs(centerY - focusCenterY);
+            const horizontalDist = Math.abs(rect.left + rect.width / 2 - focusCenterX);
+            // Prioritize vertical proximity, then horizontal closeness
+            const distance = verticalDist * 1000 + horizontalDist;
+
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              bestMatch = i;
+            }
+          }
+
+          if (bestMatch !== null) targetIndex = bestMatch;
+        }
+
+        if (targetIndex >= 0 && targetIndex < allLinks.length) {
+          e.preventDefault();
+          allLinks[targetIndex].focus();
+        }
+      }
+
+      container.addEventListener("keydown", handleKeyDown);
+      return () => container.removeEventListener("keydown", handleKeyDown);
+    }, [refContainer.current]);
+
     return (
       <div id="fav" ref={refContainer}>
         <SchemaRender
