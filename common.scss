@@ -213,11 +213,13 @@ a {
   &:focus,
   &:focus-visible {
     opacity: 0.85;
-    box-shadow: 0 0 0 4px var(--colorFocusRing);
+    box-shadow: 0 0 0 6px var(--colorFocusRing);
     outline: none;
   }
 
-  &.primary {
+  &.primary,
+  &.selected,
+  &:active {
     background: var(--colorTextLink);
     color: var(--colorBgMain);
     border-color: transparent;
@@ -329,6 +331,16 @@ textarea {
   input {
     padding: var(--spaceSize1) var(--spaceSize2);
   }
+}
+
+// ============================================================================
+// Radio Group
+// ============================================================================
+
+.nav-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spaceSize2);
 }
 
 // ============================================================================
