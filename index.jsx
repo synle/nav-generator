@@ -1552,6 +1552,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
                     onClick={_onLinkNavigate}
+                    onBlur={_onLinkBlur}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
@@ -1565,6 +1566,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
                     onClick={_onLinkNavigate}
+                    onBlur={_onLinkBlur}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
                   </a>
@@ -1577,6 +1579,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     className="link jsLink"
                     type="button"
                     onClick={(e) => { _onLinkNavigate(e); eval(schemaComponent.linkUrl); }}
+                    onBlur={_onLinkBlur}
                     data-section={schemaComponent.headerName}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
@@ -1590,6 +1593,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     className="link dataLink"
                     type="button"
                     onClick={(e) => { _onLinkNavigate(e); _navigateToDataUrl(schemaComponent.linkUrl); }}
+                    onBlur={_onLinkBlur}
                     data-section={schemaComponent.headerName}
                   >
                     <FavIcon {...schemaComponent} /> {schemaComponent.linkText}
