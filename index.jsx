@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import "./index.scss";
+import styles from "./index.scss?inline";
+
+// Inject styles inline into the document head
+const styleEl = document.createElement("style");
+styleEl.textContent = styles;
+document.head.appendChild(styleEl);
 
 // Set global flag if script URL has ?hasCustomNavBeforeLoad=1
 const params = new URLSearchParams(document.currentScript?.src.split("?")[1]);
@@ -395,7 +400,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
   <head>
     <meta charset="UTF-8" />
     <title>Loading...</title>
-    <link rel="stylesheet" href="${APP_UPSTREAM_DEFAULT_BASE_URL}/index.css" />
   </head>
   <body>
     <js_script type='schema'>${input}</js_script>
