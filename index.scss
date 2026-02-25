@@ -123,7 +123,7 @@ body {
     gap: var(--spaceSize2);
     margin-bottom: var(--spaceSize3);
 
-    a,
+    a[role="button"],
     button {
       text-align: center !important;
     }

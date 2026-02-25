@@ -187,8 +187,29 @@ h5,
 // Buttons
 // ============================================================================
 
-button,
+// ============================================================================
+// Anchors (plain links)
+// ============================================================================
+
 a {
+  color: var(--colorTextLink);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover,
+  &:focus {
+    opacity: 0.85;
+    text-decoration: underline;
+  }
+}
+
+// ============================================================================
+// Buttons (and anchor buttons)
+// ============================================================================
+
+button,
+a[role="button"] {
   cursor: pointer;
   user-select: none;
   text-decoration: none;
@@ -217,6 +238,7 @@ a {
     opacity: 0.85;
     box-shadow: 0 0 0 6px var(--colorFocusRing);
     outline: none;
+    text-decoration: none;
   }
 
   &.primary,
@@ -329,7 +351,7 @@ textarea {
   }
 
   button,
-  a,
+  a[role="button"],
   input {
     padding: var(--spaceSize1) var(--spaceSize2);
   }
@@ -357,7 +379,7 @@ textarea {
   text-align: center;
 
   button,
-  a {
+  a[role="button"] {
     text-align: center;
     width: 100%;
     display: block;
@@ -384,7 +406,7 @@ textarea {
     }
 
     button,
-    a {
+    a[role="button"] {
       border: none;
       border-radius: 0;
       border-bottom: 1px solid var(--colorBorderSecondary);
