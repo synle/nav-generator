@@ -77,8 +77,7 @@ body {
 #fav,
 #command {
   margin: auto;
-  padding: var(--spaceSize3) var(--spaceSize3) var(--spaceSize4)
-    var(--spaceSize3);
+  padding: var(--spaceSize3) var(--spaceSize3) var(--spaceSize4) var(--spaceSize3);
 
   .title {
     @include h1;
@@ -390,7 +389,7 @@ body {
       }
     }
 
-    .link{
+    .link {
       &.navigating {
         opacity: 0.7;
         background: var(--colorBgHover);

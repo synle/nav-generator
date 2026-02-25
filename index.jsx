@@ -34,9 +34,7 @@ window.copyToClipboard = async (text) => {
     }
   }
 };
-document.addEventListener("AppCopyTextToClipboard", (e) =>
-  window.copyToClipboard(e.text),
-);
+document.addEventListener("AppCopyTextToClipboard", (e) => window.copyToClipboard(e.text));
 
 // Modal component for alerts, prompts, and confirms
 function Modal(props) {
@@ -93,19 +91,10 @@ function AlertModal(props) {
         <div className="modalBody">
           <div className="modalMessage">{message}</div>
           <footer className="modalFooter">
-            <button
-              ref={primaryButtonRef}
-              type="button"
-              className="modalBtn primary"
-              onClick={() => onClose(true)}
-            >
+            <button ref={primaryButtonRef} type="button" className="modalBtn primary" onClick={() => onClose(true)}>
               Yes
             </button>
-            <button
-              type="button"
-              className="modalBtn modalBtnSecondary"
-              onClick={() => onClose(false)}
-            >
+            <button type="button" className="modalBtn modalBtnSecondary" onClick={() => onClose(false)}>
               No
             </button>
           </footer>
@@ -119,12 +108,7 @@ function AlertModal(props) {
       <div className="modalBody">
         <div className="modalMessage">{message}</div>
         <footer className="modalFooter">
-          <button
-            ref={primaryButtonRef}
-            type="button"
-            className="modalBtn primary"
-            onClick={() => onClose()}
-          >
+          <button ref={primaryButtonRef} type="button" className="modalBtn primary" onClick={() => onClose()}>
             OK
           </button>
         </footer>
@@ -159,11 +143,7 @@ function PromptModal(props) {
       const maxViewportRows = Math.floor((window.innerHeight * 0.6) / 20);
 
       // Set rows: minimum 5, maximum based on viewport, with our calculated value in between
-      textareaRef.current.rows = Math.min(
-        Math.max(calculatedRows, 5),
-        maxViewportRows,
-        30,
-      );
+      textareaRef.current.rows = Math.min(Math.max(calculatedRows, 5), maxViewportRows, 30);
     }
   }, [initialValue, hasCallback]);
 
@@ -180,26 +160,12 @@ function PromptModal(props) {
       <Modal isOpen={true} onClose={handleCancel}>
         <div className="modalBody">
           <div className="modalMessage">{message}</div>
-          <textarea
-            ref={textareaRef}
-            className="modalTextarea"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
+          <textarea ref={textareaRef} className="modalTextarea" value={value} onChange={(e) => setValue(e.target.value)} />
           <footer className="modalFooter">
-            <button
-              ref={primaryButtonRef}
-              type="button"
-              className="modalBtn primary"
-              onClick={handleOk}
-            >
+            <button ref={primaryButtonRef} type="button" className="modalBtn primary" onClick={handleOk}>
               OK
             </button>
-            <button
-              type="button"
-              className="modalBtn modalBtnSecondary"
-              onClick={handleCancel}
-            >
+            <button type="button" className="modalBtn modalBtnSecondary" onClick={handleCancel}>
               Cancel
             </button>
           </footer>
@@ -212,19 +178,9 @@ function PromptModal(props) {
     <Modal isOpen={true} onClose={handleOk}>
       <div className="modalBody">
         <div className="modalMessage">{message}</div>
-        <textarea
-          ref={textareaRef}
-          className="modalTextarea modalTextarea--readonly"
-          value={value}
-          readOnly
-        />
+        <textarea ref={textareaRef} className="modalTextarea modalTextarea--readonly" value={value} readOnly />
         <footer className="modalFooter">
-          <button
-            ref={primaryButtonRef}
-            type="button"
-            className="modalBtn primary"
-            onClick={handleOk}
-          >
+          <button ref={primaryButtonRef} type="button" className="modalBtn primary" onClick={handleOk}>
             OK
           </button>
         </footer>
@@ -372,10 +328,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   async function _navigateToDataUrl(base64URL, forceOpenWindow) {
     try {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(
-        decodeURIComponent(base64URL.replace("data:text/html,", "")),
-        "text/html",
-      );
+      const doc = parser.parseFromString(decodeURIComponent(base64URL.replace("data:text/html,", "")), "text/html");
       const schema = doc.querySelector("[type=schema]").innerText.trim();
       const childWindow = window.open(`${APP_INDEX_URL}?loadNav`);
 
@@ -622,18 +575,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
         isInABlock = true;
         blockType = "code";
         if (link.length > CODE_BLOCK_SPLIT.length) {
-          blockId = link.substr(
-            blockId.indexOf(CODE_BLOCK_SPLIT) + CODE_BLOCK_SPLIT.length + 1,
-          );
+          blockId = link.substr(blockId.indexOf(CODE_BLOCK_SPLIT) + CODE_BLOCK_SPLIT.length + 1);
           _upsertBlockId(blockId);
         }
       } else if (link.trim().indexOf(HTML_BLOCK_SPLIT) === 0) {
         isInABlock = true;
         blockType = "html";
         if (link.length > HTML_BLOCK_SPLIT.length) {
-          blockId = link.substr(
-            blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1,
-          );
+          blockId = link.substr(blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1);
           _upsertBlockId(blockId);
         }
       } else if (link.trim().indexOf(TAB_SPLIT) === 0) {
@@ -663,36 +612,18 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
         try {
           // try parse as new tab link
-          if (
-            link.indexOf(NEW_TAB_LINK_SPLIT) !== -1 &&
-            link.indexOf(NEW_TAB_LINK_SPLIT) <=
-              link.indexOf(SAME_TAB_LINK_SPLIT)
-          ) {
+          if (link.indexOf(NEW_TAB_LINK_SPLIT) !== -1 && link.indexOf(NEW_TAB_LINK_SPLIT) <= link.indexOf(SAME_TAB_LINK_SPLIT)) {
             linkText = link.substr(0, link.indexOf(NEW_TAB_LINK_SPLIT)).trim();
-            linkUrl = link
-              .substr(
-                link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length,
-              )
-              .trim();
+            linkUrl = link.substr(link.indexOf(NEW_TAB_LINK_SPLIT) + NEW_TAB_LINK_SPLIT.length).trim();
             linkType = "newTabLink";
           }
         } catch (err) {}
 
         if (!linkType) {
           try {
-            if (
-              link.length > 0 &&
-              SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)
-            ) {
-              linkText = link
-                .substr(0, link.indexOf(SAME_TAB_LINK_SPLIT))
-                .trim();
-              linkUrl = link
-                .substr(
-                  link.indexOf(SAME_TAB_LINK_SPLIT) +
-                    SAME_TAB_LINK_SPLIT.length,
-                )
-                .trim();
+            if (link.length > 0 && SAME_TAB_LINK_SPLIT.includes(SAME_TAB_LINK_SPLIT)) {
+              linkText = link.substr(0, link.indexOf(SAME_TAB_LINK_SPLIT)).trim();
+              linkUrl = link.substr(link.indexOf(SAME_TAB_LINK_SPLIT) + SAME_TAB_LINK_SPLIT.length).trim();
               linkType = "sameTabLink";
             }
           } catch (err) {}
@@ -730,8 +661,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                 let hostname = url.hostname.replace(/^www\./, "");
                 const parts = hostname.split(".");
                 // Get root domain name (second-to-last part before TLD)
-                linkText =
-                  parts.length >= 2 ? parts[parts.length - 2] : hostname;
+                linkText = parts.length >= 2 ? parts[parts.length - 2] : hostname;
               }
             } catch (e) {
               // If URL parsing fails, use the raw linkUrl
@@ -756,12 +686,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   // react components
   function SearchBox(props) {
-    const {
-      onSearch,
-      searchText,
-      onClear,
-      resultCount,
-    } = props;
+    const { onSearch, searchText, onClear, resultCount } = props;
     const [showHelp, setShowHelp] = useState(false);
 
     return (
@@ -780,13 +705,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           {searchText && (
             <>
               <span className="search-result-count">{resultCount} results</span>
-              <button
-                type="button"
-                className="search-clear-btn"
-                onClick={onClear}
-                aria-label="Clear search"
-                title="Clear search"
-              >
+              <button type="button" className="search-clear-btn" onClick={onClear} aria-label="Clear search" title="Clear search">
                 ✕
               </button>
             </>
@@ -805,11 +724,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           <div className="search-help-popup">
             <div className="search-help-header">
               Search Shortcuts
-              <button
-                type="button"
-                className="search-help-close"
-                onClick={() => setShowHelp(false)}
-              >
+              <button type="button" className="search-help-close" onClick={() => setShowHelp(false)}>
                 ✕
               </button>
             </div>
@@ -849,10 +764,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const refContainer = useRef();
 
     // events
-    const onEdit = useCallback(() => {
-      onSetViewMode("edit");
-    }, []);
-
     const onSearch = useCallback((newSearchText) => {
       setSearchText(newSearchText);
     }, []);
@@ -901,9 +812,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       const doc = refContainer.current;
       const links = doc.querySelectorAll(".link");
-      const otherNonLinks = doc.querySelectorAll(
-        ":scope > *:not(.form-search-excluded)",
-      );
+      const otherNonLinks = doc.querySelectorAll(":scope > *:not(.form-search-excluded)");
       const allElems = [...links, ...otherNonLinks];
 
       // Helper to clear all search highlights from links
@@ -1107,8 +1016,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             const centerY = rect.top + rect.height / 2;
             const focusCenterY = focusedRect.top + focusedRect.height / 2;
 
-            const isCorrectDirection =
-              e.key === "ArrowDown" ? centerY > focusCenterY + 1 : centerY < focusCenterY - 1;
+            const isCorrectDirection = e.key === "ArrowDown" ? centerY > focusCenterY + 1 : centerY < focusCenterY - 1;
             if (!isCorrectDirection) continue;
 
             const verticalDist = Math.abs(centerY - focusCenterY);
@@ -1149,56 +1057,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="fav" ref={refContainer}>
-        <SchemaRender
-          schema={schema}
-          refContainer={refContainer}
-
-        />
-        <form
-          id="searchForm"
-          className="form-search-excluded"
-          onSubmit={(e) => onSubmitNavigationSearch(e)}
-        >
-          <SearchBox
-            onSearch={onSearch}
-            searchText={searchText}
-            onClear={onClearSearch}
-            resultCount={resultCount}
-          />
+        <SchemaRender schema={schema} refContainer={refContainer} onSetViewMode={onSetViewMode} />
+        <form id="searchForm" className="form-search-excluded" onSubmit={(e) => onSubmitNavigationSearch(e)}>
+          <SearchBox onSearch={onSearch} searchText={searchText} onClear={onClearSearch} resultCount={resultCount} />
         </form>
-        <div className="commands">
-          <button id="edit" onClick={onEdit} role="button">
-            Edit
-          </button>
-          <DropdownButtons type="pullUp">
-            <button className="dropdown-trigger">Actions</button>
-            <a role="button" target="_blank" href={NEW_NAV_URL}>
-              New Nav
-            </a>
-            <button
-              className="copyBookmarkToClipboard"
-              onClick={() =>
-                _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))
-              }
-            >
-              Copy Bookmark
-            </button>
-            <button onClick={() => onSetViewMode("bookmark_import_chrome")}>
-              Import Chrome Bookmarks
-            </button>
-            <button onClick={() => onSetViewMode("bookmark_export_chrome")}>
-              Export Chrome Bookmarks
-            </button>
-            <a
-              role="button"
-              href={_getUrlDownloadSchema(schema)}
-              download={`schema.${new Date().getTime()}.txt`}
-            >
-              Download Schema
-            </a>
-          </DropdownButtons>
-          <VersionHistoryButton key={Date.now()} {...props} />
-        </div>
       </div>
     );
   }
@@ -1208,7 +1070,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const [bufferSchema, setBufferSchema] = useState(schema.trim());
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const [bookmark, setBookmark] = useState("");
-
 
     // events
     const onApply = useCallback(() => {
@@ -1286,8 +1147,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       if (hasPendingChanges) {
         window.onbeforeunload = function (e) {
           e.preventDefault();
-          return (e.returnValue =
-            "You have unsaved changes. Do you want to continue with exit?");
+          return (e.returnValue = "You have unsaved changes. Do you want to continue with exit?");
         };
       }
     }, [hasPendingChanges]);
@@ -1303,76 +1163,41 @@ window.prompt = (message, initialValue = "", callback = null) => {
         <div className="title">
           Edit Navigation
           <div className="action-bar">
-          <button
-            id="applyEdit"
-            type="button"
-            role="button"
-            onClick={() => onApply()}
-          >
-            Apply
-          </button>
-          <button
-            id="cancelEdit"
-            type="button"
-            role="button"
-            onClick={() => onCancel()}
-          >
-            Cancel
-          </button>
-          <DropdownButtons>
-            <button className="dropdown-trigger" type="button">
-              Actions
+            <button id="applyEdit" type="button" role="button" onClick={() => onApply()}>
+              Apply
             </button>
-            <a role="button" target="_blank" href={NEW_NAV_URL}>
-              New Nav
-            </a>
-            <button
-              onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}
-            >
-              Sort Schema
+            <button id="cancelEdit" type="button" role="button" onClick={() => onCancel()}>
+              Cancel
             </button>
-            <button
-              className="copyBookmarkToClipboard"
-              onClick={() => _onCopyToClipboard(bookmark)}
-            >
-              Copy Bookmark
-            </button>
-            <button onClick={() => _onCopyToClipboard(bufferSchema)}>
-              Copy Schema
-            </button>
-            <a
-              role="button"
-              target="_blank"
-              href="https://github.com/synle/nav-generator/blob/main/index.jsx"
-            >
-              JS Code
-            </a>
-            <a
-              role="button"
-              target="_blank"
-              href="https://github.com/synle/nav-generator/blob/main/index.scss"
-            >
-              CSS Code
-            </a>
-            <button type="button" onClick={onTest}>
-              Test
-            </button>
-            <a
-              role="button"
-              href={_getUrlDownloadSchema(schema)}
-              download={`schema.${new Date().getTime()}.txt`}
-            >
-              Download Schema
-            </a>
-            <a
-              role="button"
-              href={bookmark}
-              download={`bookmark.${new Date().getTime()}.html`}
-            >
-              Download Bookmark
-            </a>
-          </DropdownButtons>
-        </div>
+            <DropdownButtons>
+              <button className="dropdown-trigger" type="button">
+                Actions
+              </button>
+              <a role="button" target="_blank" href={NEW_NAV_URL}>
+                New Nav
+              </a>
+              <button onClick={() => onSortSchemaBySectionNameAndTitle(bufferSchema)}>Sort Schema</button>
+              <button className="copyBookmarkToClipboard" onClick={() => _onCopyToClipboard(bookmark)}>
+                Copy Bookmark
+              </button>
+              <button onClick={() => _onCopyToClipboard(bufferSchema)}>Copy Schema</button>
+              <a role="button" target="_blank" href="https://github.com/synle/nav-generator/blob/main/index.jsx">
+                JS Code
+              </a>
+              <a role="button" target="_blank" href="https://github.com/synle/nav-generator/blob/main/index.scss">
+                CSS Code
+              </a>
+              <button type="button" onClick={onTest}>
+                Test
+              </button>
+              <a role="button" href={_getUrlDownloadSchema(schema)} download={`schema.${new Date().getTime()}.txt`}>
+                Download Schema
+              </a>
+              <a role="button" href={bookmark} download={`bookmark.${new Date().getTime()}.html`}>
+                Download Bookmark
+              </a>
+            </DropdownButtons>
+          </div>
         </div>
         <SchemaEditor
           id="input"
@@ -1389,9 +1214,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   function _getFaviconUrl(url) {
     // Extract domain from URL
-    let domain = url.match(
-      /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im,
-    )[1];
+    let domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im)[1];
 
     // Add "/favicon.ico" to the domain
     return `${domain}/favicon.ico`;
@@ -1404,10 +1227,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     if (!error) {
       switch (linkType) {
         default:
-          if (
-            linkUrl.indexOf("http://") === 0 ||
-            linkUrl.indexOf("https://") === 0
-          ) {
+          if (linkUrl.indexOf("http://") === 0 || linkUrl.indexOf("https://") === 0) {
             let favIconUrl = `http://${_getFaviconUrl(linkUrl)}`;
             return (
               <img
@@ -1427,7 +1247,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 
   function SchemaRender(props) {
-    const { schema, refContainer } = props;
+    const { schema, refContainer, onSetViewMode } = props;
     const [doms, setDoms] = useState(null);
 
     // handling tabs
@@ -1456,27 +1276,59 @@ window.prompt = (message, initialValue = "", callback = null) => {
             // set the page title
             document.title = schemaComponent.value;
 
-            let domSettings = null;
-
             return (
               <div
                 id={schemaComponent.id}
                 key={schemaComponent.key}
                 className="title form-search-excluded"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
               >
                 {schemaComponent.value}
-                <div id='modular-setting'></div>
+
+                <div className='action-bar'>
+                  {onSetViewMode ? (
+                    <>
+                      <button id="edit" onClick={() => onSetViewMode("edit")} role="button">
+                        Edit
+                      </button>
+                      <DropdownButtons type="pullUp">
+                        <button className="dropdown-trigger">Actions</button>
+                        <a role="button" target="_blank" href={NEW_NAV_URL}>
+                          New Nav
+                        </a>
+                        <button
+                          className="copyBookmarkToClipboard"
+                          onClick={() => _onCopyToClipboard(_getNavBookmarkletFromSchema(schema))}
+                        >
+                          Copy Bookmark
+                        </button>
+                        <button onClick={() => onSetViewMode("bookmark_import_chrome")}>Import Chrome Bookmarks</button>
+                        <button onClick={() => onSetViewMode("bookmark_export_chrome")}>Export Chrome Bookmarks</button>
+                        <a role="button" href={_getUrlDownloadSchema(schema)} download={`schema.${new Date().getTime()}.txt`}>
+                          Download Schema
+                        </a>
+                      </DropdownButtons>
+                      <VersionHistoryButton key={Date.now()} {...props} />
+                    </>
+                  ) : null}
+
+                  <DropdownButtons>
+                    <button className="dropdown-trigger">Settings</button>
+                    <ThemeToggle />
+                  </DropdownButtons>
+                </div>
               </div>
             );
           case "favIcon":
             // insert the fav icon
             const pageFavIcon = schemaComponent.value;
-            document.querySelector("#pageFavIcon") &&
-              document.querySelector("#pageFavIcon").remove();
+            document.querySelector("#pageFavIcon") && document.querySelector("#pageFavIcon").remove();
             const favIconEncoded =
-              encodeURIComponent(
-                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='0' y='14'>`,
-              ) +
+              encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='0' y='14'>`) +
               pageFavIcon +
               encodeURIComponent(`</text></svg>`);
             document.head.insertAdjacentHTML(
@@ -1486,11 +1338,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             break;
           case "header":
             return (
-              <div
-                id={schemaComponent.id}
-                key={schemaComponent.key}
-                className="header"
-              >
+              <div id={schemaComponent.id} key={schemaComponent.key} className="header">
                 {schemaComponent.value}
               </div>
             );
@@ -1500,9 +1348,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                 id={schemaComponent.id}
                 key={schemaComponent.key}
                 className="block codeBlock"
-                onDoubleClick={(e) =>
-                  _onCopyToClipboard(e.target.innerText.trim())
-                }
+                onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}
               >
                 {schemaComponent.value}
               </pre>
@@ -1526,11 +1372,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               );
             }
             return (
-              <tabs
-                id={schemaComponent.id}
-                key={schemaComponent.key}
-                className="tabs"
-              >
+              <tabs id={schemaComponent.id} key={schemaComponent.key} className="tabs">
                 {tabContent}
               </tabs>
             );
@@ -1542,7 +1384,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
               e.currentTarget.classList.remove("navigating");
             };
 
-
             switch (schemaComponent.linkType) {
               case "newTabLink":
                 return (
@@ -1550,7 +1391,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link newTabLink"
-                    role='button'
+                    role="button"
                     target="_blank"
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
@@ -1566,7 +1407,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link sameTabLink"
-                    role='button'
+                    role="button"
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
                     onClick={_onLinkNavigate}
@@ -1582,7 +1423,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     key={schemaComponent.key}
                     className="link jsLink"
                     type="button"
-                    onClick={(e) => { _onLinkNavigate(e); eval(schemaComponent.linkUrl); }}
+                    onClick={(e) => {
+                      _onLinkNavigate(e);
+                      eval(schemaComponent.linkUrl);
+                    }}
                     onBlur={_onLinkBlur}
                     data-section={schemaComponent.headerName}
                   >
@@ -1596,7 +1440,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     key={schemaComponent.key}
                     className="link dataLink"
                     type="button"
-                    onClick={(e) => { _onLinkNavigate(e); _navigateToDataUrl(schemaComponent.linkUrl); }}
+                    onClick={(e) => {
+                      _onLinkNavigate(e);
+                      _navigateToDataUrl(schemaComponent.linkUrl);
+                    }}
                     onBlur={_onLinkBlur}
                     data-section={schemaComponent.headerName}
                   >
@@ -1632,20 +1479,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
           [/^>>>.*$/, "tab-definition"],
           [/^(---)([\w]*)$/, ["html-delimiter", "block-id"]],
           [/^(```)([\w]*)$/, ["code-fence", "block-id"]],
-          [
-            /^(.+?)(\s*\|\|\|\s*)(.+)$/,
-            ["link-label", "separator-new-tab", "url"],
-          ],
-          [
-            /^(.+?)(\s*\|\s*)(.+)$/,
-            ["link-label", "separator-same-tab", "url"],
-          ],
+          [/^(.+?)(\s*\|\|\|\s*)(.+)$/, ["link-label", "separator-new-tab", "url"]],
+          [/^(.+?)(\s*\|\s*)(.+)$/, ["link-label", "separator-same-tab", "url"]],
           [/^https?:\/\/[^\s]+$/, "url"],
           [/^www\.[^\s]+$/, "url"],
-          [
-            /^[a-zA-Z0-9.-]+\.(com|org|net|io|dev|app|co)[^\s]*$/,
-            "url",
-          ],
+          [/^[a-zA-Z0-9.-]+\.(com|org|net|io|dev|app|co)[^\s]*$/, "url"],
         ],
       },
     });
@@ -1688,23 +1526,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 
   function SchemaEditor(props) {
-    const {
-      value,
-      onInput,
-      onBlur,
-      autoFocus,
-      id,
-      type = "nav-generator",
-      readOnly = false,
-      ...restProps
-    } = props;
+    const { value, onInput, onBlur, autoFocus, id, type = "nav-generator", readOnly = false, ...restProps } = props;
     const editorRef = useRef(null);
     const [useFallback, setUseFallback] = useState(false);
 
     const currentTheme = document.documentElement.getAttribute("data-theme");
     const language = type === "html" ? "html" : "nav-generator";
-    const editorTheme =
-      currentTheme === "light" ? "nav-generator-light" : "nav-generator-dark";
+    const editorTheme = currentTheme === "light" ? "nav-generator-light" : "nav-generator-dark";
 
     // Auto-height calculation based on content
     const lineHeight = 20;
@@ -1716,10 +1544,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     useLayoutEffect(() => {
       const observer = new MutationObserver(() => {
         if (editorRef.current) {
-          const theme =
-            document.documentElement.getAttribute("data-theme") === "light"
-              ? "nav-generator-light"
-              : "nav-generator-dark";
+          const theme = document.documentElement.getAttribute("data-theme") === "light" ? "nav-generator-light" : "nav-generator-dark";
           editorRef.current.updateOptions({ theme });
         }
       });
@@ -1761,17 +1586,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
 
     if (useFallback) {
-      return (
-        <BasicTextarea
-          value={value}
-          onInput={onInput}
-          onBlur={onBlur}
-          autoFocus={autoFocus}
-          id={id}
-          type={type}
-          {...restProps}
-        />
-      );
+      return <BasicTextarea value={value} onInput={onInput} onBlur={onBlur} autoFocus={autoFocus} id={id} type={type} {...restProps} />;
     }
 
     return (
@@ -1807,11 +1622,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             lineDecorationsWidth: 10,
             lineNumbersMinChars: 4,
           }}
-          loading={
-            <div style={{ color: "var(--colorTextMain)" }}>
-              Loading Monaco Editor...
-            </div>
-          }
+          loading={<div style={{ color: "var(--colorTextMain)" }}>Loading Monaco Editor...</div>}
         />
       </div>
     );
@@ -1819,14 +1630,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   // Basic textarea fallback with keyboard shortcuts
   function BasicTextarea(props) {
-    const {
-      value,
-      onInput,
-      onBlur,
-      type,
-      readOnly = false,
-      ...restProps
-    } = props;
+    const { value, onInput, onBlur, type, readOnly = false, ...restProps } = props;
 
     const onInputKeyDown = useCallback(
       (e) => {
@@ -1851,26 +1655,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
           let endPos = myField.selectionEnd;
 
           if (startPos === endPos) {
-            myField.value =
-              myField.value.substring(0, startPos) +
-              myValue +
-              myField.value.substring(endPos);
-            myField.setSelectionRange(
-              startPos + myValue.length,
-              endPos + myValue.length,
-            );
+            myField.value = myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos);
+            myField.setSelectionRange(startPos + myValue.length, endPos + myValue.length);
           } else {
-            const [lineStart, lineEnd] = _getLineStartEnd(
-              myField,
-              startPos,
-              endPos,
-            );
-            const [res, newStartPos, newEndPos] = _iterateOverRows(
-              myField.value.split("\n"),
-              lineStart,
-              lineEnd,
-              (row) => myValue + row,
-            );
+            const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+            const [res, newStartPos, newEndPos] = _iterateOverRows(myField.value.split("\n"), lineStart, lineEnd, (row) => myValue + row);
             myField.value = res;
             myField.setSelectionRange(newStartPos, newEndPos);
           }
@@ -1882,29 +1671,18 @@ window.prompt = (message, initialValue = "", callback = null) => {
           let endPos = myField.selectionEnd;
 
           if (startPos === endPos) {
-            myField.value =
-              myField.value.substring(0, startPos - 2) +
-              myField.value.substring(endPos);
+            myField.value = myField.value.substring(0, startPos - 2) + myField.value.substring(endPos);
             myField.setSelectionRange(startPos - length, endPos - length);
           } else {
-            const [lineStart, lineEnd] = _getLineStartEnd(
-              myField,
-              startPos,
-              endPos,
-            );
-            const [res, newStartPos, newEndPos] = _iterateOverRows(
-              myField.value.split("\n"),
-              lineStart,
-              lineEnd,
-              (row) => {
-                for (let i = 0; i < row.length; i++) {
-                  if (row[i] !== " " || i === length) {
-                    return row.substr(i);
-                  }
+            const [lineStart, lineEnd] = _getLineStartEnd(myField, startPos, endPos);
+            const [res, newStartPos, newEndPos] = _iterateOverRows(myField.value.split("\n"), lineStart, lineEnd, (row) => {
+              for (let i = 0; i < row.length; i++) {
+                if (row[i] !== " " || i === length) {
+                  return row.substr(i);
                 }
-                return row;
-              },
-            );
+              }
+              return row;
+            });
             myField.value = res;
             myField.setSelectionRange(newStartPos, newEndPos);
           }
@@ -1913,9 +1691,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
         function _persistTabIndent(myField) {
           try {
-            const rows = myField.value
-              .substr(0, myField.selectionStart)
-              .split("\n");
+            const rows = myField.value.substr(0, myField.selectionStart).split("\n");
             const lastRow = rows[rows.length - 1];
             const lastRowIndent = lastRow.match(/^[ ]+/)[0];
             _insertIndentAtCursor(e.target, "\n" + lastRowIndent);
@@ -1985,10 +1761,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     // Close dropdown when clicking outside
     useLayoutEffect(() => {
       const handleClickOutside = (event) => {
-        if (
-          dropdownRef.current &&
-          !dropdownRef.current.contains(event.target)
-        ) {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
           closeDropdown();
         }
       };
@@ -2040,11 +1813,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return (
       <div className="dropdown" ref={dropdownRef}>
         {enhancedTrigger}
-        {isOpen && (
-          <div className={`dropdown-content ${type}`.trim()}>
-            {enhancedButtons}
-          </div>
-        )}
+        {isOpen && <div className={`dropdown-content ${type}`.trim()}>{enhancedButtons}</div>}
       </div>
     );
   }
@@ -2120,9 +1889,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           const allVersions = await getVersions();
           if (mounted) {
             // sort newest first
-            const sorted = allVersions.sort(
-              (a, b) => new Date(b.created_at) - new Date(a.created_at),
-            );
+            const sorted = allVersions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             setVersions(sorted);
           }
         } catch (err) {
@@ -2160,43 +1927,27 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-version-history">
-        <div className="title">Version History
-        <div className="action-bar">
-          <select value={selectedDate} onChange={handleSelectChange}>
-            <option value="">Select a Version</option>
-            {versions.map((v) => (
-              <option key={v.created_at} value={v.created_at}>
-                {new Date(v.created_at).toLocaleString()}
-              </option>
-            ))}
-          </select>
-          <button
-            id="applyEdit"
-            type="button"
-            role="button"
-            onClick={() => handleApply()}
-          >
-            Apply
-          </button>
-          <button
-            id="cancelEdit"
-            type="button"
-            role="button"
-            onClick={() => handleCancel()}
-          >
-            Cancel
-          </button>
+        <div className="title">
+          Version History
+          <div className="action-bar">
+            <select value={selectedDate} onChange={handleSelectChange}>
+              <option value="">Select a Version</option>
+              {versions.map((v) => (
+                <option key={v.created_at} value={v.created_at}>
+                  {new Date(v.created_at).toLocaleString()}
+                </option>
+              ))}
+            </select>
+            <button id="applyEdit" type="button" role="button" onClick={() => handleApply()}>
+              Apply
+            </button>
+            <button id="cancelEdit" type="button" role="button" onClick={() => handleCancel()}>
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
 
-        <SchemaEditor
-          id="input"
-          wrap="soft"
-          spellcheck="false"
-          autoFocus
-          value={selectedValue}
-          readOnly={true}
-        ></SchemaEditor>
+        <SchemaEditor id="input" wrap="soft" spellcheck="false" autoFocus value={selectedValue} readOnly={true}></SchemaEditor>
       </div>
     );
   }
@@ -2211,10 +1962,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const serializedSchema = _getSerializedSchema(schema);
 
     // Filter for only title, header, and link types
-    const relevantItems = serializedSchema.filter(
-      (item) =>
-        item.type === "title" || item.type === "header" || item.type === "link",
-    );
+    const relevantItems = serializedSchema.filter((item) => item.type === "title" || item.type === "header" || item.type === "link");
 
     if (relevantItems.length === 0) {
       return "<!-- No bookmarks to export -->";
@@ -2323,11 +2071,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
         const rootDLs = Array.from(allDLs).filter((dl) => {
           // Find DLs that are not nested inside another DL
           let parent = dl.parentElement;
-          while (
-            parent &&
-            parent !== doc.body &&
-            parent !== doc.documentElement
-          ) {
+          while (parent && parent !== doc.body && parent !== doc.documentElement) {
             if (parent.tagName === "DL") {
               return false; // This DL is nested, skip it
             }
@@ -2490,24 +2234,17 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-chrome-bookmark-import">
-        <div className="title">Import Chrome Bookmarks<div className="action-bar">
-          <button
-            id="applyEdit"
-            type="button"
-            role="button"
-            onClick={() => handleApply()}
-          >
-            Apply
-          </button>
-          <button
-            id="cancelEdit"
-            type="button"
-            role="button"
-            onClick={() => handleCancel()}
-          >
-            Cancel
-          </button>
-        </div></div>
+        <div className="title">
+          Import Chrome Bookmarks
+          <div className="action-bar">
+            <button id="applyEdit" type="button" role="button" onClick={() => handleApply()}>
+              Apply
+            </button>
+            <button id="cancelEdit" type="button" role="button" onClick={() => handleCancel()}>
+              Cancel
+            </button>
+          </div>
+        </div>
 
         <SchemaEditor
           id="input"
@@ -2567,35 +2304,19 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-chrome-bookmark-export">
-        <div className="title">Export Chrome Bookmarks<div className="action-bar">
-          <button
-            id="downloadBookmark"
-            type="button"
-            role="button"
-            onClick={() => handleDownload()}
-          >
-            Download
-          </button>
-          <button
-            id="cancelExport"
-            type="button"
-            role="button"
-            onClick={() => handleCancel()}
-          >
-            Cancel
-          </button>
-        </div></div>
+        <div className="title">
+          Export Chrome Bookmarks
+          <div className="action-bar">
+            <button id="downloadBookmark" type="button" role="button" onClick={() => handleDownload()}>
+              Download
+            </button>
+            <button id="cancelExport" type="button" role="button" onClick={() => handleCancel()}>
+              Cancel
+            </button>
+          </div>
+        </div>
 
-
-        <SchemaEditor
-          id="output"
-          type="html"
-          wrap="soft"
-          spellcheck="false"
-          autoFocus={false}
-          value={htmlOutput}
-          readOnly={true}
-        />
+        <SchemaEditor id="output" type="html" wrap="soft" spellcheck="false" autoFocus={false} value={htmlOutput} readOnly={true} />
       </div>
     );
   }
@@ -2634,34 +2355,19 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-backup-download">
-        <div className="title">Backup Download<div className="action-bar">
-          <button
-            id="downloadBackup"
-            type="button"
-            role="button"
-            onClick={() => handleDownload()}
-          >
-            Download
-          </button>
-          <button
-            id="cancelBackup"
-            type="button"
-            role="button"
-            onClick={() => handleCancel()}
-          >
-            Cancel
-          </button>
-        </div></div>
+        <div className="title">
+          Backup Download
+          <div className="action-bar">
+            <button id="downloadBackup" type="button" role="button" onClick={() => handleDownload()}>
+              Download
+            </button>
+            <button id="cancelBackup" type="button" role="button" onClick={() => handleCancel()}>
+              Cancel
+            </button>
+          </div>
+        </div>
 
-        <SchemaEditor
-          id="backupOutput"
-          type="text"
-          wrap="soft"
-          spellcheck="false"
-          autoFocus={false}
-          value={schema}
-          readOnly={true}
-        />
+        <SchemaEditor id="backupOutput" type="text" wrap="soft" spellcheck="false" autoFocus={false} value={schema} readOnly={true} />
       </div>
     );
   }
@@ -2699,12 +2405,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
         }
       }
       if (key === "Enter" || key === " ") {
-        if (
-          parseInt(target.tabIndex) === 0 &&
-          target.tagName !== "TEXTAREA" &&
-          target.tagName !== "INPUT" &&
-          target.tagName !== "SELECT"
-        ) {
+        if (parseInt(target.tabIndex) === 0 && target.tagName !== "TEXTAREA" && target.tagName !== "INPUT" && target.tagName !== "SELECT") {
           _dispatchEvent(target, "click");
 
           e.preventDefault();
@@ -2751,10 +2452,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             break;
           case "c":
             if (!e.ctrlKey && !e.altKey && !e.metaKey) {
-              _dispatchEvent(
-                document.querySelectorAll(".copyBookmarkToClipboard")[0],
-                "click",
-              );
+              _dispatchEvent(document.querySelectorAll(".copyBookmarkToClipboard")[0], "click");
               e.preventDefault();
             }
             break;
@@ -2775,9 +2473,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
         for (const targetTab of tabChildren) {
           const targetTabId = targetTab.dataset?.tabId;
-          const contentEl = targetTabId
-            ? document.getElementById(targetTabId)
-            : null;
+          const contentEl = targetTabId ? document.getElementById(targetTabId) : null;
 
           if (tab === targetTab) {
             // Show and select target tab
@@ -2825,10 +2521,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   await Promise.all([]);
 
   // find and parse the schema from script
-  let inputSchema =
-    document.querySelector("[type=schema]")?.innerText?.trim() ||
-    _getPersistedBufferSchema() ||
-    "";
+  let inputSchema = document.querySelector("[type=schema]")?.innerText?.trim() || _getPersistedBufferSchema() || "";
   let viewMode = "read";
 
   document.innerHTML = `<div style="text-align: center; margin: 20px; font-size: 20px;">Loading...</div>`;
@@ -2854,10 +2547,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
         }
       };
       window.addEventListener("message", _onHandlePostMessageEvent);
-    } else if (
-      location.search.includes("newNav") ||
-      (!isRenderedInDataUrl && !location.href.includes("index.html"))
-    ) {
+    } else if (location.search.includes("newNav") || (!isRenderedInDataUrl && !location.href.includes("index.html"))) {
       // render as edit mode for newNav
       window.history.replaceState("", "", APP_INDEX_URL);
       _persistBufferSchema(DEFAULT_SCHEMA_TO_RENDER);
@@ -2867,10 +2557,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       viewMode = "edit";
 
       _render(); // rerender the dom
-    } else if (
-      _getSessionValue("loadNavFromSessionStorage") === "1" &&
-      location.href.includes(APP_INDEX_URL)
-    ) {
+    } else if (_getSessionValue("loadNavFromSessionStorage") === "1" && location.href.includes(APP_INDEX_URL)) {
       // if this flag is set, then continue
       // will proceed with loading from session storage
       _render(); // rerender the dom
@@ -2934,11 +2621,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       setThemeState((prev) => (prev === "dark" ? "light" : "dark"));
     };
 
-    return (
-      <button onClick={toggleTheme}>
-        {theme === "dark" ? "Light Mode" : "Dark Mode"}
-      </button>
-    );
+    return <button onClick={toggleTheme}>{theme === "dark" ? "Light Mode" : "Dark Mode"}</button>;
   }
 
   function VersionHistoryButton({ onSetViewMode }) {
@@ -2964,11 +2647,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     if (!hasVersions) return null;
 
     return (
-      <button
-        onClick={() => onSetViewMode("version_history")}
-        type="button"
-        role="button"
-      >
+      <button onClick={() => onSetViewMode("version_history")} type="button" role="button">
         Version History
       </button>
     );
