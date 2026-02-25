@@ -387,8 +387,6 @@ body {
     }
 
     .link{
-      gap: 0;
-
       &.navigating {
         opacity: 0.7;
         background: var(--colorBgHover);
