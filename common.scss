@@ -10,9 +10,10 @@
   --colorBgMain: #f9f9f9;
   --colorBgSecondary: #f0f0f0;
   --colorBgHover: #e4e4e4;
-  --colorTextMain: #1a1a1a;
-  --colorTextLink: #1a3d6e;
-  --colorBorderMain: #2a5cab;
+  --colorTextMain: #3030ff;
+  --colorTextLink: #2222ff;
+  --colorTextSuccess: #008008;
+  --colorTextError: #dc3545 --colorTextWarning: #ffc107 --colorBorderMain: #2a5cab;
   --colorBorderSecondary: #cccccc;
   --colorShadow: rgba(0, 0, 0, 0.15);
   --colorFocusRing: rgba(10, 91, 215, 0.45);
@@ -24,7 +25,8 @@
   --colorBgHover: #333333;
   --colorTextMain: #f5f5f5;
   --colorTextLink: #4ea1ff;
-  --colorBorderMain: #3399ff;
+  --colorTextSuccess: #608b4e;
+  --colorTextError: #dc3545 --colorTextWarning: #ffc107 --colorBorderMain: #3399ff;
   --colorBorderSecondary: #444444;
   --colorShadow: #222222;
   --colorFocusRing: rgba(80, 160, 255, 0.5);
@@ -46,11 +48,11 @@
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   @include dark-theme;
 }
 
-:root[data-theme="light"] {
+:root[data-theme='light'] {
   @include light-theme;
 }
 
@@ -60,9 +62,7 @@
 
 :root {
   // Font families
-  --fontFamilyMain:
-    -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif,
-    Apple Color Emoji, Segoe UI Emoji;
+  --fontFamilyMain: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
   --fontFamilySecondary: Helvetica, Tahoma, Geneva, sans-serif;
   --fontFamilyMonospace: monospace;
 
@@ -209,13 +209,14 @@ a {
 // ============================================================================
 
 button,
-a[role="button"] {
+a[role='button'] {
   cursor: pointer;
   user-select: none;
   text-decoration: none;
   outline: none;
   display: inline-flex;
   align-items: center;
+  gap: 0.5rem;
   padding: var(--spaceSize2);
   border-radius: 6px;
   border: var(--borderSize1) solid var(--colorBorderSecondary);
@@ -252,7 +253,6 @@ a[role="button"] {
     width: 16px;
     height: 16px;
     flex-shrink: 0;
-    margin-right: var(--spaceSize1)
   }
 }
 
@@ -351,7 +351,7 @@ textarea {
   }
 
   button,
-  a[role="button"],
+  a[role='button'],
   input {
     padding: var(--spaceSize1) var(--spaceSize2);
   }
@@ -379,7 +379,7 @@ textarea {
   text-align: center;
 
   button,
-  a[role="button"] {
+  a[role='button'] {
     text-align: center;
     width: 100%;
     display: block;
@@ -406,7 +406,7 @@ textarea {
     }
 
     button,
-    a[role="button"] {
+    a[role='button'] {
       border: none;
       border-radius: 0;
       border-bottom: 1px solid var(--colorBorderSecondary);
@@ -441,14 +441,14 @@ textarea {
     text-overflow: ellipsis;
 
     &::after {
-      content: "▼";
+      content: '▼';
       margin-left: 0.5rem;
       font-size: 0.7rem;
       display: inline-block;
       transition: transform 0.2s ease;
     }
 
-    &[aria-expanded="true"]::after {
+    &[aria-expanded='true']::after {
       transform: rotate(180deg);
     }
   }
@@ -586,4 +586,38 @@ textarea {
     width: 800px;
     min-width: 800px;
   }
+}
+
+// ============================================================================
+// Monaco Editor
+// ============================================================================
+
+.monaco-editor,
+.monaco-editor .overflow-guard,
+.monaco-editor .monaco-scrollable-element {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+// ============================================================================
+// bashrc/webapp Specific Utilities
+// ============================================================================
+
+// Text color utilities
+.text-error,
+.text-danger {
+  color: var(--colorTextError) !important;
+}
+
+.text-success,
+.text-info {
+  color: var(--colorTextSuccess) !important;
+}
+
+.text-warning {
+  color: var(--colorTextWarning) !important;
+}
+
+.text-muted {
+  color: var(--colorTextSecondary) !important;
 }
