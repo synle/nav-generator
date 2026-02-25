@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
+import Editor, { loader } from "@monaco-editor/react";
 import styles from "./index.scss?inline";
 
 // Inject styles inline into the document head
@@ -1625,8 +1626,79 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return <>{doms}</>;
   }
 
+  // Track whether custom nav-generator language has been registered
+  let navGeneratorLanguageRegistered = false;
+
+  function registerNavGeneratorLanguage(monaco) {
+    if (navGeneratorLanguageRegistered) return;
+    navGeneratorLanguageRegistered = true;
+
+    monaco.languages.register({ id: "nav-generator" });
+
+    monaco.languages.setMonarchTokensProvider("nav-generator", {
+      tokenizer: {
+        root: [
+          [/^!\s+.*$/, "page-title"],
+          [/^#+\s+.*$/, "section-header"],
+          [/^>>>.*$/, "tab-definition"],
+          [/^(---)([\w]*)$/, ["html-delimiter", "block-id"]],
+          [/^(```)([\w]*)$/, ["code-fence", "block-id"]],
+          [
+            /^(.+?)(\s*\|\|\|\s*)(.+)$/,
+            ["link-label", "separator-new-tab", "url"],
+          ],
+          [
+            /^(.+?)(\s*\|\s*)(.+)$/,
+            ["link-label", "separator-same-tab", "url"],
+          ],
+          [/^https?:\/\/[^\s]+$/, "url"],
+          [/^www\.[^\s]+$/, "url"],
+          [
+            /^[a-zA-Z0-9.-]+\.(com|org|net|io|dev|app|co)[^\s]*$/,
+            "url",
+          ],
+        ],
+      },
+    });
+
+    monaco.editor.defineTheme("nav-generator-light", {
+      base: "vs",
+      inherit: true,
+      rules: [
+        { token: "page-title", foreground: "0066cc", fontStyle: "bold" },
+        { token: "section-header", foreground: "267f99", fontStyle: "bold" },
+        { token: "tab-definition", foreground: "7f3b9f", fontStyle: "bold" },
+        { token: "html-delimiter", foreground: "e91e63", fontStyle: "bold" },
+        { token: "code-fence", foreground: "00897b", fontStyle: "bold" },
+        { token: "block-id", foreground: "996600", fontStyle: "italic" },
+        { token: "link-label", foreground: "283593", fontStyle: "bold" },
+        { token: "separator-new-tab", foreground: "ff6600", fontStyle: "bold" },
+        { token: "separator-same-tab", foreground: "008800", fontStyle: "bold" },
+        { token: "url", foreground: "0000ff", fontStyle: "underline" },
+      ],
+      colors: {},
+    });
+
+    monaco.editor.defineTheme("nav-generator-dark", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [
+        { token: "page-title", foreground: "4fc3f7", fontStyle: "bold" },
+        { token: "section-header", foreground: "81c784", fontStyle: "bold" },
+        { token: "tab-definition", foreground: "ba68c8", fontStyle: "bold" },
+        { token: "html-delimiter", foreground: "ff1744", fontStyle: "bold" },
+        { token: "code-fence", foreground: "26c6da", fontStyle: "bold" },
+        { token: "block-id", foreground: "ffb74d", fontStyle: "italic" },
+        { token: "link-label", foreground: "9fa8da", fontStyle: "bold" },
+        { token: "separator-new-tab", foreground: "ff9800", fontStyle: "bold" },
+        { token: "separator-same-tab", foreground: "66bb6a", fontStyle: "bold" },
+        { token: "url", foreground: "64b5f6", fontStyle: "underline" },
+      ],
+      colors: {},
+    });
+  }
+
   function SchemaEditor(props) {
-    const MONACO_LOAD_TIMEOUT = 5000; // seconds timeout
     const {
       value,
       onInput,
@@ -1638,336 +1710,28 @@ window.prompt = (message, initialValue = "", callback = null) => {
       ...restProps
     } = props;
     const editorRef = useRef(null);
-    const monacoRef = useRef(null);
-    const containerRef = useRef(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [useFallback, setUseFallback] = useState(false);
-    const fallbackTimeoutRef = useRef(null);
 
-    useLayoutEffect(() => {
-      // Set fallback timeout
-      fallbackTimeoutRef.current = setTimeout(() => {
-        if (!monacoRef.current) {
-          console.warn(
-            "Monaco Editor failed to load within timeout, using fallback textarea",
-          );
-          setUseFallback(true);
-          setIsLoading(false);
-        }
-      }, MONACO_LOAD_TIMEOUT);
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const language = type === "html" ? "html" : "nav-generator";
+    const editorTheme =
+      currentTheme === "light" ? "nav-generator-light" : "nav-generator-dark";
 
-      // Load Monaco Editor from CDN
-      if (!window.monaco && !window.monacoLoading) {
-        window.monacoLoading = true;
+    // Auto-height calculation based on content
+    const lineHeight = 20;
+    const padding = 20;
+    const lineCount = (value || "").split("\n").length;
+    const computedHeight = `${Math.max(200, lineCount * lineHeight + padding)}px`;
 
-        const loader = document.createElement("script");
-        loader.src =
-          "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js";
-        loader.onload = () => {
-          window.require.config({
-            paths: {
-              vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs",
-            },
-          });
-          window.require(["vs/editor/editor.main"], () => {
-            window.monacoLoaded = true;
-            window.monacoLoading = false;
-            initMonaco();
-          });
-        };
-        loader.onerror = () => {
-          console.error("Failed to load Monaco Editor");
-          clearTimeout(fallbackTimeoutRef.current);
-          setUseFallback(true);
-          setIsLoading(false);
-        };
-        document.head.appendChild(loader);
-      } else if (window.monacoLoaded) {
-        initMonaco();
-      } else {
-        // Wait for Monaco to load
-        const checkInterval = setInterval(() => {
-          if (window.monacoLoaded) {
-            clearInterval(checkInterval);
-            initMonaco();
-          }
-        }, 100);
-        return () => clearInterval(checkInterval);
-      }
-
-      function initMonaco() {
-        if (!containerRef.current || monacoRef.current) return;
-
-        try {
-          // Register nav-generator language
-          if (
-            !window.monaco.languages
-              .getLanguages()
-              .some((lang) => lang.id === "nav-generator")
-          ) {
-            window.monaco.languages.register({ id: "nav-generator" });
-
-            // Define syntax highlighting rules
-            window.monaco.languages.setMonarchTokensProvider("nav-generator", {
-              tokenizer: {
-                root: [
-                  // Page title (starts with !)
-                  [/^!\s+.*$/, "page-title"],
-
-                  // Section headers (starts with #)
-                  [/^#+\s+.*$/, "section-header"],
-
-                  // Tab definitions (starts with >>>)
-                  [/^>>>.*$/, "tab-definition"],
-
-                  // HTML block delimiters (---blockId)
-                  [/^(---)([\w]*)$/, ["html-delimiter", "block-id"]],
-
-                  // Code block markers (```blockId)
-                  [/^(```)([\w]*)$/, ["code-fence", "block-id"]],
-
-                  // Link with label and new tab separator (|||)
-                  [
-                    /^(.+?)(\s*\|\|\|\s*)(.+)$/,
-                    ["link-label", "separator-new-tab", "url"],
-                  ],
-
-                  // Link with label and same tab separator (|) - must come after |||
-                  [
-                    /^(.+?)(\s*\|\s*)(.+)$/,
-                    ["link-label", "separator-same-tab", "url"],
-                  ],
-
-                  // Standalone URLs (no label, no separator)
-                  [/^https?:\/\/[^\s]+$/, "url"],
-                  [/^www\.[^\s]+$/, "url"],
-                  [
-                    /^[a-zA-Z0-9.-]+\.(com|org|net|io|dev|app|co)[^\s]*$/,
-                    "url",
-                  ],
-                ],
-              },
-            });
-
-            // Define theme colors
-            window.monaco.editor.defineTheme("nav-generator-light", {
-              base: "vs",
-              inherit: true,
-              rules: [
-                {
-                  token: "page-title",
-                  foreground: "0066cc",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "section-header",
-                  foreground: "267f99",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "tab-definition",
-                  foreground: "7f3b9f",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "html-delimiter",
-                  foreground: "e91e63",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "code-fence",
-                  foreground: "00897b",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "block-id",
-                  foreground: "996600",
-                  fontStyle: "italic",
-                },
-                {
-                  token: "link-label",
-                  foreground: "283593",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "separator-new-tab",
-                  foreground: "ff6600",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "separator-same-tab",
-                  foreground: "008800",
-                  fontStyle: "bold",
-                },
-                { token: "url", foreground: "0000ff", fontStyle: "underline" },
-              ],
-              colors: {},
-            });
-
-            window.monaco.editor.defineTheme("nav-generator-dark", {
-              base: "vs-dark",
-              inherit: true,
-              rules: [
-                {
-                  token: "page-title",
-                  foreground: "4fc3f7",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "section-header",
-                  foreground: "81c784",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "tab-definition",
-                  foreground: "ba68c8",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "html-delimiter",
-                  foreground: "ff1744",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "code-fence",
-                  foreground: "26c6da",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "block-id",
-                  foreground: "ffb74d",
-                  fontStyle: "italic",
-                },
-                {
-                  token: "link-label",
-                  foreground: "9fa8da",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "separator-new-tab",
-                  foreground: "ff9800",
-                  fontStyle: "bold",
-                },
-                {
-                  token: "separator-same-tab",
-                  foreground: "66bb6a",
-                  fontStyle: "bold",
-                },
-                { token: "url", foreground: "64b5f6", fontStyle: "underline" },
-              ],
-              colors: {},
-            });
-          }
-
-          const currentTheme =
-            document.documentElement.getAttribute("data-theme");
-          const theme =
-            currentTheme === "light"
-              ? "nav-generator-light"
-              : "nav-generator-dark";
-
-          // Determine language based on type prop
-          const language = type === "html" ? "html" : "nav-generator";
-
-          const editor = window.monaco.editor.create(containerRef.current, {
-            value: value || "",
-            language: language,
-            theme: theme,
-            automaticLayout: true,
-            minimap: { enabled: false },
-            lineNumbers: "on",
-            scrollBeyondLastLine: false,
-            wordWrap: "off",
-            fontSize: 14,
-            fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-            tabSize: 2,
-            insertSpaces: true,
-            renderWhitespace: "selection",
-            contextmenu: true,
-            folding: true,
-            lineDecorationsWidth: 10,
-            lineNumbersMinChars: 4,
-            readOnly: readOnly,
-            scrollbar: {
-              verticalScrollbarSize: 10,
-              horizontalScrollbarSize: 10,
-            },
-          });
-
-          monacoRef.current = editor;
-          editorRef.current = editor;
-          clearTimeout(fallbackTimeoutRef.current);
-          setIsLoading(false);
-
-          // Handle value changes
-          editor.onDidChangeModelContent(() => {
-            const newValue = editor.getValue();
-            if (onInput) {
-              onInput({ target: { value: newValue } });
-            }
-          });
-
-          // Handle blur
-          editor.onDidBlurEditorText(() => {
-            if (onBlur) {
-              onBlur({ target: { value: editor.getValue() } });
-            }
-          });
-
-          // Auto focus
-          if (autoFocus) {
-            setTimeout(() => editor.focus(), 100);
-          }
-        } catch (err) {
-          console.error("Error initializing Monaco Editor:", err);
-          clearTimeout(fallbackTimeoutRef.current);
-          setUseFallback(true);
-          setIsLoading(false);
-        }
-      }
-
-      return () => {
-        clearTimeout(fallbackTimeoutRef.current);
-        if (monacoRef.current) {
-          monacoRef.current.dispose();
-          monacoRef.current = null;
-        }
-      };
-    }, []);
-
-    // Update editor value when prop changes
-    useLayoutEffect(() => {
-      if (monacoRef.current && monacoRef.current.getValue() !== value) {
-        const position = monacoRef.current.getPosition();
-        monacoRef.current.setValue(value || "");
-        if (position) {
-          monacoRef.current.setPosition(position);
-        }
-      }
-    }, [value]);
-
-    // Update language when type prop changes
-    useLayoutEffect(() => {
-      if (monacoRef.current && window.monaco) {
-        const language = type === "html" ? "html" : "nav-generator";
-        const model = monacoRef.current.getModel();
-        if (model) {
-          window.monaco.editor.setModelLanguage(model, language);
-        }
-      }
-    }, [type]);
-
-    // Update theme when it changes
+    // Watch for theme changes and update editor
     useLayoutEffect(() => {
       const observer = new MutationObserver(() => {
-        if (window.monaco && monacoRef.current) {
-          const currentTheme =
-            document.documentElement.getAttribute("data-theme");
+        if (editorRef.current) {
           const theme =
-            currentTheme === "light"
+            document.documentElement.getAttribute("data-theme") === "light"
               ? "nav-generator-light"
               : "nav-generator-dark";
-          window.monaco.editor.setTheme(theme);
+          editorRef.current.updateOptions({ theme });
         }
       });
 
@@ -1979,7 +1743,34 @@ window.prompt = (message, initialValue = "", callback = null) => {
       return () => observer.disconnect();
     }, []);
 
-    // Fallback to basic textarea
+    function handleEditorWillMount(monaco) {
+      registerNavGeneratorLanguage(monaco);
+    }
+
+    function handleEditorDidMount(editor, monaco) {
+      editorRef.current = editor;
+
+      editor.onDidBlurEditorText(() => {
+        if (onBlur) {
+          onBlur({ target: { value: editor.getValue() } });
+        }
+      });
+
+      if (autoFocus) {
+        setTimeout(() => editor.focus(), 100);
+      }
+    }
+
+    function handleEditorChange(newValue) {
+      if (onInput) {
+        onInput({ target: { value: newValue } });
+      }
+    }
+
+    function handleEditorValidation() {
+      // no-op, can be extended later
+    }
+
     if (useFallback) {
       return (
         <BasicTextarea
@@ -1995,24 +1786,44 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
 
     return (
-      <div
-        id={id}
-        style={{ height: "100%", width: "100%", position: "relative" }}
-      >
-        {isLoading && (
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              color: "var(--colorTextMain)",
-            }}
-          >
-            Loading Monaco Editor...
-          </div>
-        )}
-        <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
+      <div id={id} style={{ width: "100%" }}>
+        <Editor
+          height={computedHeight}
+          language={language}
+          value={value || ""}
+          theme={editorTheme}
+          beforeMount={handleEditorWillMount}
+          onMount={handleEditorDidMount}
+          onChange={handleEditorChange}
+          onValidate={handleEditorValidation}
+          options={{
+            readOnly,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            scrollbar: {
+              vertical: "hidden",
+              horizontal: "hidden",
+              handleMouseWheel: false,
+            },
+            fontSize: 14,
+            fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+            lineNumbers: "on",
+            wordWrap: "on",
+            automaticLayout: true,
+            tabSize: 2,
+            insertSpaces: true,
+            renderWhitespace: "selection",
+            contextmenu: true,
+            folding: true,
+            lineDecorationsWidth: 10,
+            lineNumbersMinChars: 4,
+          }}
+          loading={
+            <div style={{ color: "var(--colorTextMain)" }}>
+              Loading Monaco Editor...
+            </div>
+          }
+        />
       </div>
     );
   }
