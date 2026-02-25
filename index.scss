@@ -116,9 +116,11 @@ body {
 
   .commands {
     display: flex;
+    flex-wrap: wrap;
     margin-top: 1rem;
     align-items: center;
     justify-content: space-evenly;
+    gap: var(--spaceSize2);
     margin-bottom: var(--spaceSize3);
 
     a,
@@ -128,12 +130,7 @@ body {
 
     > * {
       flex-grow: 1;
-      margin-right: var(--spaceSize4);
       max-width: 210px;
-
-      &:last-child {
-        margin-right: 0;
-      }
     }
   }
 
@@ -563,5 +560,16 @@ load {
   #fav .header,
   #fav .block {
     padding: var(--spaceSize1) var(--spaceSize2);
+  }
+
+  #fav,
+  #command {
+    padding: var(--spaceSize2);
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .commands > * {
+    max-width: none !important;
   }
 }
