@@ -1556,6 +1556,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link newTabLink"
+                    role='button'
                     target="_blank"
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
@@ -1571,6 +1572,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link sameTabLink"
+                    role='button'
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
                     onClick={_onLinkNavigate}
