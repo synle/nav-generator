@@ -80,10 +80,6 @@ body {
   padding: var(--spaceSize3) var(--spaceSize3) var(--spaceSize4)
     var(--spaceSize3);
 
-  > * {
-    text-align: left;
-  }
-
   .title {
     @include h1;
     padding: var(--spaceSize2);
@@ -92,6 +88,14 @@ body {
     border-top: var(--borderSize2) solid var(--colorBorderMain);
     border-bottom: var(--borderSize2) solid var(--colorBorderMain);
     font-weight: var(--fontWeightBold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .action-bar {
+      display: inline-flex;
+      gap: var(--borderSize4);
+    }
   }
 
   .header {

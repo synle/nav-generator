@@ -1189,9 +1189,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
             <button onClick={() => onSetViewMode("bookmark_export_chrome")}>
               Export Chrome Bookmarks
             </button>
-            <button onClick={() => onSetViewMode("backup_download")}>
-              Backup Download
-            </button>
+            <a
+              role="button"
+              href={_getUrlDownloadSchema(schema)}
+              download={`schema.${new Date().getTime()}.txt`}
+            >
+              Download Schema
+            </a>
           </DropdownButtons>
           <VersionHistoryButton key={Date.now()} {...props} />
         </div>
@@ -1205,7 +1209,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const [bookmark, setBookmark] = useState("");
 
-    const urlDownloadSchema = _getUrlDownloadSchema(schema);
 
     // events
     const onApply = useCallback(() => {
@@ -1297,8 +1300,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
     // generate the view
     return (
       <div id="command">
-        <div className="title">Edit Navigation</div>
-        <div className="commands">
+        <div className="title">
+          Edit Navigation
+          <div className="action-bar">
           <button
             id="applyEdit"
             type="button"
@@ -1346,7 +1350,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             <a
               role="button"
               target="_blank"
-              href="https://github.com/synle/nav-generator/blob/main/index.less"
+              href="https://github.com/synle/nav-generator/blob/main/index.scss"
             >
               CSS Code
             </a>
@@ -1355,7 +1359,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             </button>
             <a
               role="button"
-              href={urlDownloadSchema}
+              href={_getUrlDownloadSchema(schema)}
               download={`schema.${new Date().getTime()}.txt`}
             >
               Download Schema
@@ -1368,6 +1372,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               Download Bookmark
             </a>
           </DropdownButtons>
+        </div>
         </div>
         <SchemaEditor
           id="input"
@@ -1445,8 +1450,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
     useLayoutEffect(() => {
       const serializedSchema = _getSerializedSchema(schema);
 
-      let renderedSettingButtonOnTitle = false;
-
       const newDoms = serializedSchema.map((schemaComponent) => {
         switch (schemaComponent.type) {
           case "title":
@@ -1454,29 +1457,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
             document.title = schemaComponent.value;
 
             let domSettings = null;
-            if (renderedSettingButtonOnTitle === false) {
-              renderedSettingButtonOnTitle = true;
-              domSettings = (
-                <DropdownButtons>
-                  <button className="dropdown-trigger">Settings</button>
-                  <ThemeToggle />
-                </DropdownButtons>
-              );
-            }
 
             return (
               <div
                 id={schemaComponent.id}
                 key={schemaComponent.key}
                 className="title form-search-excluded"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
               >
                 {schemaComponent.value}
-                {domSettings}
+                <div id='modular-setting'></div>
               </div>
             );
           case "favIcon":
@@ -2171,8 +2160,16 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-version-history">
-        <div className="title">Version History</div>
-        <div className="commands">
+        <div className="title">Version History
+        <div className="action-bar">
+          <select value={selectedDate} onChange={handleSelectChange}>
+            <option value="">Select a Version</option>
+            {versions.map((v) => (
+              <option key={v.created_at} value={v.created_at}>
+                {new Date(v.created_at).toLocaleString()}
+              </option>
+            ))}
+          </select>
           <button
             id="applyEdit"
             type="button"
@@ -2189,15 +2186,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
           >
             Cancel
           </button>
-          <select value={selectedDate} onChange={handleSelectChange}>
-            <option value="">Select a Version</option>
-            {versions.map((v) => (
-              <option key={v.created_at} value={v.created_at}>
-                {new Date(v.created_at).toLocaleString()}
-              </option>
-            ))}
-          </select>
         </div>
+      </div>
 
         <SchemaEditor
           id="input"
@@ -2500,8 +2490,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-chrome-bookmark-import">
-        <div className="title">Import Chrome Bookmarks</div>
-        <div className="commands">
+        <div className="title">Import Chrome Bookmarks<div className="action-bar">
           <button
             id="applyEdit"
             type="button"
@@ -2518,7 +2507,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           >
             Cancel
           </button>
-        </div>
+        </div></div>
 
         <SchemaEditor
           id="input"
@@ -2578,8 +2567,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-chrome-bookmark-export">
-        <div className="title">Export Chrome Bookmarks</div>
-        <div className="commands">
+        <div className="title">Export Chrome Bookmarks<div className="action-bar">
           <button
             id="downloadBookmark"
             type="button"
@@ -2596,7 +2584,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
           >
             Cancel
           </button>
-        </div>
+        </div></div>
+
 
         <SchemaEditor
           id="output"
@@ -2645,8 +2634,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="command" className="nav-backup-download">
-        <div className="title">Backup Download</div>
-        <div className="commands">
+        <div className="title">Backup Download<div className="action-bar">
           <button
             id="downloadBackup"
             type="button"
@@ -2663,7 +2651,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           >
             Cancel
           </button>
-        </div>
+        </div></div>
 
         <SchemaEditor
           id="backupOutput"
