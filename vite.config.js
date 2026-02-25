@@ -42,7 +42,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         extend: true,
-        assetFileNames: "index.css",
       },
     },
     minify: true,
