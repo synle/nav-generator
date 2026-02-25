@@ -1167,7 +1167,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           </button>
           <DropdownButtons type="pullUp">
             <button className="dropdown-trigger">Actions</button>
-            <a target="_blank" href={NEW_NAV_URL}>
+            <a role="button" target="_blank" href={NEW_NAV_URL}>
               New Nav
             </a>
             <button
@@ -1314,7 +1314,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             <button className="dropdown-trigger" type="button">
               Actions
             </button>
-            <a target="_blank" href={NEW_NAV_URL}>
+            <a role="button" target="_blank" href={NEW_NAV_URL}>
               New Nav
             </a>
             <button
@@ -1332,12 +1332,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
               Copy Schema
             </button>
             <a
+              role="button"
               target="_blank"
               href="https://github.com/synle/nav-generator/blob/main/index.jsx"
             >
               JS Code
             </a>
             <a
+              role="button"
               target="_blank"
               href="https://github.com/synle/nav-generator/blob/main/index.less"
             >
@@ -1347,12 +1349,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
               Test
             </button>
             <a
+              role="button"
               href={urlDownloadSchema}
               download={`schema.${new Date().getTime()}.txt`}
             >
               Download Schema
             </a>
             <a
+              role="button"
               href={bookmark}
               download={`bookmark.${new Date().getTime()}.html`}
             >
