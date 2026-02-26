@@ -699,7 +699,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
             placeholder="Search bookmarks..."
             autoComplete="off"
             spellCheck="false"
-            autoFocus={false}
             value={searchText}
           />
           {searchText && (
@@ -1203,7 +1202,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
           id="input"
           wrap="soft"
           spellcheck="false"
-          autoFocus
           value={bufferSchema}
           onInput={(e) => onSetBufferSchema(e.target.value)}
           onBlur={(e) => onSetBufferSchema(e.target.value)}
@@ -1295,7 +1293,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                       <button id="edit" onClick={() => onSetViewMode("edit")} role="button">
                         Edit
                       </button>
-                      <DropdownButtons type="pullUp">
+                      <DropdownButtons>
                         <button className="dropdown-trigger">Actions</button>
                         <a role="button" target="_blank" href={NEW_NAV_URL}>
                           New Nav
@@ -1947,7 +1945,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           </div>
         </div>
 
-        <SchemaEditor id="input" wrap="soft" spellcheck="false" autoFocus value={selectedValue} readOnly={true}></SchemaEditor>
+        <SchemaEditor id="input" wrap="soft" spellcheck="false" value={selectedValue} readOnly={true}></SchemaEditor>
       </div>
     );
   }
@@ -2251,7 +2249,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
           type="html"
           wrap="soft"
           spellcheck="false"
-          autoFocus
           value={htmlInput}
           onInput={(e) => setHtmlInput(e.target.value)}
         />
@@ -2316,7 +2313,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           </div>
         </div>
 
-        <SchemaEditor id="output" type="html" wrap="soft" spellcheck="false" autoFocus={false} value={htmlOutput} readOnly={true} />
+        <SchemaEditor id="output" type="html" wrap="soft" spellcheck="false" value={htmlOutput} readOnly={true} />
       </div>
     );
   }
@@ -2367,7 +2364,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           </div>
         </div>
 
-        <SchemaEditor id="backupOutput" type="text" wrap="soft" spellcheck="false" autoFocus={false} value={schema} readOnly={true} />
+        <SchemaEditor id="backupOutput" type="text" wrap="soft" spellcheck="false" value={schema} readOnly={true} />
       </div>
     );
   }
@@ -2764,3 +2761,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 })();
+
+
+console.log('Initializing Nav-Generator')

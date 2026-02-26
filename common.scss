@@ -100,7 +100,7 @@
 
   // Spacing
   --spaceSize0: 0;
-  --spaceSize1: 0.5rem;
+  --spaceSize1: 0.3rem;
   --spaceSize2: 0.6rem;
   --spaceSize3: 0.75rem;
   --spaceSize4: 1rem;
@@ -155,7 +155,7 @@ body {
   &,
   &:before,
   &:after {
-    height: 100%;
+    min-height: 100%;
     border: none !important;
     background-color: var(--colorBgMain) !important;
   }
@@ -172,6 +172,7 @@ body {
   font-weight: var(--fontWeightLight);
   overflow-x: hidden;
   overflow-y: auto !important;
+  padding-bottom: 200px;
 }
 
 // ============================================================================
@@ -297,7 +298,8 @@ textarea {
   }
 }
 
-select {
+select,
+input {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;

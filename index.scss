@@ -70,12 +70,17 @@
 }
 
 // nav-generator specific body style
+html {
+  height: auto !important;
+}
+
 body {
   background: #000;
   min-height: 100vh;
-  padding: var(--spaceSize3);
-  padding-bottom: 200px;
-  box-sizing: border-box; /* Ensures padding is added to the height */
+  height: auto !important;
+  padding: var(--spaceSize2);
+  padding-bottom: 80px;
+  box-sizing: border-box;
 }
 
 #fav,
@@ -206,9 +211,9 @@ body {
 
     #searchForm {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: var(--spaceSize1);
+      left: var(--spaceSize2);
+      right: var(--spaceSize2);
       width: 100%;
       z-index: 1;
 

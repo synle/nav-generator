@@ -5,3 +5,6 @@ build
 coverage
 dist
 node_modules
+/index.css
+/index.js
+/index.js.map
