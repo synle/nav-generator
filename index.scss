@@ -216,7 +216,7 @@ body {
         box-shadow:
           0 -2px 8px var(--colorShadow),
           0 -4px 16px var(--colorShadow);
-        padding: var(--spaceSize2);
+        padding: 0 var(--spaceSize2);
         backdrop-filter: blur(8px);
         transition: all 0.2s ease;
 
