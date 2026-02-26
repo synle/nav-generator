@@ -8,8 +8,8 @@
   --colorBlacklight: #222222;
   --spaceSizeAuto: auto;
 
-  // Default: 1 column
-  --gridColumnLayout: 1fr;
+  // Flexbox column width
+  --flexColumnWidth: 100%;
 }
 
 // Typography mixins (nav-generator specific)
@@ -33,39 +33,39 @@
   font-size: var(--fontSize5);
 }
 
-// Grid column layout (nav-generator specific)
+// Flexbox column layout (nav-generator specific)
 // 2 columns
 @media only screen and (min-width: $gridColumnWidth * 2) {
   :root {
-    --gridColumnLayout: repeat(2, 1fr);
+    --flexColumnWidth: calc(50% - var(--gridGapWidth) / 2);
   }
 }
 
 // 3 columns
 @media only screen and (min-width: $gridColumnWidth * 3) {
   :root {
-    --gridColumnLayout: repeat(3, 1fr);
+    --flexColumnWidth: calc(33.333% - var(--gridGapWidth) * 2 / 3);
   }
 }
 
 // 4 columns
 @media only screen and (min-width: $gridColumnWidth * 4) {
   :root {
-    --gridColumnLayout: repeat(4, 1fr);
+    --flexColumnWidth: calc(25% - var(--gridGapWidth) * 3 / 4);
   }
 }
 
 // 5 columns
 @media only screen and (min-width: $gridColumnWidth * 5) {
   :root {
-    --gridColumnLayout: repeat(5, 1fr);
+    --flexColumnWidth: calc(20% - var(--gridGapWidth) * 4 / 5);
   }
 }
 
 // 6 columns
 @media only screen and (min-width: $gridColumnWidth * 6) {
   :root {
-    --gridColumnLayout: repeat(6, 1fr);
+    --flexColumnWidth: calc(16.666% - var(--gridGapWidth) * 5 / 6);
   }
 }
 
@@ -117,7 +117,7 @@ body {
   .tabs,
   .commands,
   form {
-    grid-column: 1/-1;
+    width: 100%;
   }
 
   .commands {
@@ -141,9 +141,13 @@ body {
   }
 
   &#fav {
-    display: grid;
-    grid-template-columns: var(--gridColumnLayout);
-    grid-gap: var(--spaceSize3) var(--gridGapWidth);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spaceSize3) var(--gridGapWidth);
+
+    > .link {
+      width: var(--flexColumnWidth);
+    }
 
     .header {
       position: sticky;
