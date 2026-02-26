@@ -72,13 +72,15 @@
 // nav-generator specific body style
 body {
   background: #000;
+  min-height: 100vh;
+  padding: var(--spaceSize3);
+  padding-bottom: 200px;
+  box-sizing: border-box; /* Ensures padding is added to the height */
 }
 
 #fav,
 #command {
   margin: auto;
-  padding: var(--spaceSize3) var(--spaceSize3) var(--spaceSize4) var(--spaceSize3);
-  padding-bottom: 200px; // leave room in the bottom for the search
 
   .title {
     @include h1;
