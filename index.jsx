@@ -2763,4 +2763,4 @@ window.prompt = (message, initialValue = "", callback = null) => {
 })();
 
 
-console.log('Initializing Nav-Generator')
+console.log('Initializing Nav-Generator', new Date())
