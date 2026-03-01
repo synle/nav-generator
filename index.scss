@@ -214,7 +214,7 @@ body {
       bottom: var(--spaceSize1);
       left: var(--spaceSize2);
       right: var(--spaceSize2);
-      width: 100%;
+      width: auto;
       z-index: 1;
 
       .search-container {
