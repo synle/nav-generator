@@ -29,7 +29,7 @@
   "license": "ISC",
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^12.1.5",
+    "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^4.0.4",
     "@vitest/coverage-c8": "^0.33.0",
