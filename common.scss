@@ -269,7 +269,7 @@ a[role="button"] {
     border-color: transparent;
   }
 
-  >&:first-child {
+  >*:first-child {
     width: 16px;
     height: 16px;
     line-height: 16px;
