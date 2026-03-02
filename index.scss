@@ -192,6 +192,7 @@ body {
       display: flex;
 
       tab {
+        font-size: var(--fontSize3);
         border-bottom: var(--borderSize2) solid var(--colorBorderSecondary);
         padding: var(--spaceSize2) var(--spaceSize4);
         user-select: none;
