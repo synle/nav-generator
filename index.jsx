@@ -703,7 +703,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
           />
           {searchText && (
             <>
-              <span className="search-result-count">{resultCount} results</span>
+              <span className="search-result-count">
+                {resultCount === 0
+                  ? <>No matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClear(); }}>Click here to reset</a>.</>
+                  : <>{resultCount} matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClear(); }}>Click here to reset search</a>.</>
+                }
+              </span>
               <button type="button" className="search-clear-btn" onClick={onClear} aria-label="Clear search" title="Clear search">
                 ✕
               </button>
@@ -980,6 +985,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
       });
 
       setResultCount(visibleCount);
+
+      // Scroll to top to show search results
+      window.scrollTo(0, 0);
     }, [searchText, refContainer.current]);
 
     // Arrow key navigation for links in the grid
