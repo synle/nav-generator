@@ -686,7 +686,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   // react components
   function SearchBox(props) {
-    const { onSearch, searchText, onClear, resultCount } = props;
+    const { onSearch, searchText, onClear } = props;
     const [showHelp, setShowHelp] = useState(false);
 
     return (
@@ -702,17 +702,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
             value={searchText}
           />
           {searchText && (
-            <>
-              <span className="search-result-count">
-                {resultCount === 0
-                  ? <>No matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClear(); }}>Click here to reset</a>.</>
-                  : <>{resultCount} matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClear(); }}>Click here to reset search</a>.</>
-                }
-              </span>
-              <button type="button" className="search-clear-btn" onClick={onClear} aria-label="Clear search" title="Clear search">
-                ✕
-              </button>
-            </>
+            <button type="button" className="search-clear-btn" onClick={onClear} aria-label="Clear search" title="Clear search">
+              ✕
+            </button>
           )}
           <button
             type="button"
@@ -816,7 +808,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       const doc = refContainer.current;
       const links = doc.querySelectorAll(".link");
-      const otherNonLinks = doc.querySelectorAll(":scope > *:not(.form-search-excluded)");
+      const otherNonLinks = doc.querySelectorAll(".schema-render-wrapper > *");
       const allElems = [...links, ...otherNonLinks];
 
       // Helper to clear all search highlights from links
@@ -1064,9 +1056,19 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <div id="fav" ref={refContainer}>
-        <SchemaRender schema={schema} refContainer={refContainer} onSetViewMode={onSetViewMode} />
+        <div className="schema-render-wrapper">
+          <SchemaRender schema={schema} refContainer={refContainer} onSetViewMode={onSetViewMode} />
+        </div>
+        {searchText && (
+          <span className="search-result-count form-search-excluded">
+            {resultCount === 0
+              ? <>No matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClearSearch(); }}>Click here to reset</a>.</>
+              : <>{resultCount} matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClearSearch(); }}>Click here to reset search</a>.</>
+            }
+          </span>
+        )}
         <form id="searchForm" className="form-search-excluded" onSubmit={(e) => onSubmitNavigationSearch(e)}>
-          <SearchBox onSearch={onSearch} searchText={searchText} onClear={onClearSearch} resultCount={resultCount} />
+          <SearchBox onSearch={onSearch} searchText={searchText} onClear={onClearSearch} />
         </form>
       </div>
     );
