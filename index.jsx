@@ -734,10 +734,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
                 <span>Google search on submit</span>
               </div>
               <div className="search-help-item">
-                <code>Alt+Enter</code>
-                <span>Google search (any query)</span>
-              </div>
-              <div className="search-help-item">
                 <code>Enter</code>
                 <span>Navigate if single result</span>
               </div>
@@ -1055,22 +1051,48 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }, []);
 
     return (
-      <div id="fav" ref={refContainer}>
-        <div className="schema-render-wrapper">
+      <>
+        {searchText && (
+          <div className="search-result-count">
+            {resultCount === 0 ? (
+              <>
+                No matches found.{" "}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onClearSearch();
+                  }}
+                >
+                  Click here to reset
+                </a>
+                .
+              </>
+            ) : (
+              <>
+                {resultCount} matches found.{" "}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onClearSearch();
+                  }}
+                >
+                  Click here to reset search
+                </a>
+                .
+              </>
+            )}
+          </div>
+        )}
+        <div id="fav" ref={refContainer} className="schema-render-wrapper">
           <SchemaRender schema={schema} refContainer={refContainer} onSetViewMode={onSetViewMode} />
         </div>
-        {searchText && (
-          <span className="search-result-count form-search-excluded">
-            {resultCount === 0
-              ? <>No matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClearSearch(); }}>Click here to reset</a>.</>
-              : <>{resultCount} matches found. <a href="#" onClick={(e) => { e.preventDefault(); onClearSearch(); }}>Click here to reset search</a>.</>
-            }
-          </span>
-        )}
+
         <form id="searchForm" className="form-search-excluded" onSubmit={(e) => onSubmitNavigationSearch(e)}>
           <SearchBox onSearch={onSearch} searchText={searchText} onClear={onClearSearch} />
         </form>
-      </div>
+      </>
     );
   }
 
@@ -1297,7 +1319,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               >
                 {schemaComponent.value}
 
-                <div className='action-bar'>
+                <div className="action-bar">
                   {onSetViewMode ? (
                     <>
                       <button id="edit" onClick={() => onSetViewMode("edit")} role="button">
@@ -2772,5 +2794,4 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 })();
 
-
-console.log('Initializing Nav-Generator', new Date())
+console.log("Initializing Nav-Generator", new Date());
