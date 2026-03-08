@@ -94,9 +94,9 @@
   // Font sizes
   --fontSize1: 1.1rem;
   --fontSize2: 1rem;
-  --fontSize3: .9rem;
-  --fontSize4: .8rem;
-  --fontSize5: .6rem;
+  --fontSize3: 0.9rem;
+  --fontSize4: 0.8rem;
+  --fontSize5: 0.6rem;
 
   // Spacing
   --spaceSize0: 0;
@@ -237,7 +237,7 @@ a[role="button"] {
   outline: none;
   display: inline-flex;
   align-items: center;
-  padding: var(--spaceSize2);
+  padding: var(--spaceSize2) var(--spaceSize3);
   border-radius: 6px;
   border: var(--borderSize1) solid var(--colorBorderSecondary);
   background: var(--colorBgMain);
@@ -269,7 +269,7 @@ a[role="button"] {
     border-color: transparent;
   }
 
-  >*:first-child {
+  > *:first-child {
     width: 16px;
     height: 16px;
     line-height: 16px;
@@ -305,12 +305,12 @@ input {
   -webkit-appearance: none;
   -moz-appearance: none;
   display: block;
-  padding: 10px 12px;
+  padding: var(--spaceSize2) var(--spaceSize3);
   background-color: var(--colorBgSecondary);
   color: var(--colorTextMain);
-  border: 1px solid var(--colorBorderMain);
-  border-radius: 4px;
-  font-size: 14px;
+  border: var(--borderSize1) solid var(--colorBorderMain);
+  border-radius: var(--borderSize2);
+  font-size: var(--fontSize3);
   line-height: 1.4;
   cursor: pointer;
   box-shadow: 0 2px 4px var(--colorShadow);
@@ -338,10 +338,10 @@ input {
 textarea {
   background-color: var(--colorBgSecondary);
   color: var(--colorTextMain);
-  border: 1px solid var(--colorBorderMain);
-  border-radius: 4px;
-  padding: 8px;
-  font-size: 14px;
+  border: var(--borderSize1) solid var(--colorBorderMain);
+  border-radius: var(--borderSize2);
+  padding: var(--spaceSize2) var(--spaceSize3);
+  font-size: var(--fontSize3);
   line-height: 1.4;
   width: 100%;
   resize: vertical;
@@ -462,8 +462,8 @@ textarea {
 
     &::after {
       content: "▼";
-      margin-left: 0.5rem;
-      font-size: 0.7rem;
+      margin-left: var(--spaceSize2);
+      font-size: var(--fontSize4);
       display: inline-block;
       transition: transform 0.2s ease;
     }
