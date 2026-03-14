@@ -1246,8 +1246,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
     // Extract domain from URL
     let domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im)[1];
 
-    // Add "/favicon.ico" to the domain
-    return `${domain}/favicon.ico`;
+    // Use Google's favicon service to avoid direct local network access
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   }
 
   function FavIcon(props) {
@@ -1258,7 +1258,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       switch (linkType) {
         default:
           if (linkUrl.indexOf("http://") === 0 || linkUrl.indexOf("https://") === 0) {
-            let favIconUrl = `http://${_getFaviconUrl(linkUrl)}`;
+            let favIconUrl = _getFaviconUrl(linkUrl);
             return (
               <img
                 src={favIconUrl}
