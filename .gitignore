@@ -1,4 +1,5 @@
 *.LICENSE.txt
+*.patch
 *.rej
 *storybook.log
 .DS_Store

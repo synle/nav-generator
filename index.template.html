@@ -8,13 +8,13 @@
   <body>
     <load></load>
     <script src="./index.js"></script>
-    <script src="//synle.github.io/nav-generator/index.js?hasCustomNavBeforeLoad=1"></script>
+    <script src="https://synle.github.io/nav-generator/index.js?hasCustomNavBeforeLoad=1"></script>
     <script>
       // Register service worker for offline support
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("//synle.github.io/nav-generator/sw-nav.js")
+            .register("https://synle.github.io/nav-generator/sw-nav.js")
             .then((registration) => {
               console.log(
                 "Service Worker registered successfully:",

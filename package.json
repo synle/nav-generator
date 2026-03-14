@@ -15,7 +15,7 @@
     "clean": "rm -rf import-map.json .prettier-cache",
     "build": "NODE_ENV=production vite build",
     "format": "prettier --write --cache --ignore-unknown --no-error-on-unmatched-pattern --print-width 140 .",
-    "start": "npx http-server --cors .",
+    "start": "npx http-server --cors -a 127.0.0.1 .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
