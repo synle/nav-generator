@@ -1406,13 +1406,27 @@ window.prompt = (message, initialValue = "", callback = null) => {
           case "code_block":
             const codeBlockLang = _detectCodeLanguage(schemaComponent.value);
             return (
-              <pre
-                id={schemaComponent.id}
-                key={schemaComponent.key}
-                className={`block codeBlock language-${codeBlockLang}`}
-                onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}
-                dangerouslySetInnerHTML={{ __html: _highlightCode(schemaComponent.value) }}
-              />
+              <div id={schemaComponent.id} key={schemaComponent.key} className="codeBlockWrapper">
+                <div className="codeBlockBanner">
+                  <span className="codeBlockTitle">{schemaComponent.id || codeBlockLang}</span>
+                  <div className="codeBlockActions">
+                    <button onClick={() => _onCopyToClipboard(schemaComponent.value)}>Copy</button>
+                    <button
+                      className="codeBlockToggle"
+                      onClick={(e) => {
+                        const wrapper = e.target.closest(".codeBlockWrapper");
+                        wrapper.classList.toggle("collapsed");
+                      }}
+                    >
+                      ▼
+                    </button>
+                  </div>
+                </div>
+                <pre
+                  className={`block codeBlock language-${codeBlockLang}`}
+                  dangerouslySetInnerHTML={{ __html: _highlightCode(schemaComponent.value) }}
+                />
+              </div>
             );
           case "html_block":
             return (
