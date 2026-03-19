@@ -684,72 +684,74 @@ pre[class*="language-"] {
   background: var(--colorBgCode);
 }
 
-.token.comment,
-.token.block-comment,
-.token.prolog,
-.token.doctype,
-.token.cdata {
-  color: var(--prismComment);
-}
+.token {
+  &.comment,
+  &.block-comment,
+  &.prolog,
+  &.doctype,
+  &.cdata {
+    color: var(--prismComment);
+  }
 
-.token.punctuation {
-  color: var(--prismPunctuation);
-}
+  &.punctuation {
+    color: var(--prismPunctuation);
+  }
 
-.token.tag,
-.token.attr-name,
-.token.namespace,
-.token.deleted {
-  color: var(--prismTag);
-}
+  &.tag,
+  &.attr-name,
+  &.namespace,
+  &.deleted {
+    color: var(--prismTag);
+  }
 
-.token.function-name {
-  color: var(--prismFunctionName);
-}
+  &.function-name {
+    color: var(--prismFunctionName);
+  }
 
-.token.boolean,
-.token.number {
-  color: var(--prismNumber);
-}
+  &.boolean,
+  &.number {
+    color: var(--prismNumber);
+  }
 
-.token.function {
-  color: var(--prismFunction);
-}
+  &.function {
+    color: var(--prismFunction);
+  }
 
-.token.property,
-.token.class-name,
-.token.constant,
-.token.symbol {
-  color: var(--prismProperty);
-}
+  &.property,
+  &.class-name,
+  &.constant,
+  &.symbol {
+    color: var(--prismProperty);
+  }
 
-.token.selector,
-.token.important,
-.token.atrule,
-.token.keyword,
-.token.builtin {
-  color: var(--prismKeyword);
-}
+  &.selector,
+  &.important,
+  &.atrule,
+  &.keyword,
+  &.builtin {
+    color: var(--prismKeyword);
+  }
 
-.token.string,
-.token.char,
-.token.attr-value,
-.token.regex {
-  color: var(--prismString);
-}
+  &.string,
+  &.char,
+  &.attr-value,
+  &.regex {
+    color: var(--prismString);
+  }
 
-.token.variable {
-  color: var(--prismVariable);
-}
+  &.variable {
+    color: var(--prismVariable);
+  }
 
-.token.operator,
-.token.entity,
-.token.url {
-  color: var(--prismOperator);
-}
+  &.operator,
+  &.entity,
+  &.url {
+    color: var(--prismOperator);
+  }
 
-.token.inserted {
-  color: var(--prismInserted);
+  &.inserted {
+    color: var(--prismInserted);
+  }
 }
 
 // ============================================================================
