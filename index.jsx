@@ -1,11 +1,15 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import Editor, { loader } from "@monaco-editor/react";
+import Prism from "prismjs";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-bash";
+import prismStyles from "prismjs/themes/prism-tomorrow.min.css?inline";
 import styles from "./index.scss?inline";
 
 // Inject styles inline into the document head
 const styleEl = document.createElement("style");
-styleEl.textContent = styles;
+styleEl.textContent = prismStyles + "\n" + styles;
 document.head.appendChild(styleEl);
 
 // Set global flag if script URL has ?hasCustomNavBeforeLoad=1
@@ -14,36 +18,8 @@ window.hasCustomNavBeforeLoad = params.get("hasCustomNavBeforeLoad") === "1";
 
 const isRenderedInDataUrl = location.href.indexOf("data:") === 0;
 
-// Load Prism.js for syntax highlighting in code blocks
-const prismThemeCssUrl = "https://unpkg.com/prismjs@1.29.0/themes/prism-tomorrow.min.css";
-const prismJsUrl = "https://unpkg.com/prismjs@1.29.0/prism.min.js";
-const prismBashUrl = "https://unpkg.com/prismjs@1.29.0/components/prism-bash.min.js";
-const prismJsonUrl = "https://unpkg.com/prismjs@1.29.0/components/prism-json.min.js";
-
-const prismCssLink = document.createElement("link");
-prismCssLink.rel = "stylesheet";
-prismCssLink.href = prismThemeCssUrl;
-document.head.appendChild(prismCssLink);
-
-const prismReady = (async () => {
-  const script = document.createElement("script");
-  script.src = prismJsUrl;
-  document.head.appendChild(script);
-  await new Promise((resolve) => (script.onload = resolve));
-  // Disable Prism auto-highlighting
-  window.Prism.manual = true;
-  // Load bash and json language components
-  const bashScript = document.createElement("script");
-  bashScript.src = prismBashUrl;
-  const jsonScript = document.createElement("script");
-  jsonScript.src = prismJsonUrl;
-  document.head.appendChild(bashScript);
-  document.head.appendChild(jsonScript);
-  await Promise.all([
-    new Promise((resolve) => (bashScript.onload = resolve)),
-    new Promise((resolve) => (jsonScript.onload = resolve)),
-  ]);
-})();
+// Disable Prism auto-highlighting
+Prism.manual = true;
 
 function _detectCodeLanguage(code) {
   const trimmed = code.trim();
@@ -63,11 +39,10 @@ function _detectCodeLanguage(code) {
 }
 
 function _highlightCode(code) {
-  if (!window.Prism) return code;
   const lang = _detectCodeLanguage(code);
-  const grammar = window.Prism.languages[lang];
+  const grammar = Prism.languages[lang];
   if (!grammar) return code;
-  return window.Prism.highlight(code, grammar, lang);
+  return Prism.highlight(code, grammar, lang);
 }
 
 const APP_UPSTREAM_DEFAULT_BASE_URL = "https://synle.github.io/nav-generator";

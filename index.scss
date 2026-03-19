@@ -196,8 +196,10 @@ body {
     .tabs {
       background: var(--colorBgSecondary);
       display: flex;
+      flex-wrap: wrap;
 
       tab {
+        flex-shrink: 0;
         font-size: var(--fontSize3);
         border-bottom: var(--borderSize2) solid var(--colorBorderSecondary);
         padding: var(--spaceSize2) var(--spaceSize4);
