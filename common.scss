@@ -671,7 +671,7 @@ textarea {
     flex-shrink: 0;
   }
 
-  @include mobile {
+  @media only screen and (max-width: $gridColumnWidth * 2) {
     > *:first-child {
       flex: 1 1 100%;
       width: 100%;
