@@ -163,6 +163,7 @@ body {
     }
 
     .codeBlockWrapper {
+      width: 100%;
       border: 1px solid var(--colorBorderSecondary);
       border-radius: 4px;
       overflow: hidden;
@@ -216,11 +217,6 @@ body {
 
     .block {
       background: var(--colorBgSecondary);
-      max-height: 450px;
-
-      &.expanded {
-        max-height: max-content;
-      }
 
       &:focus {
         background: var(--colorBgSecondary) !important;
