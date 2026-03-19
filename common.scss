@@ -6,50 +6,50 @@
 // Color Theme Mixins
 // ============================================================================
 
-// Ayu Light (Day)
+// Sy Light
 @mixin light-theme {
   /* Backgrounds */
-  --colorBgMain: #fafafa; /* Ayu Light Background */
-  --colorBgSecondary: #f0f0f0; /* Ayu Light UI / Sidebar */
-  --colorBgHover: #e6e6e6; /* Soft Grey Hover */
+  --colorBgMain: #f8f8f8; /* light.background */
+  --colorBgSecondary: #e0e0e0; /* light.white */
+  --colorBgHover: #d4d4d4; /* light.brightBlack */
 
   /* Typography */
-  --colorTextMain: #5c6773; /* Ayu Light Body Text (Dark Grey-Blue) */
-  --colorTextLink: #36a3d9; /* Ayu Light Blue */
+  --colorTextMain: #1e1e1e; /* light.foreground */
+  --colorTextLink: #0366d6; /* light.linkBlue */
 
   /* Status Colors */
-  --colorTextSuccess: #6cbf43; /* Ayu Light Green */
-  --colorTextError: #ff3333; /* Ayu Light Red */
-  --colorTextWarning: #e7c547; /* Ayu Light Yellow/Orange */
+  --colorTextSuccess: #006b1e; /* light.green */
+  --colorTextError: #b30000; /* light.red */
+  --colorTextWarning: #bf8803; /* light.yellow */
 
   /* Borders & Accents */
-  --colorBorderMain: #f29718; /* Ayu Light Accent (Orange/Gold) */
-  --colorBorderSecondary: #abb0b6; /* Muted Border */
-  --colorShadow: rgba(0, 0, 0, 0.05);
-  --colorFocusRing: rgba(242, 151, 24, 0.3); /* Subtle Orange Glow */
+  --colorBorderMain: #0033b3; /* light.blue */
+  --colorBorderSecondary: #e0e0e0; /* light.white */
+  --colorShadow: #f0f0f0; /* light.background */
+  --colorFocusRing: #0033b3; /* light.blue */
 }
 
-// dracula theme
+// Sy Dark
 @mixin dark-theme {
   /* Backgrounds */
-  --colorBgMain: #282a36; /* Dracula Background */
-  --colorBgSecondary: #44475a; /* Dracula Current Line / Selection */
-  --colorBgHover: #6272a4; /* Dracula Comment / Muted Blue */
+  --colorBgMain: #0a0a0a; /* dark.background */
+  --colorBgSecondary: #2a2d2e; /* dark.brightBlack */
+  --colorBgHover: #454545; /* dark.white */
 
   /* Typography */
-  --colorTextMain: #f8f8f2; /* Dracula Foreground */
-  --colorTextLink: #8be9fd; /* Dracula Cyan */
+  --colorTextMain: #e0e0e0; /* dark.foreground */
+  --colorTextLink: #4fc1ff; /* dark.linkBlue */
 
   /* Status Colors */
-  --colorTextSuccess: #50fa7b; /* Dracula Green */
-  --colorTextError: #ff5555; /* Dracula Red */
-  --colorTextWarning: #f1fa8c; /* Dracula Yellow */
+  --colorTextSuccess: #608b4e; /* dark.green */
+  --colorTextError: #f44747; /* dark.red */
+  --colorTextWarning: #dcdcaa; /* dark.yellow */
 
   /* Borders & Accents */
-  --colorBorderMain: #bd93f9; /* Dracula Purple */
-  --colorBorderSecondary: #44475a;
-  --colorShadow: #191a21; /* Darker shade for depth */
-  --colorFocusRing: rgba(189, 147, 249, 0.5); /* Semi-transparent Purple */
+  --colorBorderMain: #569cd6; /* dark.blue */
+  --colorBorderSecondary: #454545; /* dark.white */
+  --colorShadow: #000000; /* dark.black */
+  --colorFocusRing: #569cd6; /* dark.blue */
 }
 
 :root {
