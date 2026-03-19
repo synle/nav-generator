@@ -655,6 +655,7 @@ textarea {
   gap: var(--spaceSize2);
   font-weight: var(--fontWeightSemiBold);
   text-transform: uppercase;
+  border-bottom: var(--borderSize1) solid var(--colorBorderSecondary);
 
   > *:first-child {
     flex-shrink: 0;
