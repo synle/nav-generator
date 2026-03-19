@@ -152,6 +152,13 @@
   --borderSize3: 4px;
   --borderSize4: 0.5rem;
 
+  // Z-Index layers
+  --zIndexStickyHeader: 100;
+  --zIndexDropdown: 1000;
+  --zIndexFixedNav: 5000;
+  --zIndexFullscreen: 9000;
+  --zIndexModal: 10000;
+
   // Border Radius
   --borderRadius0: 0;
   --borderRadius1: 4px;
@@ -467,7 +474,7 @@ textarea {
     box-shadow:
       0 2px 4px var(--colorShadow),
       0 4px 8px var(--colorShadow);
-    z-index: 1000;
+    z-index: var(--zIndexDropdown);
     left: 0;
     width: max-content;
     min-width: 100%;
@@ -539,7 +546,7 @@ textarea {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 10000;
+  z-index: var(--zIndexModal);
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(2px);
   animation: fadeIn 0.2s ease-out;
@@ -617,6 +624,39 @@ textarea {
         justify-content: center;
       }
     }
+  }
+}
+
+// ============================================================================
+// Fullscreen Code Viewer
+// ============================================================================
+
+.fullscreenCodeViewer {
+  width: 95% !important;
+  max-width: 100% !important;
+  max-height: 95vh !important;
+
+  .modalBody {
+    display: flex;
+    flex-direction: column;
+    max-height: 95vh;
+    overflow: hidden;
+  }
+
+  .fullscreenCodeHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spaceSize2);
+    gap: var(--spaceSize2);
+    border-bottom: 1px solid var(--colorBorderSecondary);
+    flex-shrink: 0;
+  }
+
+  .codeBlock {
+    flex: 1;
+    overflow: auto;
+    margin: 0;
   }
 }
 

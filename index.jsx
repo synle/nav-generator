@@ -1307,6 +1307,43 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return <span>📙</span>;
   }
 
+  function FullScreenCodeViewer(props) {
+    const { value, label } = props;
+    const [isOpen, setIsOpen] = useState(false);
+
+    if (!isOpen) {
+      return <button onClick={() => setIsOpen(true)}>Fullscreen</button>;
+    }
+
+    const codeBlockLang = _detectCodeLanguage(value);
+
+    return (
+      <>
+        <button onClick={() => setIsOpen(true)}>Fullscreen</button>
+        {ReactDOM.createPortal(
+          <div className="modal" onClick={() => setIsOpen(false)}>
+            <div className="modalContent fullscreenCodeViewer" onClick={(e) => e.stopPropagation()}>
+              <div className="modalBody">
+                <div className="fullscreenCodeHeader">
+                  {label && <span className="codeBlockTitle">{label}</span>}
+                  <div className="codeBlockActions">
+                    <button onClick={() => _onCopyToClipboard(value)}>Copy</button>
+                    <button onClick={() => setIsOpen(false)}>Close (ESC)</button>
+                  </div>
+                </div>
+                <pre
+                  className={`block codeBlock language-${codeBlockLang}`}
+                  dangerouslySetInnerHTML={{ __html: _highlightCode(value) }}
+                />
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+      </>
+    );
+  }
+
   function SchemaRender(props) {
     const { schema, refContainer, onSetViewMode } = props;
     const [doms, setDoms] = useState(null);
@@ -1411,6 +1448,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                   <span className="codeBlockTitle">{schemaComponent.id || codeBlockLang}</span>
                   <div className="codeBlockActions">
                     <button onClick={() => _onCopyToClipboard(schemaComponent.value)}>Copy</button>
+                    <FullScreenCodeViewer value={schemaComponent.value} label={schemaComponent.id || codeBlockLang} />
                     <button
                       className="codeBlockToggle"
                       onClick={(e) => {
