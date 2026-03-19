@@ -526,6 +526,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     let pageFavIcon = "📑";
 
     let blockIdMap = {};
+    let blockIdToTabNameMap = {};
 
     const serializedSchema = [];
 
@@ -553,9 +554,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
         } catch (err) {}
 
         if (blockType === "code" && link.trim() === CODE_BLOCK_SPLIT) {
+          const resolvedBlockId = _upsertBlockId(blockId);
           serializedSchema.push({
             key: newCacheId,
-            id: _upsertBlockId(blockId),
+            id: resolvedBlockId,
+            tabName: blockIdToTabNameMap[resolvedBlockId],
             value: valueToUse,
             type: "code_block",
           });
@@ -628,8 +631,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
           .forEach((t) => {
             const [tabName, tabId] = t.split(TAB_TITLE_SPLIT);
             if (tabName && tabId) {
+              const resolvedTabId = _upsertBlockId(tabId);
+              blockIdToTabNameMap[resolvedTabId] = tabName;
               tabContent.push({
-                tabId: _upsertBlockId(tabId),
+                tabId: resolvedTabId,
                 tabName,
               });
             }
@@ -1326,7 +1331,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     const codeBlockLang = _detectCodeLanguage(content);
 
-    const titleDom = title ? <span className="codeBlockTitle">{title}</span> : null;
+    const titleDom = title ? (
+      <span className="codeBlockTitle" onClick={() => _onCopyToClipboard(content)} style={{ cursor: "pointer" }}>
+        {title}
+      </span>
+    ) : null;
 
     const actionsDom = (
       <div className="codeBlockActions">
@@ -1477,7 +1486,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               <CodeBlockWrapper
                 key={schemaComponent.key}
                 id={schemaComponent.id}
-                title={schemaComponent.id || codeBlockLang}
+                title={schemaComponent.tabName || schemaComponent.id || codeBlockLang}
                 content={schemaComponent.value}
               >
                 <pre
