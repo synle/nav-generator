@@ -9,47 +9,87 @@
 // Sy Light
 @mixin light-theme {
   /* Backgrounds */
-  --colorBgMain: #f8f8f8; /* light.background */
-  --colorBgSecondary: #e0e0e0; /* light.white */
-  --colorBgHover: #d4d4d4; /* light.brightBlack */
+  --colorBgMain: #F8F8F8; // {{light.background}}
+  --colorBgSecondary: #A0A0A0; // {{light.white}}
+  --colorBgHover: #595959; // {{light.brightBlack}}
 
   /* Typography */
-  --colorTextMain: #1e1e1e; /* light.foreground */
-  --colorTextLink: #0366d6; /* light.linkBlue */
+  --colorTextMain: #1E1E1E; // {{light.foreground}}
+  --colorTextLink: #0366D6; // {{light.linkBlue}}
 
   /* Status Colors */
-  --colorTextSuccess: #006b1e; /* light.green */
-  --colorTextError: #b30000; /* light.red */
-  --colorTextWarning: #bf8803; /* light.yellow */
+  --colorTextSuccess: #006B1E; // {{light.green}}
+  --colorTextError: #B30000; // {{light.red}}
+  --colorTextWarning: #BF8803; // {{light.yellow}}
 
   /* Borders & Accents */
-  --colorBorderMain: #0033b3; /* light.blue */
-  --colorBorderSecondary: #e0e0e0; /* light.white */
-  --colorShadow: #f0f0f0; /* light.background */
-  --colorFocusRing: #0033b3; /* light.blue */
+  --colorBorderMain: #0033B3; // {{light.blue}}
+  --colorBorderSecondary: #A0A0A0; // {{light.white}}
+  --colorShadow: #F8F8F8; // {{light.background}}
+  --colorFocusRing: #0033B3; // {{light.blue}}
+
+  /* Code Blocks */
+  --colorBgCode: #E0E0E0; // {{light.brightGray}}
+
+  /* Prism Syntax Highlighting */
+  --prismText: #1E1E1E; // {{light.foreground}}
+  --prismBg: #E0E0E0; // {{light.brightGray}}
+  --prismComment: #006B1E; // {{light.green}}
+  --prismPunctuation: #595959; // {{light.brightBlack}}
+  --prismTag: #9B2C2C; // {{light.darkRed}}
+  --prismFunctionName: #0033B3; // {{light.blue}}
+  --prismFunction: #7B5E00; // {{light.brown}}
+  --prismNumber: #036B3F; // {{light.darkGreen}}
+  --prismProperty: #BF8803; // {{light.yellow}}
+  --prismKeyword: #6C0099; // {{light.purple}}
+  --prismString: #C75B2E; // {{light.orange}}
+  --prismOperator: #005FA3; // {{light.cyan}}
+  --prismVariable: #001080; // {{light.darkBlue}}
+  --prismInserted: #006B1E; // {{light.green}}
+  --prismDeleted: #B30000; // {{light.red}}
 }
 
 // Sy Dark
 @mixin dark-theme {
   /* Backgrounds */
-  --colorBgMain: #0a0a0a; /* dark.background */
-  --colorBgSecondary: #2a2d2e; /* dark.brightBlack */
-  --colorBgHover: #454545; /* dark.white */
+  --colorBgMain: #0A0A0A; // {{dark.background}}
+  --colorBgSecondary: #858585; // {{dark.brightBlack}}
+  --colorBgHover: #CCCCCC; // {{dark.white}}
 
   /* Typography */
-  --colorTextMain: #e0e0e0; /* dark.foreground */
-  --colorTextLink: #4fc1ff; /* dark.linkBlue */
+  --colorTextMain: #E0E0E0; // {{dark.foreground}}
+  --colorTextLink: #4FC1FF; // {{dark.linkBlue}}
 
   /* Status Colors */
-  --colorTextSuccess: #608b4e; /* dark.green */
-  --colorTextError: #f44747; /* dark.red */
-  --colorTextWarning: #dcdcaa; /* dark.yellow */
+  --colorTextSuccess: #608B4E; // {{dark.green}}
+  --colorTextError: #F44747; // {{dark.red}}
+  --colorTextWarning: #DCDCAA; // {{dark.yellow}}
 
   /* Borders & Accents */
-  --colorBorderMain: #569cd6; /* dark.blue */
-  --colorBorderSecondary: #454545; /* dark.white */
-  --colorShadow: #000000; /* dark.black */
-  --colorFocusRing: #569cd6; /* dark.blue */
+  --colorBorderMain: #569CD6; // {{dark.blue}}
+  --colorBorderSecondary: #CCCCCC; // {{dark.white}}
+  --colorShadow: #000000; // {{dark.black}}
+  --colorFocusRing: #569CD6; // {{dark.blue}}
+
+  /* Code Blocks */
+  --colorBgCode: #454545; // {{dark.brightGray}}
+
+  /* Prism Syntax Highlighting */
+  --prismText: #E0E0E0; // {{dark.foreground}}
+  --prismBg: #454545; // {{dark.brightGray}}
+  --prismComment: #608B4E; // {{dark.green}}
+  --prismPunctuation: #E0E0E0; // {{dark.foreground}}
+  --prismTag: #F44747; // {{dark.red}}
+  --prismFunctionName: #569CD6; // {{dark.blue}}
+  --prismFunction: #DCDCAA; // {{dark.yellow}}
+  --prismNumber: #B5CEA8; // {{dark.lightGreen}}
+  --prismProperty: #DCDCAA; // {{dark.yellow}}
+  --prismKeyword: #C586C0; // {{dark.purple}}
+  --prismString: #CE9178; // {{dark.orange}}
+  --prismOperator: #4EC9B0; // {{dark.cyan}}
+  --prismVariable: #9CDCFE; // {{dark.lightBlue}}
+  --prismInserted: #608B4E; // {{dark.green}}
+  --prismDeleted: #F44747; // {{dark.red}}
 }
 
 :root {
@@ -148,6 +188,13 @@ p,
 ul {
   margin: 0;
   padding: 0;
+}
+
+code {
+  background: var(--colorBgCode);
+  padding: var(--spaceSize1) var(--spaceSize2);
+  border-radius: 4px;
+  font-family: var(--fontFamilyMonospace);
 }
 
 html,
@@ -617,6 +664,88 @@ textarea {
 .monaco-editor .monaco-scrollable-element {
   width: 100% !important;
   max-width: 100% !important;
+}
+
+// ============================================================================
+// Prism Syntax Highlighting (theme-aware overrides)
+// ============================================================================
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: var(--prismText);
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+  background: var(--colorBgCode);
+}
+
+.token.comment,
+.token.block-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--prismComment);
+}
+
+.token.punctuation {
+  color: var(--prismPunctuation);
+}
+
+.token.tag,
+.token.attr-name,
+.token.namespace,
+.token.deleted {
+  color: var(--prismTag);
+}
+
+.token.function-name {
+  color: var(--prismFunctionName);
+}
+
+.token.boolean,
+.token.number {
+  color: var(--prismNumber);
+}
+
+.token.function {
+  color: var(--prismFunction);
+}
+
+.token.property,
+.token.class-name,
+.token.constant,
+.token.symbol {
+  color: var(--prismProperty);
+}
+
+.token.selector,
+.token.important,
+.token.atrule,
+.token.keyword,
+.token.builtin {
+  color: var(--prismKeyword);
+}
+
+.token.string,
+.token.char,
+.token.attr-value,
+.token.regex {
+  color: var(--prismString);
+}
+
+.token.variable {
+  color: var(--prismVariable);
+}
+
+.token.operator,
+.token.entity,
+.token.url {
+  color: var(--prismOperator);
+}
+
+.token.inserted {
+  color: var(--prismInserted);
 }
 
 // ============================================================================
