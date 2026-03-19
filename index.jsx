@@ -2898,7 +2898,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
   let _appRoot = null;
   function _render() {
     if (!_appRoot) {
-      _appRoot = createRoot(document.body);
+      let appContainer = document.getElementById("app-root");
+      if (!appContainer) {
+        appContainer = document.createElement("div");
+        appContainer.id = "app-root";
+        document.body.appendChild(appContainer);
+      }
+      _appRoot = createRoot(appContainer);
     }
     _appRoot.render(
       React.createElement(App, {
