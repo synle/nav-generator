@@ -9,87 +9,87 @@
 // Sy Light
 @mixin light-theme {
   /* Backgrounds */
-  --colorBgMain: #f8f8f8; // {{light.background}}
-  --colorBgSecondary: #eaeaea; // {{light.brightGray}}
+  --colorBgMain: #F8F8F8; // {{light.background}}
+  --colorBgSecondary: #EAEAEA; // {{light.brightGray}}
   --colorBgHover: #595959; // {{light.brightBlack}}
 
   /* Typography */
-  --colorTextMain: #1e1e1e; // {{light.foreground}}
-  --colorTextLink: #0366d6; // {{light.linkBlue}}
+  --colorTextMain: #1E1E1E; // {{light.foreground}}
+  --colorTextLink: #0366D6; // {{light.linkBlue}}
 
   /* Status Colors */
-  --colorTextSuccess: #006b1e; // {{light.green}}
-  --colorTextError: #b30000; // {{light.red}}
-  --colorTextWarning: #bf8803; // {{light.yellow}}
+  --colorTextSuccess: #006B1E; // {{light.green}}
+  --colorTextError: #B30000; // {{light.red}}
+  --colorTextWarning: #BF8803; // {{light.yellow}}
 
   /* Borders & Accents */
-  --colorBorderMain: #0033b3; // {{light.blue}}
-  --colorBorderSecondary: #a0a0a0; // {{light.white}}
-  --colorShadow: #f8f8f8; // {{light.background}}
-  --colorFocusRing: #0033b3; // {{light.blue}}
+  --colorBorderMain: #0033B3; // {{light.blue}}
+  --colorBorderSecondary: #A0A0A0; // {{light.white}}
+  --colorShadow: #F8F8F8; // {{light.background}}
+  --colorFocusRing: #0033B3; // {{light.blue}}
 
   /* Code Blocks */
-  --colorBgCode: #eaeaea; // {{light.brightGray}}
+  --colorBgCode: #EAEAEA; // {{light.brightGray}}
 
   /* Prism Syntax Highlighting */
-  --prismText: #1e1e1e; // {{light.foreground}}
-  --prismBg: #eaeaea; // {{light.brightGray}}
-  --prismComment: #006b1e; // {{light.green}}
+  --prismText: #1E1E1E; // {{light.foreground}}
+  --prismBg: #EAEAEA; // {{light.brightGray}}
+  --prismComment: #006B1E; // {{light.green}}
   --prismPunctuation: #595959; // {{light.brightBlack}}
-  --prismTag: #9b2c2c; // {{light.darkRed}}
-  --prismFunctionName: #0033b3; // {{light.blue}}
-  --prismFunction: #7b5e00; // {{light.brown}}
-  --prismNumber: #036b3f; // {{light.darkGreen}}
-  --prismProperty: #bf8803; // {{light.yellow}}
-  --prismKeyword: #6c0099; // {{light.purple}}
-  --prismString: #c75b2e; // {{light.orange}}
-  --prismOperator: #005fa3; // {{light.cyan}}
+  --prismTag: #9B2C2C; // {{light.darkRed}}
+  --prismFunctionName: #0033B3; // {{light.blue}}
+  --prismFunction: #7B5E00; // {{light.brown}}
+  --prismNumber: #036B3F; // {{light.darkGreen}}
+  --prismProperty: #BF8803; // {{light.yellow}}
+  --prismKeyword: #6C0099; // {{light.purple}}
+  --prismString: #C75B2E; // {{light.orange}}
+  --prismOperator: #005FA3; // {{light.cyan}}
   --prismVariable: #001080; // {{light.darkBlue}}
-  --prismInserted: #006b1e; // {{light.green}}
-  --prismDeleted: #b30000; // {{light.red}}
+  --prismInserted: #006B1E; // {{light.green}}
+  --prismDeleted: #B30000; // {{light.red}}
 }
 
 // Sy Dark
 @mixin dark-theme {
   /* Backgrounds */
-  --colorBgMain: #0a0a0a; // {{dark.background}}
-  --colorBgSecondary: #1e1e1e; // {{dark.gray}}
-  --colorBgHover: #cccccc; // {{dark.white}}
+  --colorBgMain: #0A0A0A; // {{dark.background}}
+  --colorBgSecondary: #1E1E1E; // {{dark.gray}}
+  --colorBgHover: #CCCCCC; // {{dark.white}}
 
   /* Typography */
-  --colorTextMain: #e0e0e0; // {{dark.foreground}}
-  --colorTextLink: #4fc1ff; // {{dark.linkBlue}}
+  --colorTextMain: #E0E0E0; // {{dark.foreground}}
+  --colorTextLink: #4FC1FF; // {{dark.linkBlue}}
 
   /* Status Colors */
-  --colorTextSuccess: #608b4e; // {{dark.green}}
-  --colorTextError: #f44747; // {{dark.red}}
-  --colorTextWarning: #dcdcaa; // {{dark.yellow}}
+  --colorTextSuccess: #608B4E; // {{dark.green}}
+  --colorTextError: #F44747; // {{dark.red}}
+  --colorTextWarning: #DCDCAA; // {{dark.yellow}}
 
   /* Borders & Accents */
-  --colorBorderMain: #569cd6; // {{dark.blue}}
+  --colorBorderMain: #569CD6; // {{dark.blue}}
   --colorBorderSecondary: #454545; // {{dark.brightGray}}
   --colorShadow: #000000; // {{dark.black}}
-  --colorFocusRing: #569cd6; // {{dark.blue}}
+  --colorFocusRing: #569CD6; // {{dark.blue}}
 
   /* Code Blocks */
   --colorBgCode: #454545; // {{dark.brightGray}}
 
   /* Prism Syntax Highlighting */
-  --prismText: #e0e0e0; // {{dark.foreground}}
+  --prismText: #E0E0E0; // {{dark.foreground}}
   --prismBg: #454545; // {{dark.brightGray}}
-  --prismComment: #608b4e; // {{dark.green}}
-  --prismPunctuation: #e0e0e0; // {{dark.foreground}}
-  --prismTag: #f44747; // {{dark.red}}
-  --prismFunctionName: #569cd6; // {{dark.blue}}
-  --prismFunction: #dcdcaa; // {{dark.yellow}}
-  --prismNumber: #b5cea8; // {{dark.lightGreen}}
-  --prismProperty: #dcdcaa; // {{dark.yellow}}
-  --prismKeyword: #c586c0; // {{dark.purple}}
-  --prismString: #ce9178; // {{dark.orange}}
-  --prismOperator: #4ec9b0; // {{dark.cyan}}
-  --prismVariable: #9cdcfe; // {{dark.lightBlue}}
-  --prismInserted: #608b4e; // {{dark.green}}
-  --prismDeleted: #f44747; // {{dark.red}}
+  --prismComment: #608B4E; // {{dark.green}}
+  --prismPunctuation: #E0E0E0; // {{dark.foreground}}
+  --prismTag: #F44747; // {{dark.red}}
+  --prismFunctionName: #569CD6; // {{dark.blue}}
+  --prismFunction: #DCDCAA; // {{dark.yellow}}
+  --prismNumber: #B5CEA8; // {{dark.lightGreen}}
+  --prismProperty: #DCDCAA; // {{dark.yellow}}
+  --prismKeyword: #C586C0; // {{dark.purple}}
+  --prismString: #CE9178; // {{dark.orange}}
+  --prismOperator: #4EC9B0; // {{dark.cyan}}
+  --prismVariable: #9CDCFE; // {{dark.lightBlue}}
+  --prismInserted: #608B4E; // {{dark.green}}
+  --prismDeleted: #F44747; // {{dark.red}}
 }
 
 :root {
@@ -628,6 +628,62 @@ textarea {
 }
 
 // ============================================================================
+// Code Block Wrapper
+// ============================================================================
+
+.codeBlockWrapper {
+  border: var(--borderSize1) solid var(--colorBorderSecondary);
+  border-radius: var(--borderRadius1);
+  padding: 0 var(--spaceSize2);
+  margin-bottom: var(--spaceSize2);
+  background: var(--colorBgSecondary);
+
+  &.collapsed .codeBlockBanner {
+    margin-bottom: 0;
+  }
+
+  &.collapsed .codeBlockToggle {
+    transform: rotate(-90deg);
+  }
+}
+
+.codeBlockBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spaceSize2);
+  gap: var(--spaceSize2);
+  font-weight: var(--fontWeightSemiBold);
+  text-transform: uppercase;
+
+  > *:first-child {
+    flex-shrink: 0;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .codeBlockActions {
+    display: flex;
+    gap: var(--spaceSize2);
+    flex-shrink: 0;
+  }
+
+  @include mobile {
+    > *:first-child {
+      flex: 1 1 100%;
+      width: 100%;
+    }
+  }
+}
+
+.codeBlockContent {
+  padding: var(--spaceSize2);
+}
+
+// ============================================================================
 // Fullscreen Code Viewer
 // ============================================================================
 
@@ -643,29 +699,9 @@ textarea {
     overflow: hidden;
   }
 
-  .fullscreenCodeHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spaceSize2);
-    gap: var(--spaceSize2);
+  .codeBlockBanner {
     border-bottom: 1px solid var(--colorBorderSecondary);
     flex-shrink: 0;
-
-    .codeBlockTitle {
-      font-weight: var(--fontWeightSemiBold);
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0;
-    }
-
-    .codeBlockActions {
-      display: flex;
-      gap: var(--spaceSize2);
-      flex-shrink: 0;
-    }
   }
 
   .codeBlock {
