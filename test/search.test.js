@@ -56,15 +56,7 @@ describe("Search Functionality", () => {
   });
 
   describe("Suggestion Filtering", () => {
-    const suggestions = [
-      "Google Search",
-      "Google Finance",
-      "GitHub",
-      "GitLab",
-      "Facebook",
-      "Twitter",
-      "LinkedIn",
-    ];
+    const suggestions = ["Google Search", "Google Finance", "GitHub", "GitLab", "Facebook", "Twitter", "LinkedIn"];
 
     it("should filter suggestions with normal search", () => {
       const results = filterFuzzySuggestions("google", suggestions);

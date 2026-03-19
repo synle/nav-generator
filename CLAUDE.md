@@ -82,6 +82,7 @@ The main application is in `index.jsx` (~3,300 lines), structured as:
      - `@` - Custom favicon URLs
 
 3. **Core Components** (lines 750-2800)
+   - `CodeBlockWrapper` - Reusable collapsible code block with Copy, Fullscreen, and Collapse toggle
    - `SearchBox` - Fuzzy search with keyboard navigation
    - `PageRead` - View mode for rendered navigation
    - `PageEdit` - Edit mode with schema editor
@@ -122,6 +123,12 @@ Implements stale-while-revalidate caching strategy:
 - Custom elements: `<load>`, `<tabs>`, `<tab>`
 - Theme variables for dark/light modes
 - Responsive design
+
+**Shared styles (`common.scss`):** `common.scss` is shared identically with the `synle/bashrc` repo (`webapp/common.scss`). It contains theme mixins (light/dark), CSS variables (including z-index layers: `--zIndexStickyHeader`, `--zIndexDropdown`, `--zIndexFixedNav`, `--zIndexFullscreen`, `--zIndexModal`), base element styles, button/form/select resets, responsive breakpoints, radio groups, dropdowns, modal styles, fullscreen code viewer styles, and Prism syntax highlighting overrides. Changes to `common.scss` must be kept in sync across both repos. App-specific styles go in `index.scss` only.
+
+**Modal system:** Uses CSS classes from `common.scss`. The `.modal` class provides the fixed overlay backdrop with blur and `z-index: var(--zIndexModal)`. `.modalContent` centers content. `.modalBody` applies background, border, and padding. The fullscreen code viewer uses `.fullscreenCodeViewer` (extends `.modalContent` with 95% width/height) and `.fullscreenCodeHeader` for the title/actions bar. The base `Modal` component (lines 71-107) is used for alerts, confirms, and prompts. `AlertModal` and `PromptModal` build on it. `window.alert`, `window.confirm`, and `window.prompt` are overridden to use these modals via `modalManager`.
+
+**CodeBlockWrapper:** A reusable component for displaying code blocks with a header banner and collapsible content. Props: `id`, `title`, `content` (raw text for copy/fullscreen), `extraButtons`, `defaultCollapsed`, `children`. The banner (`.codeBlockBanner`) shows: title on the left, action buttons on the right (extra buttons, Copy, Fullscreen, Collapse/Expand toggle ▼). The collapse toggle uses CSS `transform: rotate(-90deg)` on `.codeBlockToggle` when `.collapsed`. The fullscreen mode portals a modal with the same banner layout (Copy + Close buttons) and renders the code content. Styling for `.codeBlockWrapper` comes from `index.scss` (within the `#pageReadContent` scope), while `.fullscreenCodeViewer` comes from `common.scss`.
 
 ### Generated Output
 

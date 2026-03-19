@@ -181,14 +181,7 @@ describe("parseSchemaLineType", () => {
 });
 
 describe("filterFuzzySuggestions", () => {
-  const suggestions = [
-    "google",
-    "google finance",
-    "facebook",
-    "twitter",
-    "github",
-    "gitlab",
-  ];
+  const suggestions = ["google", "google finance", "facebook", "twitter", "github", "gitlab"];
 
   it("should filter with fuzzy search", () => {
     const results = filterFuzzySuggestions("/ggl", suggestions);

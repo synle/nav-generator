@@ -174,18 +174,13 @@ export function filterFuzzySuggestions(searchText, suggestions, limit = 10) {
       return [];
     }
 
-    const fuzzyPattern = new RegExp(
-      "[ ]*" + cleanedSearchText.split("").join("[a-z0-9 -_]*"),
-      "i",
-    );
+    const fuzzyPattern = new RegExp("[ ]*" + cleanedSearchText.split("").join("[a-z0-9 -_]*"), "i");
 
     filtered = suggestions.filter((s) => fuzzyPattern.test(s)).slice(0, limit);
   } else {
     // Normal substring search
     const searchLower = searchText.toLowerCase();
-    filtered = suggestions
-      .filter((s) => s.toLowerCase().includes(searchLower))
-      .slice(0, limit);
+    filtered = suggestions.filter((s) => s.toLowerCase().includes(searchLower)).slice(0, limit);
   }
 
   return filtered;

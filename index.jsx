@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import ReactDOM from "react-dom";
+import { createPortal } from "react-dom";
+import { createRoot } from "react-dom/client";
 import Editor, { loader } from "@monaco-editor/react";
 import Prism from "prismjs";
 import "prismjs/components/prism-json";
@@ -98,7 +99,7 @@ function Modal(props) {
 
   if (!isOpen) return null;
 
-  return ReactDOM.createPortal(
+  return createPortal(
     <div className="modal" ref={modalRef}>
       <div className="modalContent">{children}</div>
     </div>,
@@ -223,23 +224,25 @@ function PromptModal(props) {
 // Modal manager to render modals
 const modalManager = {
   container: null,
+  root: null,
 
   init() {
     if (!this.container) {
       this.container = document.createElement("div");
       this.container.id = "modal-root";
       document.body.appendChild(this.container);
+      this.root = createRoot(this.container);
     }
   },
 
   render(component) {
     this.init();
-    ReactDOM.render(component, this.container);
+    this.root.render(component);
   },
 
   unmount() {
-    if (this.container) {
-      ReactDOM.unmountComponentAtNode(this.container);
+    if (this.root) {
+      this.root.render(null);
     }
   },
 };
@@ -1330,7 +1333,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
         {extraButtons}
         <button onClick={() => _onCopyToClipboard(content)}>Copy</button>
         <button onClick={() => setFullscreen(true)}>Fullscreen</button>
-        <button className="codeBlockToggle" onClick={() => setCollapsed(!collapsed)}>▼</button>
+        <button className="codeBlockToggle" onClick={() => setCollapsed(!collapsed)}>
+          ▼
+        </button>
       </div>
     );
 
@@ -1344,7 +1349,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           {!collapsed && <div className="codeBlockContent">{children}</div>}
         </div>
         {fullscreen &&
-          ReactDOM.createPortal(
+          createPortal(
             <div className="modal" onClick={() => setFullscreen(false)}>
               <div className="modalContent fullscreenCodeViewer" onClick={(e) => e.stopPropagation()}>
                 <div className="modalBody">
@@ -2881,13 +2886,16 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  let _appRoot = null;
   function _render() {
-    ReactDOM.render(
+    if (!_appRoot) {
+      _appRoot = createRoot(document.body);
+    }
+    _appRoot.render(
       React.createElement(App, {
         schema: inputSchema,
         viewMode: viewMode,
       }),
-      document.body,
     );
   }
 })();

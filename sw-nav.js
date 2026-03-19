@@ -1,23 +1,23 @@
 // 1770399909232 will be replaced during build
-const CACHE_VERSION = '1770399909232';
+const CACHE_VERSION = "1770399909232";
 const CACHE_NAME = `nav-generator-cache-${CACHE_VERSION}`;
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
 
 // Listen for skip waiting message
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
 // Install event
-self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installed');
+self.addEventListener("install", (event) => {
+  console.log("Service Worker: Installed");
   // Don't auto skip waiting - let the page control it
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     Promise.all([
       // Delete old cache versions
@@ -25,7 +25,7 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
-              console.log('Service Worker: Clearing old cache', cacheName);
+              console.log("Service Worker: Clearing old cache", cacheName);
               return caches.delete(cacheName);
             }
           }),
@@ -39,7 +39,7 @@ self.addEventListener('activate', (event) => {
         for (const request of requests) {
           const response = await cache.match(request);
           if (isCacheExpired(response)) {
-            console.log('Service Worker: Removing expired cache entry:', request.url);
+            console.log("Service Worker: Removing expired cache entry:", request.url);
             deletionPromises.push(cache.delete(request));
           }
         }
@@ -58,32 +58,45 @@ function shouldCacheUrl(url) {
   const pathname = urlObj.pathname;
 
   // Cache root paths
-  if (pathname === '/' || pathname === './' || pathname === '/index.html' || pathname === './index.html') {
+  if (pathname === "/" || pathname === "./" || pathname === "/index.html" || pathname === "./index.html") {
     return true;
   }
 
   // Cache ./fav
-  if (pathname === '/fav' || pathname === './fav' || pathname.endsWith('/fav')) {
+  if (pathname === "/fav" || pathname === "./fav" || pathname.endsWith("/fav")) {
     return true;
   }
 
   // Check file extensions
   const cachableExtensions = [
     // Images
-    '.ico', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.avif',
+    ".ico",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".svg",
+    ".webp",
+    ".bmp",
+    ".avif",
     // Code/Styles
-    '.js', '.jsx', '.css',
+    ".js",
+    ".jsx",
+    ".css",
     // Data/Text
-    '.txt', '.json', '.md', '.sh'
+    ".txt",
+    ".json",
+    ".md",
+    ".sh",
   ];
-  return cachableExtensions.some(ext => pathname.endsWith(ext));
+  return cachableExtensions.some((ext) => pathname.endsWith(ext));
 }
 
 // Helper function to check if cached response is expired
 function isCacheExpired(response) {
   if (!response) return true;
 
-  const cachedTime = response.headers.get('sw-cache-time');
+  const cachedTime = response.headers.get("sw-cache-time");
   if (!cachedTime) return true;
 
   const age = Date.now() - parseInt(cachedTime, 10);
@@ -93,18 +106,18 @@ function isCacheExpired(response) {
 // Helper function to add timestamp to response
 async function addTimestampToResponse(response) {
   const headers = new Headers(response.headers);
-  headers.set('sw-cache-time', Date.now().toString());
+  headers.set("sw-cache-time", Date.now().toString());
 
   const blob = await response.blob();
   return new Response(blob, {
     status: response.status,
     statusText: response.statusText,
-    headers: headers
+    headers: headers,
   });
 }
 
 // Fetch event - stale-while-revalidate strategy
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   // Only intercept requests we want to cache
   if (!shouldCacheUrl(event.request.url)) {
     return;
@@ -122,20 +135,20 @@ self.addEventListener('fetch', (event) => {
 
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, responseWithTimestamp);
-              console.log('Service Worker: Updated cache in background:', event.request.url);
+              console.log("Service Worker: Updated cache in background:", event.request.url);
             });
           }
           return networkResponse;
         })
         .catch((error) => {
-          console.log('Service Worker: Background fetch failed:', event.request.url, error);
+          console.log("Service Worker: Background fetch failed:", event.request.url, error);
           return null;
         });
 
       // If we have a cached response (even if expired), return it immediately
       // while the network request updates the cache in the background
       if (cachedResponse) {
-        console.log('Service Worker: Serving from cache (revalidating in background):', event.request.url);
+        console.log("Service Worker: Serving from cache (revalidating in background):", event.request.url);
 
         // If cache is still valid, refresh the TTL in background
         if (!isCacheExpired(cachedResponse)) {
@@ -150,7 +163,7 @@ self.addEventListener('fetch', (event) => {
       }
 
       // No cache - wait for network response
-      console.log('Service Worker: No cache, waiting for network:', event.request.url);
+      console.log("Service Worker: No cache, waiting for network:", event.request.url);
       return fetchPromise;
     }),
   );
