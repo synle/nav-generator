@@ -1328,7 +1328,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                   {label && <span className="codeBlockTitle">{label}</span>}
                   <div className="codeBlockActions">
                     <button onClick={() => _onCopyToClipboard(value)}>Copy</button>
-                    <button onClick={() => setIsOpen(false)}>Close (ESC)</button>
+                    <button onClick={() => setIsOpen(false)}>Close</button>
                   </div>
                 </div>
                 <pre

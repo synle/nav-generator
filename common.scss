@@ -651,6 +651,21 @@ textarea {
     gap: var(--spaceSize2);
     border-bottom: 1px solid var(--colorBorderSecondary);
     flex-shrink: 0;
+
+    .codeBlockTitle {
+      font-weight: var(--fontWeightSemiBold);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .codeBlockActions {
+      display: flex;
+      gap: var(--spaceSize2);
+      flex-shrink: 0;
+    }
   }
 
   .codeBlock {
