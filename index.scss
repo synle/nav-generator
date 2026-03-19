@@ -293,7 +293,7 @@ body {
   }
 
   #search {
-    background: transparent;
+    background: transparent !important;
     border: none;
     padding: var(--spaceSize2);
     width: 100%;
@@ -305,6 +305,10 @@ body {
     &::placeholder {
       color: var(--colorTextMain);
       opacity: 0.5;
+    }
+
+    &:hover, &:focus{
+      background:transparent !important;
     }
   }
 
