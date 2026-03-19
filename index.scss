@@ -294,21 +294,18 @@ body {
 
   #search {
     background: transparent !important;
-    border: none;
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
     padding: var(--spaceSize2);
     width: 100%;
     flex: 1;
     font-size: var(--fontSize3);
     font-weight: var(--fontWeightSemiBold);
-    outline: none;
 
     &::placeholder {
       color: var(--colorTextMain);
       opacity: 0.5;
-    }
-
-    &:hover, &:focus{
-      background:transparent !important;
     }
   }
 
