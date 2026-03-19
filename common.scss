@@ -152,6 +152,10 @@
   --borderSize3: 4px;
   --borderSize4: 0.5rem;
 
+  // Border Radius
+  --borderRadius0: 0;
+  --borderRadius1: 4px;
+
   // Grid
   --gridGapHeight: 1rem;
   --gridGapWidth: 1.25rem;
@@ -193,7 +197,7 @@ ul {
 code {
   background: var(--colorBgCode);
   padding: var(--spaceSize1) var(--spaceSize2);
-  border-radius: 4px;
+  border-radius: var(--borderRadius1);
   font-family: var(--fontFamilyMonospace);
 }
 
@@ -285,7 +289,7 @@ a[role="button"] {
   display: inline-flex;
   align-items: center;
   padding: var(--spaceSize2) var(--spaceSize3);
-  border-radius: 6px;
+  border-radius: var(--borderRadius1);
   border: var(--borderSize1) solid var(--colorBorderSecondary);
   background: var(--colorBgMain);
   color: var(--colorTextLink);
@@ -356,7 +360,7 @@ input {
   background-color: var(--colorBgSecondary);
   color: var(--colorTextMain);
   border: var(--borderSize1) solid var(--colorBorderMain);
-  border-radius: var(--borderSize2);
+  border-radius: var(--borderRadius1);
   font-size: var(--fontSize3);
   line-height: 1.4;
   cursor: pointer;
@@ -386,7 +390,7 @@ textarea {
   background-color: var(--colorBgSecondary);
   color: var(--colorTextMain);
   border: var(--borderSize1) solid var(--colorBorderMain);
-  border-radius: var(--borderSize2);
+  border-radius: var(--borderRadius1);
   padding: var(--spaceSize2) var(--spaceSize3);
   font-size: var(--fontSize3);
   line-height: 1.4;
@@ -459,7 +463,7 @@ textarea {
     position: absolute;
     background: var(--colorBgMain);
     border: var(--borderSize1) solid var(--colorBorderSecondary);
-    border-radius: 5px;
+    border-radius: var(--borderRadius1);
     box-shadow:
       0 2px 4px var(--colorShadow),
       0 4px 8px var(--colorShadow);
@@ -478,7 +482,7 @@ textarea {
     button,
     a[role="button"] {
       border: none;
-      border-radius: 0;
+      border-radius: var(--borderRadius0);
       border-bottom: 1px solid var(--colorBorderSecondary);
       white-space: nowrap;
       word-break: normal;
@@ -486,14 +490,14 @@ textarea {
       justify-content: flex-start;
 
       &:first-child {
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
+        border-top-left-radius: var(--borderRadius1);
+        border-top-right-radius: var(--borderRadius1);
       }
 
       &:last-child {
         border-bottom: none;
-        border-bottom-left-radius: 5px;
-        border-bottom-right-radius: 5px;
+        border-bottom-left-radius: var(--borderRadius1);
+        border-bottom-right-radius: var(--borderRadius1);
       }
     }
   }
@@ -552,7 +556,7 @@ textarea {
   .modalBody {
     background: var(--colorBgSecondary);
     border: var(--borderSize1) solid var(--colorBorderMain);
-    border-radius: 8px;
+    border-radius: var(--borderRadius1);
     padding: var(--spaceSize4);
     box-shadow:
       0 4px 6px var(--colorShadow),
@@ -577,7 +581,7 @@ textarea {
     font-family: var(--fontFamilyMonospace);
     background: var(--colorBgMain);
     border: var(--borderSize1) solid var(--colorBorderMain);
-    border-radius: 8px;
+    border-radius: var(--borderRadius1);
     padding: var(--spaceSize3);
     font-size: var(--fontSize3);
     resize: vertical;
@@ -605,7 +609,7 @@ textarea {
       min-width: 100px;
       padding: var(--spaceSize2) var(--spaceSize4);
       font-weight: var(--fontWeightSemiBold);
-      border-radius: 6px;
+      border-radius: var(--borderRadius1);
       transition: all 0.2s ease;
 
       button {
