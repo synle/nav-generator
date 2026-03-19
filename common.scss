@@ -10,7 +10,7 @@
 @mixin light-theme {
   /* Backgrounds */
   --colorBgMain: #F8F8F8; // {{light.background}}
-  --colorBgSecondary: #A0A0A0; // {{light.white}}
+  --colorBgSecondary: #EAEAEA; // {{light.brightGray}}
   --colorBgHover: #595959; // {{light.brightBlack}}
 
   /* Typography */
@@ -29,11 +29,11 @@
   --colorFocusRing: #0033B3; // {{light.blue}}
 
   /* Code Blocks */
-  --colorBgCode: #E0E0E0; // {{light.brightGray}}
+  --colorBgCode: #EAEAEA; // {{light.brightGray}}
 
   /* Prism Syntax Highlighting */
   --prismText: #1E1E1E; // {{light.foreground}}
-  --prismBg: #E0E0E0; // {{light.brightGray}}
+  --prismBg: #EAEAEA; // {{light.brightGray}}
   --prismComment: #006B1E; // {{light.green}}
   --prismPunctuation: #595959; // {{light.brightBlack}}
   --prismTag: #9B2C2C; // {{light.darkRed}}
@@ -53,7 +53,7 @@
 @mixin dark-theme {
   /* Backgrounds */
   --colorBgMain: #0A0A0A; // {{dark.background}}
-  --colorBgSecondary: #858585; // {{dark.brightBlack}}
+  --colorBgSecondary: #1E1E1E; // {{dark.gray}}
   --colorBgHover: #CCCCCC; // {{dark.white}}
 
   /* Typography */
@@ -67,7 +67,7 @@
 
   /* Borders & Accents */
   --colorBorderMain: #569CD6; // {{dark.blue}}
-  --colorBorderSecondary: #CCCCCC; // {{dark.white}}
+  --colorBorderSecondary: #454545; // {{dark.brightGray}}
   --colorShadow: #000000; // {{dark.black}}
   --colorFocusRing: #569CD6; // {{dark.blue}}
 
