@@ -14,6 +14,62 @@ window.hasCustomNavBeforeLoad = params.get("hasCustomNavBeforeLoad") === "1";
 
 const isRenderedInDataUrl = location.href.indexOf("data:") === 0;
 
+// Load Prism.js for syntax highlighting in code blocks
+const prismThemeCssUrl = "https://unpkg.com/prismjs@1.29.0/themes/prism-tomorrow.min.css";
+const prismJsUrl = "https://unpkg.com/prismjs@1.29.0/prism.min.js";
+const prismBashUrl = "https://unpkg.com/prismjs@1.29.0/components/prism-bash.min.js";
+const prismJsonUrl = "https://unpkg.com/prismjs@1.29.0/components/prism-json.min.js";
+
+const prismCssLink = document.createElement("link");
+prismCssLink.rel = "stylesheet";
+prismCssLink.href = prismThemeCssUrl;
+document.head.appendChild(prismCssLink);
+
+const prismReady = (async () => {
+  const script = document.createElement("script");
+  script.src = prismJsUrl;
+  document.head.appendChild(script);
+  await new Promise((resolve) => (script.onload = resolve));
+  // Disable Prism auto-highlighting
+  window.Prism.manual = true;
+  // Load bash and json language components
+  const bashScript = document.createElement("script");
+  bashScript.src = prismBashUrl;
+  const jsonScript = document.createElement("script");
+  jsonScript.src = prismJsonUrl;
+  document.head.appendChild(bashScript);
+  document.head.appendChild(jsonScript);
+  await Promise.all([
+    new Promise((resolve) => (bashScript.onload = resolve)),
+    new Promise((resolve) => (jsonScript.onload = resolve)),
+  ]);
+})();
+
+function _detectCodeLanguage(code) {
+  const trimmed = code.trim();
+  // Try JSON
+  if (/^\s*[\[{]/.test(trimmed)) {
+    try {
+      JSON.parse(trimmed);
+      return "json";
+    } catch {}
+  }
+  // Try JS-like patterns: const/let/var/function/=>/import/export/class
+  if (/(?:^|\n)\s*(?:const |let |var |function |import |export |class |=>|\/\/)/.test(trimmed)) {
+    return "javascript";
+  }
+  // Default to bash
+  return "bash";
+}
+
+function _highlightCode(code) {
+  if (!window.Prism) return code;
+  const lang = _detectCodeLanguage(code);
+  const grammar = window.Prism.languages[lang];
+  if (!grammar) return code;
+  return window.Prism.highlight(code, grammar, lang);
+}
+
 const APP_UPSTREAM_DEFAULT_BASE_URL = "https://synle.github.io/nav-generator";
 const APP_BASE_URL =
   isRenderedInDataUrl || window.hasCustomNavBeforeLoad
@@ -1373,15 +1429,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
               </div>
             );
           case "code_block":
+            const codeBlockLang = _detectCodeLanguage(schemaComponent.value);
             return (
               <pre
                 id={schemaComponent.id}
                 key={schemaComponent.key}
-                className="block codeBlock"
+                className={`block codeBlock language-${codeBlockLang}`}
                 onDoubleClick={(e) => _onCopyToClipboard(e.target.innerText.trim())}
-              >
-                {schemaComponent.value}
-              </pre>
+                dangerouslySetInnerHTML={{ __html: _highlightCode(schemaComponent.value) }}
+              />
             );
           case "html_block":
             return (

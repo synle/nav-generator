@@ -176,9 +176,15 @@ body {
 
       &.codeBlock {
         padding: var(--spaceSize2);
-        overflow: hidden;
+        overflow-x: auto;
         font-family: var(--fontFamilyMonospace);
         font-size: var(--fontSize4);
+
+        // Prism.js syntax highlighting overrides
+        &[class*="language-"],
+        code[class*="language-"] {
+          margin: 0;
+        }
       }
 
       &.htmlBlock {
