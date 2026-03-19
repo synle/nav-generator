@@ -628,60 +628,6 @@ textarea {
 }
 
 // ============================================================================
-// Code Block Wrapper
-// ============================================================================
-
-.codeBlockWrapper {
-  border: var(--borderSize1) solid var(--colorBorderSecondary);
-  border-radius: var(--borderRadius1);
-  overflow: hidden;
-  margin-bottom: var(--spaceSize2);
-
-  .codeBlockBanner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spaceSize1) var(--spaceSize2);
-    background: var(--colorBgSecondary);
-    border-bottom: var(--borderSize1) solid var(--colorBorderSecondary);
-    gap: var(--spaceSize2);
-    position: sticky;
-    top: 0;
-    z-index: var(--zIndexStickyHeader);
-  }
-
-  .codeBlockTitle {
-    font-weight: var(--fontWeightSemiBold);
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-    color: var(--colorTextLink);
-  }
-
-  .codeBlockActions {
-    display: flex;
-    gap: var(--spaceSize2);
-    flex-shrink: 0;
-  }
-
-  .codeBlockToggle {
-    transition: transform 0.2s ease;
-  }
-
-  &.collapsed {
-    .codeBlockContent {
-      display: none;
-    }
-
-    .codeBlockToggle {
-      transform: rotate(-90deg);
-    }
-  }
-}
-
-// ============================================================================
 // Fullscreen Code Viewer
 // ============================================================================
 
@@ -697,11 +643,32 @@ textarea {
     overflow: hidden;
   }
 
-  .codeBlockBanner {
+  .fullscreenCodeHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spaceSize2);
+    gap: var(--spaceSize2);
+    border-bottom: 1px solid var(--colorBorderSecondary);
     flex-shrink: 0;
+
+    .codeBlockTitle {
+      font-weight: var(--fontWeightSemiBold);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .codeBlockActions {
+      display: flex;
+      gap: var(--spaceSize2);
+      flex-shrink: 0;
+    }
   }
 
-  .codeBlockContent {
+  .codeBlock {
     flex: 1;
     overflow: auto;
     margin: 0;
