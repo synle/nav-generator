@@ -162,58 +162,6 @@ body {
       padding: var(--spaceSize2);
     }
 
-    .codeBlockWrapper {
-      border: 1px solid var(--colorBorderSecondary);
-      border-radius: 4px;
-      overflow: hidden;
-
-      .codeBlockBanner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--spaceSize1) var(--spaceSize2);
-        background: var(--colorBgSecondary);
-        border-bottom: 1px solid var(--colorBorderSecondary);
-        gap: var(--spaceSize2);
-
-        .codeBlockTitle {
-          font-size: var(--fontSize4);
-          font-weight: var(--fontWeightSemiBold);
-          text-transform: uppercase;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          min-width: 0;
-          color: var(--colorTextLink);
-        }
-
-        .codeBlockActions {
-          display: flex;
-          gap: var(--spaceSize1);
-          flex-shrink: 0;
-
-          button {
-            padding: var(--spaceSize1) var(--spaceSize2);
-            font-size: var(--fontSize5);
-          }
-
-          .codeBlockToggle {
-            transition: transform 0.2s ease;
-          }
-        }
-      }
-
-      &.collapsed {
-        .codeBlock {
-          display: none;
-        }
-
-        .codeBlockToggle {
-          transform: rotate(-90deg);
-        }
-      }
-    }
-
     .block,
     .codeBlockWrapper {
       width: 100%;

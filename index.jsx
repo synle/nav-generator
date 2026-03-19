@@ -1307,39 +1307,65 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return <span>📙</span>;
   }
 
-  function FullScreenCodeViewer(props) {
-    const { value, label } = props;
-    const [isOpen, setIsOpen] = useState(false);
+  function CodeBlockWrapper(props) {
+    const { id, title, content = "", extraButtons, defaultCollapsed = false, children } = props;
+    const [collapsed, setCollapsed] = useState(defaultCollapsed);
+    const [fullscreen, setFullscreen] = useState(false);
 
-    if (!isOpen) {
-      return <button onClick={() => setIsOpen(true)}>Fullscreen</button>;
-    }
+    useLayoutEffect(() => {
+      if (!fullscreen) return;
+      const handleEscape = (e) => {
+        if (e.key === "Escape") setFullscreen(false);
+      };
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }, [fullscreen]);
 
-    const codeBlockLang = _detectCodeLanguage(value);
+    const codeBlockLang = _detectCodeLanguage(content);
+
+    const titleDom = title ? <span className="codeBlockTitle">{title}</span> : null;
+
+    const actionsDom = (
+      <div className="codeBlockActions">
+        {extraButtons}
+        <button onClick={() => _onCopyToClipboard(content)}>Copy</button>
+        <button onClick={() => setFullscreen(true)}>Fullscreen</button>
+        <button className="codeBlockToggle" onClick={() => setCollapsed(!collapsed)}>▼</button>
+      </div>
+    );
 
     return (
       <>
-        <button onClick={() => setIsOpen(true)}>Fullscreen</button>
-        {ReactDOM.createPortal(
-          <div className="modal" onClick={() => setIsOpen(false)}>
-            <div className="modalContent fullscreenCodeViewer" onClick={(e) => e.stopPropagation()}>
-              <div className="modalBody">
-                <div className="fullscreenCodeHeader">
-                  {label && <span className="codeBlockTitle">{label}</span>}
-                  <div className="codeBlockActions">
-                    <button onClick={() => _onCopyToClipboard(value)}>Copy</button>
-                    <button onClick={() => setIsOpen(false)}>Close</button>
+        <div id={id} className={`codeBlockWrapper${collapsed ? " collapsed" : ""}`}>
+          <div className="codeBlockBanner">
+            {titleDom}
+            {actionsDom}
+          </div>
+          {!collapsed && <div className="codeBlockContent">{children}</div>}
+        </div>
+        {fullscreen &&
+          ReactDOM.createPortal(
+            <div className="modal" onClick={() => setFullscreen(false)}>
+              <div className="modalContent fullscreenCodeViewer" onClick={(e) => e.stopPropagation()}>
+                <div className="modalBody">
+                  <div className="codeBlockBanner">
+                    {titleDom}
+                    <div className="codeBlockActions">
+                      <button onClick={() => _onCopyToClipboard(content)}>Copy</button>
+                      <button onClick={() => setFullscreen(false)}>Close</button>
+                    </div>
+                  </div>
+                  <div className="codeBlockContent">
+                    <pre
+                      className={`block codeBlock language-${codeBlockLang}`}
+                      dangerouslySetInnerHTML={{ __html: _highlightCode(content) }}
+                    />
                   </div>
                 </div>
-                <pre
-                  className={`block codeBlock language-${codeBlockLang}`}
-                  dangerouslySetInnerHTML={{ __html: _highlightCode(value) }}
-                />
               </div>
-            </div>
-          </div>,
-          document.body,
-        )}
+            </div>,
+            document.body,
+          )}
       </>
     );
   }
@@ -1443,28 +1469,17 @@ window.prompt = (message, initialValue = "", callback = null) => {
           case "code_block":
             const codeBlockLang = _detectCodeLanguage(schemaComponent.value);
             return (
-              <div id={schemaComponent.id} key={schemaComponent.key} className="codeBlockWrapper">
-                <div className="codeBlockBanner">
-                  <span className="codeBlockTitle">{schemaComponent.id || codeBlockLang}</span>
-                  <div className="codeBlockActions">
-                    <button onClick={() => _onCopyToClipboard(schemaComponent.value)}>Copy</button>
-                    <FullScreenCodeViewer value={schemaComponent.value} label={schemaComponent.id || codeBlockLang} />
-                    <button
-                      className="codeBlockToggle"
-                      onClick={(e) => {
-                        const wrapper = e.target.closest(".codeBlockWrapper");
-                        wrapper.classList.toggle("collapsed");
-                      }}
-                    >
-                      ▼
-                    </button>
-                  </div>
-                </div>
+              <CodeBlockWrapper
+                key={schemaComponent.key}
+                id={schemaComponent.id}
+                title={schemaComponent.id || codeBlockLang}
+                content={schemaComponent.value}
+              >
                 <pre
                   className={`block codeBlock language-${codeBlockLang}`}
                   dangerouslySetInnerHTML={{ __html: _highlightCode(schemaComponent.value) }}
                 />
-              </div>
+              </CodeBlockWrapper>
             );
           case "html_block":
             return (
