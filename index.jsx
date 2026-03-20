@@ -22,6 +22,11 @@ const isRenderedInDataUrl = location.href.indexOf("data:") === 0;
 // Disable Prism auto-highlighting
 Prism.manual = true;
 
+/**
+ * Detects the programming language of a code snippet for syntax highlighting.
+ * @param {string} code - The code string to analyze.
+ * @returns {string} The detected language: "json", "javascript", or "bash".
+ */
 function _detectCodeLanguage(code) {
   const trimmed = code.trim();
   // Try JSON
@@ -39,6 +44,11 @@ function _detectCodeLanguage(code) {
   return "bash";
 }
 
+/**
+ * Highlights code using Prism.js with auto-detected language.
+ * @param {string} code - The code string to highlight.
+ * @returns {string} HTML string with syntax highlighting markup.
+ */
 function _highlightCode(code) {
   const lang = _detectCodeLanguage(code);
   const grammar = Prism.languages[lang];
@@ -68,7 +78,15 @@ window.copyToClipboard = async (text) => {
 };
 document.addEventListener("AppCopyTextToClipboard", (e) => window.copyToClipboard(e.text));
 
-// Modal component for alerts, prompts, and confirms
+/**
+ * Modal component that renders a portal overlay with backdrop.
+ * Supports closing via Escape key or clicking outside.
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Whether the modal is visible.
+ * @param {Function} props.onClose - Callback when the modal should close.
+ * @param {React.ReactNode} props.children - Modal content.
+ * @returns {React.ReactPortal|null}
+ */
 function Modal(props) {
   const { isOpen, onClose, children } = props;
   const modalRef = useRef(null);
@@ -107,6 +125,14 @@ function Modal(props) {
   );
 }
 
+/**
+ * Alert/Confirm modal component. Renders OK button for alerts, Yes/No for confirms.
+ * @param {Object} props
+ * @param {string} props.message - The message to display.
+ * @param {Function} props.onClose - Callback with confirmation result (boolean for confirm, void for alert).
+ * @param {"alert"|"confirm"} [props.type="alert"] - Modal type.
+ * @returns {JSX.Element}
+ */
 function AlertModal(props) {
   const { message, onClose, type = "alert" } = props;
   const primaryButtonRef = useRef(null);
@@ -149,6 +175,16 @@ function AlertModal(props) {
   );
 }
 
+/**
+ * Prompt modal component with a textarea input.
+ * Supports editable mode (with OK/Cancel) and read-only mode (OK only).
+ * @param {Object} props
+ * @param {string} props.message - The prompt message.
+ * @param {string} [props.initialValue=""] - Initial textarea value.
+ * @param {Function} props.onClose - Callback with (value, confirmed) arguments.
+ * @param {boolean} [props.hasCallback=false] - If true, shows editable textarea with Cancel button.
+ * @returns {JSX.Element}
+ */
 function PromptModal(props) {
   const { message, initialValue = "", onClose, hasCallback = false } = props;
   const [value, setValue] = useState(initialValue);
@@ -221,7 +257,11 @@ function PromptModal(props) {
   );
 }
 
-// Modal manager to render modals
+/**
+ * Singleton modal manager. Creates a React root for rendering modal components
+ * into a dedicated DOM container.
+ * @type {{container: HTMLDivElement|null, root: Object|null, init: Function, render: Function, unmount: Function}}
+ */
 const modalManager = {
   container: null,
   root: null,
@@ -358,7 +398,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
     .map((s) => s.trim())
     .join("\n");
 
-  // private methods
+  /**
+   * Opens a data URL by extracting its schema and posting it to a new window.
+   * Falls back to displaying the URL in a prompt if parsing fails.
+   * @param {string} base64URL - The data URL to navigate to.
+   * @param {boolean} forceOpenWindow - Whether to force opening a new window.
+   * @returns {Promise<void>}
+   */
   async function _navigateToDataUrl(base64URL, forceOpenWindow) {
     try {
       const parser = new DOMParser();
@@ -379,6 +425,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  /**
+   * Generates a data URL bookmarklet from a navigation schema string.
+   * @param {string} input - The raw schema string.
+   * @returns {string} A data:text/html URL containing the schema as an embeddable page.
+   */
   function _getNavBookmarkletFromSchema(input) {
     input = input.trim();
 
@@ -401,6 +452,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return "data:text/html," + encodeURIComponent(rawOutput);
   }
 
+  /**
+   * Dispatches a legacy MouseEvent on a target element.
+   * @param {EventTarget} target - The DOM element to dispatch the event on.
+   * @param {string} evName - The event name (e.g. "click").
+   * @param {Object} [evExtra={}] - Additional properties to attach to the event object.
+   */
   function _dispatchEvent(target, evName, evExtra = {}) {
     const evType = "MouseEvents";
     const evObj = document.createEvent(evType);
@@ -413,6 +470,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     target.dispatchEvent(evObj);
   }
 
+  /**
+   * Dispatches a custom Event on a target element with extra properties.
+   * @param {EventTarget} target - The DOM element to dispatch the event on.
+   * @param {string} evName - The event name.
+   * @param {Object} [evExtra={}] - Additional properties to attach to the event object.
+   */
   function _dispatchCustomEvent(target, evName, evExtra = {}) {
     const evObj = new Event(evName);
 
@@ -423,10 +486,20 @@ window.prompt = (message, initialValue = "", callback = null) => {
     target.dispatchEvent(evObj);
   }
 
+  /**
+   * Creates a data URL for downloading a schema as a plain text file.
+   * @param {string} schema - The schema text to encode.
+   * @returns {string} A data:text/plain URL.
+   */
   function _getUrlDownloadSchema(schema) {
     return `data:text/plain,${encodeURIComponent(schema)}`;
   }
 
+  /**
+   * Safely stores a value in sessionStorage.
+   * @param {string} key - The storage key.
+   * @param {string} value - The value to store.
+   */
   function _setSessionValue(key, value) {
     try {
       sessionStorage[key] = value;
@@ -435,6 +508,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  /**
+   * Safely retrieves a value from sessionStorage.
+   * @param {string} key - The storage key.
+   * @returns {string} The stored value, or empty string if unavailable.
+   */
   function _getSessionValue(key) {
     try {
       return sessionStorage[key] || "";
@@ -443,6 +521,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  /**
+   * Safely stores a value in localStorage.
+   * @param {string} key - The storage key.
+   * @param {string} value - The value to store.
+   */
   function _setLocalValue(key, value) {
     try {
       localStorage[key] = value;
@@ -451,6 +534,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  /**
+   * Safely retrieves a value from localStorage.
+   * @param {string} key - The storage key.
+   * @returns {string} The stored value, or empty string if unavailable.
+   */
   function _getLocalValue(key) {
     try {
       return localStorage[key] || "";
@@ -459,18 +547,35 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  /**
+   * Persists the current schema buffer to sessionStorage.
+   * @param {string} value - The schema string to persist.
+   */
   function _persistBufferSchema(value) {
     _setSessionValue("schemaData", value);
   }
 
+  /**
+   * Retrieves the persisted schema buffer from sessionStorage.
+   * @returns {string} The persisted schema string, or empty string.
+   */
   function _getPersistedBufferSchema() {
     return _getSessionValue("schemaData");
   }
 
+  /**
+   * Triggers a clipboard copy by dispatching a custom event.
+   * @param {string} text - The text to copy to clipboard.
+   */
   function _onCopyToClipboard(text) {
     _dispatchCustomEvent(document, "AppCopyTextToClipboard", { text });
   }
 
+  /**
+   * Dynamically loads an external script by appending a script tag.
+   * @param {string} src - The script URL.
+   * @returns {Promise<void>} Resolves when the script has loaded.
+   */
   function _addScript(src) {
     return new Promise((resolve) => {
       const script = document.createElement("script");
@@ -480,6 +585,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     });
   }
 
+  /**
+   * Dynamically loads an external stylesheet by appending a link tag.
+   * @param {string} src - The stylesheet URL.
+   * @param {string} [rel="stylesheet/less"] - The link rel attribute.
+   * @returns {Promise<void>} Resolves immediately after appending.
+   */
   function _addStyle(src, rel = "stylesheet/less") {
     return new Promise((resolve) => {
       const link = document.createElement("link");
@@ -490,6 +601,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     });
   }
 
+  /**
+   * Comparator for sorting schema sections alphabetically by their first element.
+   * @param {string[]} a - First section array.
+   * @param {string[]} b - Second section array.
+   * @returns {number} Sort order: -1, 0, or 1.
+   */
   function _schemaSectionNameOnlySorter(a, b) {
     const fa = a[0].toLowerCase();
     const fb = b[0].toLowerCase();
@@ -505,6 +622,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return 0;
   }
 
+  /**
+   * Parses a raw schema string into a serialized array of schema components.
+   * Handles titles, headers, links, code blocks, HTML blocks, tabs, and favicons.
+   * @param {string} schema - The raw schema text.
+   * @returns {Array<Object>} Array of serialized schema objects with type, key, value, etc.
+   */
   function _getSerializedSchema(schema) {
     // parse lines and generate views
     const lines = schema
@@ -723,7 +846,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return serializedSchema;
   }
 
-  // react components
+  /**
+   * Search input component with fuzzy search support and help popup.
+   * @param {Object} props
+   * @param {Function} props.onSearch - Callback with search text on input change.
+   * @param {string} props.searchText - Current search text value.
+   * @param {Function} props.onClear - Callback to clear the search.
+   * @returns {JSX.Element}
+   */
   function SearchBox(props) {
     const { onSearch, searchText, onClear } = props;
     const [showHelp, setShowHelp] = useState(false);
@@ -787,6 +917,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Read-only view page component. Renders the navigation schema with search,
+   * keyboard navigation, and search highlighting.
+   * @param {Object} props
+   * @param {string} props.schema - The navigation schema string.
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @param {Function} props.onSetSchema - Callback to update the schema.
+   * @returns {JSX.Element}
+   */
   function PageRead(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [searchText, setSearchText] = useState("");
@@ -1135,6 +1274,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Edit page component with Monaco editor for modifying the navigation schema.
+   * Supports apply, cancel, sort, test, and bookmark generation.
+   * @param {Object} props
+   * @param {string} props.schema - The current navigation schema.
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @param {Function} props.onSetSchema - Callback to update the schema.
+   * @returns {JSX.Element}
+   */
   function PageEdit(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
     const [bufferSchema, setBufferSchema] = useState(schema.trim());
@@ -1174,6 +1322,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
       setHasPendingChanges(true);
     }, []);
 
+    /**
+     * Sorts schema sections alphabetically by section header name.
+     * @param {string} schema - The schema string to sort.
+     */
     function onSortSchemaBySectionNameAndTitle(schema) {
       const rows = schema.split("\n");
       let sections = [];
@@ -1281,6 +1433,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Gets a favicon URL for a given website URL using Google's favicon service.
+   * @param {string} url - The website URL to get the favicon for.
+   * @returns {string} The Google favicon service URL.
+   */
   function _getFaviconUrl(url) {
     // Extract domain from URL
     let domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im)[1];
@@ -1289,6 +1446,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   }
 
+  /**
+   * Favicon component that displays a website's favicon image or a fallback emoji.
+   * @param {Object} props
+   * @param {string} props.linkUrl - The URL to fetch the favicon for.
+   * @param {string} props.linkType - The link type (e.g. "sameTabLink", "jsLink").
+   * @returns {JSX.Element}
+   */
   function FavIcon(props) {
     const { linkUrl, linkType } = props;
     const [error, setError] = useState(false);
@@ -1315,6 +1479,17 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return <span>📙</span>;
   }
 
+  /**
+   * Reusable collapsible code block wrapper with copy, fullscreen, and collapse toggle.
+   * @param {Object} props
+   * @param {string} props.id - DOM element ID.
+   * @param {string} props.title - Title displayed in the banner.
+   * @param {string} [props.content=""] - Raw text content for copy/fullscreen.
+   * @param {React.ReactNode} [props.extraButtons] - Additional action buttons.
+   * @param {boolean} [props.defaultCollapsed=false] - Whether to start collapsed.
+   * @param {React.ReactNode} props.children - The code block content to render.
+   * @returns {JSX.Element}
+   */
   function CodeBlockWrapper(props) {
     const { id, title, content = "", extraButtons, defaultCollapsed = false, children } = props;
     const [collapsed, setCollapsed] = useState(defaultCollapsed);
@@ -1384,6 +1559,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Renders a parsed schema into React elements (titles, headers, links, code blocks, tabs, etc.).
+   * @param {Object} props
+   * @param {string} props.schema - The raw schema string to render.
+   * @param {React.RefObject} props.refContainer - Ref to the container DOM element.
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @returns {JSX.Element}
+   */
   function SchemaRender(props) {
     const { schema, refContainer, onSetViewMode } = props;
     const [doms, setDoms] = useState(null);
@@ -1607,6 +1790,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
   // Track whether custom nav-generator language has been registered
   let navGeneratorLanguageRegistered = false;
 
+  /**
+   * Registers the custom nav-generator language with Monaco editor,
+   * including syntax tokenization and light/dark themes.
+   * @param {Object} monaco - The Monaco editor instance.
+   */
   function registerNavGeneratorLanguage(monaco) {
     if (navGeneratorLanguageRegistered) return;
     navGeneratorLanguageRegistered = true;
@@ -1667,6 +1855,19 @@ window.prompt = (message, initialValue = "", callback = null) => {
     });
   }
 
+  /**
+   * Monaco-based schema editor component with theme-aware syntax highlighting.
+   * Falls back to BasicTextarea if Monaco fails to load.
+   * @param {Object} props
+   * @param {string} props.value - The editor content.
+   * @param {Function} props.onInput - Callback on content change.
+   * @param {Function} props.onBlur - Callback on editor blur.
+   * @param {boolean} [props.autoFocus] - Whether to auto-focus the editor.
+   * @param {string} props.id - DOM element ID.
+   * @param {string} [props.type="nav-generator"] - Editor language type.
+   * @param {boolean} [props.readOnly=false] - Whether the editor is read-only.
+   * @returns {JSX.Element}
+   */
   function SchemaEditor(props) {
     const { value, onInput, onBlur, autoFocus, id, type = "nav-generator", readOnly = false, ...restProps } = props;
     const editorRef = useRef(null);
@@ -1770,7 +1971,17 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
-  // Basic textarea fallback with keyboard shortcuts
+  /**
+   * Basic textarea fallback with Tab indent/dedent and Enter auto-indent keyboard shortcuts.
+   * Used when Monaco editor is unavailable.
+   * @param {Object} props
+   * @param {string} props.value - The textarea content.
+   * @param {Function} props.onInput - Callback on content change.
+   * @param {Function} props.onBlur - Callback on blur.
+   * @param {string} props.type - Editor type identifier.
+   * @param {boolean} [props.readOnly=false] - Whether the textarea is read-only.
+   * @returns {JSX.Element}
+   */
   function BasicTextarea(props) {
     const { value, onInput, onBlur, type, readOnly = false, ...restProps } = props;
 
@@ -1886,6 +2097,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Dropdown menu component. First child is the trigger button, remaining children are menu items.
+   * Closes on outside click or Escape key.
+   * @param {Object} props
+   * @param {string} [props.type=""] - Additional CSS class for dropdown content.
+   * @param {React.ReactNode} props.children - Trigger button followed by menu items.
+   * @returns {JSX.Element}
+   */
   function DropdownButtons(props) {
     const { type = "", children } = props;
     const [isOpen, setIsOpen] = useState(false);
@@ -1960,12 +2179,25 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Placeholder page for creating a new navigation (not yet implemented).
+   * @param {Object} props
+   * @param {string} props.schema - The schema string.
+   * @returns {JSX.Element}
+   */
   function PageCreate(props) {
     const { schema } = props;
     return <>create {schema}</>;
   }
 
-  // main app starts here
+  /**
+   * Main application component. Routes between read, edit, create, version history,
+   * bookmark import/export, and backup download views.
+   * @param {Object} props
+   * @param {string} props.schema - The initial navigation schema.
+   * @param {string} props.viewMode - The initial view mode ("read", "edit", "create", etc.).
+   * @returns {JSX.Element}
+   */
   function App(props) {
     const [viewMode, setViewMode] = useState(props.viewMode); // read, edit, create
     const [schema, setSchema] = useState(props.schema);
@@ -2015,6 +2247,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  /**
+   * Version history page. Loads schema snapshots from IndexedDB and allows restoring previous versions.
+   * @param {Object} props
+   * @param {string} props.schema - The current schema.
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @param {Function} props.onSetSchema - Callback to update the schema.
+   * @returns {JSX.Element}
+   */
   function PageVersionHistory(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
 
@@ -2094,6 +2334,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Converts a nav-generator schema into Chrome bookmark HTML format (NETSCAPE-Bookmark-file-1).
+   * @param {string} schema - The navigation schema string.
+   * @returns {string} Chrome-compatible bookmark HTML string.
+   */
   function parseNavGeneratorToChromeBookmark(schema) {
     // Safety check for empty schema
     if (!schema || typeof schema !== "string" || schema.trim().length === 0) {
@@ -2178,6 +2423,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return html;
   }
 
+  /**
+   * Chrome bookmark import page. Accepts HTML bookmark file content and parses it into nav-generator schema.
+   * @param {Object} props
+   * @param {string} props.schema - The current schema.
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @param {Function} props.onSetSchema - Callback to update the schema.
+   * @returns {JSX.Element}
+   */
   function PageChromeBookmarkImport(props) {
     const { schema, onSetViewMode, onSetSchema } = props;
 
@@ -2400,6 +2653,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Chrome bookmark export page. Converts the current schema to Chrome bookmark HTML and allows download.
+   * @param {Object} props
+   * @param {string} props.schema - The current schema.
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @returns {JSX.Element}
+   */
   function PageChromeBookmarkExport(props) {
     const { schema, onSetViewMode } = props;
 
@@ -2462,6 +2722,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
     );
   }
 
+  /**
+   * Backup download page. Allows downloading the current schema as a markdown file.
+   * @param {Object} props
+   * @param {string} props.schema - The current schema.
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @returns {JSX.Element}
+   */
   function PageBackupDownload(props) {
     const { schema, onSetViewMode } = props;
 
@@ -2719,20 +2986,35 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 
   const THEME_KEY = "theme-mode";
+  /**
+   * Applies a theme by setting the data-theme attribute on the document element.
+   * @param {string} theme - The theme name ("dark" or "light").
+   */
   function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
   }
 
+  /**
+   * Sets and persists the theme to localStorage and applies it.
+   * @param {string} theme - The theme name ("dark" or "light").
+   */
   function setTheme(theme) {
     applyTheme(theme);
     _setLocalValue(THEME_KEY, theme);
   }
 
+  /**
+   * Clears the theme setting, removing the data-theme attribute and localStorage value.
+   */
   function clearTheme() {
     document.documentElement.removeAttribute("data-theme");
     _setLocalValue(THEME_KEY, "");
   }
 
+  /**
+   * Gets the initial theme from localStorage.
+   * @returns {string|null} The saved theme name, or null if unavailable.
+   */
   function getInitialTheme() {
     try {
       return _getLocalValue(THEME_KEY);
@@ -2749,6 +3031,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   })();
 
+  /**
+   * Theme toggle button component. Switches between dark and light modes.
+   * @returns {JSX.Element}
+   */
   function ThemeToggle() {
     const [theme, setThemeState] = useState(getInitialTheme);
 
@@ -2767,6 +3053,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return <button onClick={toggleTheme}>{theme === "dark" ? "Light Mode" : "Dark Mode"}</button>;
   }
 
+  /**
+   * Conditionally renders a "Version History" button if IndexedDB versions exist.
+   * @param {Object} props
+   * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @returns {JSX.Element|null}
+   */
   function VersionHistoryButton({ onSetViewMode }) {
     const [hasVersions, setHasVersions] = useState(false);
 
@@ -2803,7 +3095,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   let db;
 
-  // Initialize IndexedDB
+  /**
+   * Initializes the IndexedDB database, creating the versions object store if needed.
+   * @returns {Promise<IDBDatabase>} The opened database instance.
+   */
   function initDB() {
     return new Promise((resolve, reject) => {
       try {
@@ -2832,7 +3127,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
     });
   }
 
-  // Add a version (trim, no duplicates)
+  /**
+   * Adds a new version snapshot to IndexedDB. Trims input and skips duplicates.
+   * @param {string} value - The schema string to save as a version.
+   * @returns {Promise<Object|null>} The created version object, or null if skipped.
+   */
   async function createVersion(value) {
     try {
       if (!db) await initDB();
@@ -2875,7 +3174,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
-  // Get all versions
+  /**
+   * Retrieves all version snapshots from IndexedDB.
+   * @returns {Promise<Array<Object>>} Array of version objects with value and created_at.
+   */
   async function getVersions() {
     try {
       if (!db) await initDB();
@@ -2897,6 +3199,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
+  /**
+   * Renders or re-renders the main App component into the DOM.
+   * Creates the app root container on first call.
+   */
   function _render() {
     if (!_appRoot) {
       let appContainer = document.getElementById("app-root");

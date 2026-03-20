@@ -184,3 +184,4 @@ GitHub Actions workflow (`.github/workflows/build-main.yml`):
 - **Custom HTML elements**: Uses non-standard elements like `<load>`, `<tabs>`, `<tab>` for styling purposes
 - **eval() usage**: JavaScript links (`javascript://`) use eval() for execution (line 1585)
 - **No TypeScript**: Pure JavaScript/JSX without type checking
+- **JSDoc Required**: JSDoc comments are mandatory for all functions, components, and non-trivial code on every change. Always check and confirm JSDoc is present when modifying or adding code. This is non-negotiable.
