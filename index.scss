@@ -221,6 +221,8 @@ body {
     }
 
     .link {
+      word-break: break-all;
+
       &.navigating {
         opacity: 0.7;
         background: var(--colorBgHover);
