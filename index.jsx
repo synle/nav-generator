@@ -2667,6 +2667,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   document.innerHTML = `<div style="text-align: center; margin: 20px; font-size: 20px;">Loading...</div>`;
 
+  let _appRoot = null;
+
   if (document.querySelector("[type=schema]")) {
     // if schema tag is present let's render it as read
     _render(); // rerender the dom
@@ -2895,7 +2897,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
     }
   }
 
-  let _appRoot = null;
   function _render() {
     if (!_appRoot) {
       let appContainer = document.getElementById("app-root");
