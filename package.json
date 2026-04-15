@@ -14,7 +14,6 @@
   },
   "scripts": {
     "clean": "rm -rf import-map.json .prettier-cache",
-    "prebuild": "curl -sfL -H 'Accept: application/vnd.github.raw' https://api.github.com/repos/synle/bashrc/contents/webapp/common.scss -o common.scss",
     "build": "NODE_ENV=production vite build",
     "format": "npx --yes prettier --write --cache --ignore-unknown --no-error-on-unmatched-pattern --print-width 140 .",
     "start": "npx http-server --cors -a 127.0.0.1 .",
