@@ -185,3 +185,16 @@ GitHub Actions workflow (`.github/workflows/build-main.yml`):
 - **eval() usage**: JavaScript links (`javascript://`) use eval() for execution (line 1585)
 - **No TypeScript**: Pure JavaScript/JSX without type checking
 - **JSDoc Required**: JSDoc comments are mandatory for all functions, components, and non-trivial code on every change. Always check and confirm JSDoc is present when modifying or adding code. This is non-negotiable.
+
+## GitHub Raw File URLs
+
+When fetching raw file content from GitHub repos, always use the `?raw=true` blob URL format:
+
+```
+https://github.com/{owner}/{repo}/blob/head/{path}?raw=true
+```
+
+Do NOT use:
+
+- `https://api.github.com/repos/{owner}/{repo}/contents/{path}` (GitHub Contents API)
+- `https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}`

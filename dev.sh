@@ -1,2 +1,2 @@
-curl -sf -H 'Accept: application/vnd.github.raw' https://api.github.com/repos/synle/gha-workflows/contents/dev.sh | \
+curl -sfL https://github.com/synle/gha-workflows/blob/head/dev.sh?raw=true | \
 bash -s -- '*.json *.scss *.jsx *.js' 'npm run start'

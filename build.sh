@@ -14,7 +14,7 @@ download_with_validation() {
 
   # Download to a temp file
   local tmp_file="${target_file}.tmp"
-  curl -sfL -H 'Accept: application/vnd.github.raw' "$url" -o "$tmp_file"
+  curl -sfL "$url" -o "$tmp_file"
 
   # Get the downloaded file size
   local new_size=0
@@ -45,7 +45,7 @@ download_with_validation() {
 }
 
 download_with_validation \
-  "https://api.github.com/repos/synle/bashrc/contents/webapp/common.scss" \
+  "https://github.com/synle/bashrc/blob/head/webapp/common.scss?raw=true" \
   "common.scss" \
   "common.scss"
 
