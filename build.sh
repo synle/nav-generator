@@ -45,7 +45,7 @@ download_with_validation() {
 }
 
 download_with_validation \
-  "https://github.com/synle/bashrc/blob/head/webapp/common.scss?raw=true" \
+  "https://github.com/synle/bashrc/blob/head/webapp/common.scss?raw=1" \
   "common.scss" \
   "common.scss"
 
