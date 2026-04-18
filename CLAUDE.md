@@ -199,7 +199,6 @@ Do NOT use:
 - `https://api.github.com/repos/{owner}/{repo}/contents/{path}` (GitHub Contents API)
 - `https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}`
 
-
 ## Git / PR Merge Policy
 
 - Always use **squash and merge** when merging PRs. Never use merge commits or rebase merges. This keeps the git history clean with one commit per PR.
