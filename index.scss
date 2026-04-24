@@ -192,6 +192,11 @@ body {
         padding: var(--spaceSize2);
         overflow: hidden;
       }
+
+      &.navBlock {
+        padding: var(--spaceSize2);
+        overflow: hidden;
+      }
     }
 
     .tabs {

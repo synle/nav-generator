@@ -78,6 +78,7 @@ The main application is in `index.jsx` (~3,300 lines), structured as:
      - `|||` - New-tab links
      - ` ``` ` - Code blocks
      - `---` - HTML blocks
+     - `:::` - Nav blocks (recursively renders the enclosed schema)
      - `>>>` - Tabs
      - `@` - Custom favicon URLs
 

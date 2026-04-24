@@ -355,6 +355,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   const TITLE_SPLIT = "!";
   const CODE_BLOCK_SPLIT = "```";
   const HTML_BLOCK_SPLIT = "---";
+  const NAV_BLOCK_SPLIT = ":::";
   const TAB_SPLIT = ">>>";
   const TAB_TITLE_SPLIT = "|";
   const FAV_ICON_SPLIT = "@";
@@ -393,6 +394,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
     ---blockId2
     <u><b>sample html</b></u> blockId2
     ---
+
+    # Nested Nav Block
+    :::
+    # Embedded Section
+    github | github.com
+    hacker news | news.ycombinator.com
+    :::
   `
     .split("\n")
     .map((s) => s.trim())
@@ -624,7 +632,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   /**
    * Parses a raw schema string into a serialized array of schema components.
-   * Handles titles, headers, links, code blocks, HTML blocks, tabs, and favicons.
+   * Handles titles, headers, links, code blocks, HTML blocks, nav blocks, tabs, and favicons.
    * @param {string} schema - The raw schema text.
    * @returns {Array<Object>} Array of serialized schema objects with type, key, value, etc.
    */
@@ -702,6 +710,20 @@ window.prompt = (message, initialValue = "", callback = null) => {
           blockType = "";
           currentHeaderName = "";
           blockId = "";
+        } else if (blockType === "nav" && link.trim() === NAV_BLOCK_SPLIT) {
+          const resolvedBlockId = _upsertBlockId(blockId);
+          serializedSchema.push({
+            key: newCacheId,
+            id: resolvedBlockId,
+            tabName: blockIdToTabNameMap[resolvedBlockId],
+            value: blockBuffer.join("\n"),
+            type: "nav_block",
+          });
+          isInABlock = false;
+          blockBuffer = [];
+          blockType = "";
+          currentHeaderName = "";
+          blockId = "";
         } else {
           blockBuffer.push(link);
         }
@@ -743,6 +765,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
         blockType = "html";
         if (link.length > HTML_BLOCK_SPLIT.length) {
           blockId = link.substr(blockId.indexOf(HTML_BLOCK_SPLIT) + HTML_BLOCK_SPLIT.length + 1);
+          _upsertBlockId(blockId);
+        }
+      } else if (link.trim().indexOf(NAV_BLOCK_SPLIT) === 0) {
+        isInABlock = true;
+        blockType = "nav";
+        if (link.length > NAV_BLOCK_SPLIT.length) {
+          blockId = link.substr(blockId.indexOf(NAV_BLOCK_SPLIT) + NAV_BLOCK_SPLIT.length + 1);
           _upsertBlockId(blockId);
         }
       } else if (link.trim().indexOf(TAB_SPLIT) === 0) {
@@ -1560,6 +1589,24 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 
   /**
+   * Renders a nested navigation schema inside a block. Enables schema-in-schema
+   * composition: the inner schema is parsed and rendered with its own tab scope
+   * via a local container ref.
+   * @param {Object} props
+   * @param {string} props.id - The DOM id for the block wrapper.
+   * @param {string} props.schema - The nested schema string to render.
+   * @returns {JSX.Element}
+   */
+  function NavBlock({ id, schema }) {
+    const refNestedContainer = useRef(null);
+    return (
+      <div id={id} ref={refNestedContainer} className="block navBlock">
+        <SchemaRender schema={schema} refContainer={refNestedContainer} />
+      </div>
+    );
+  }
+
+  /**
    * Renders a parsed schema into React elements (titles, headers, links, code blocks, tabs, etc.).
    * @param {Object} props
    * @param {string} props.schema - The raw schema string to render.
@@ -1687,6 +1734,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
                 dangerouslySetInnerHTML={{ __html: schemaComponent.value }}
               ></div>
             );
+          case "nav_block":
+            return <NavBlock key={schemaComponent.key} id={schemaComponent.id} schema={schemaComponent.value} />;
           case "tabs":
             const tabContent = [];
             for (const tab of schemaComponent.tabContent) {
