@@ -581,6 +581,51 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return _getSessionValue("schemaData");
   }
 
+  const NAV_SCHEMA_CACHE_PREFIX = "navSchemaCache:";
+
+  /**
+   * Computes the NavBeforeLoad cache key for the current page, or returns null
+   * if caching shouldn't apply (non-http(s) URLs like data:, or editor/new-nav
+   * flows where the rendered schema is user-supplied / in-flux).
+   * @returns {string|null}
+   */
+  function _getNavSchemaCacheKey() {
+    // Only cache real http(s) pages — skip data:, file:, etc.
+    if (!/^https?:/i.test(location.href)) {
+      return null;
+    }
+    // Skip nav-generator's own authoring / postMessage flows. These aren't
+    // stable "read" renders; caching them would poison the next visit.
+    if (/(?:^|[?&])newNav(?:[=&]|$)/.test(location.search)) {
+      return null;
+    }
+    if (/(?:^|[?&])loadNav(?:[=&]|$)/.test(location.search)) {
+      return null;
+    }
+    return `${NAV_SCHEMA_CACHE_PREFIX}${location.href}`;
+  }
+
+  /**
+   * Reads a previously cached schema for the current page, if any.
+   * @param {string} key - Cache key from _getNavSchemaCacheKey.
+   * @returns {string} Cached schema, or empty string.
+   */
+  function _readNavSchemaCache(key) {
+    return _getLocalValue(key);
+  }
+
+  /**
+   * Writes the latest schema for the current page to cache. No-ops when the
+   * value is unchanged to avoid gratuitous writes.
+   * @param {string} key - Cache key from _getNavSchemaCacheKey.
+   * @param {string} value - The schema string to persist.
+   */
+  function _writeNavSchemaCache(key, value) {
+    if (!value) return;
+    if (_getLocalValue(key) === value) return;
+    _setLocalValue(key, value);
+  }
+
   /**
    * Triggers a clipboard copy by dispatching a custom event.
    * @param {string} text - The text to copy to clipboard.
@@ -3046,8 +3091,27 @@ window.prompt = (message, initialValue = "", callback = null) => {
     // else if no schema script or anything other way then we need
     // to listen to the app
     document.addEventListener("DOMContentLoaded", () => {
+      // Stale-while-revalidate cache by page URL. If we've rendered this
+      // URL before (e.g. synle.github.io/fav/), paint the previously-saved
+      // schema immediately so the page feels instant. The NavBeforeLoad
+      // dispatch below still fires so the consumer can produce a fresh
+      // schema; when renderSchema is called with that, we update the cache
+      // and re-render. Disabled for data: URLs and authoring URLs (?newNav,
+      // ?loadNav) — see _getNavSchemaCacheKey.
+      const cacheKey = _getNavSchemaCacheKey();
+      if (cacheKey) {
+        const cachedSchema = _readNavSchemaCache(cacheKey);
+        if (cachedSchema) {
+          inputSchema = cachedSchema;
+          _render();
+        }
+      }
+
       _dispatchCustomEvent(document, "NavBeforeLoad", {
         renderSchema: (newSchema) => {
+          if (cacheKey) {
+            _writeNavSchemaCache(cacheKey, newSchema);
+          }
           inputSchema = newSchema;
           _render();
         },
