@@ -131,7 +131,7 @@ When `index.js` is loaded from a consumer page with `?hasCustomNavBeforeLoad=1` 
 
 **Console logging** — every render entry point logs a `[nav-generator] render via …` line with length + cache-key context so the flow is debuggable end-to-end. Entry points: inline `<script type=schema>`, postMessage `onViewLinks`, `?newNav` default, sessionStorage continuation, NavBeforeLoad cache hit (stale), NavBeforeLoad consumer renderSchema (fresh). Cache misses and write/unchanged states log separately.
 
-Implementation lives in `index.jsx` — search `_getNavSchemaCacheKey`, `_readNavSchemaCache`, `_writeNavSchemaCache`, `_logRender`, and the `NavBeforeLoad` dispatcher.
+Implementation lives in `index.jsx` — search `_getNavSchemaCacheKey`, `_readNavSchemaCache`, `_writeNavSchemaCache`, `_log`, and the `NavBeforeLoad` dispatcher.
 
 ### Build Configuration (`vite.config.js`)
 
