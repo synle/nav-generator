@@ -195,14 +195,13 @@ body {
 
       &.navBlock {
         padding: var(--spaceSize2);
-        // Mirror the parent #fav container: flex-wrap grid, per-link column
-        // width so embedded schemas render like the top level (responsive,
-        // gapped, link pills fill a column). Use a fixed spaceSize3 gap for
-        // both axes so the horizontal margin stays visible even on narrow
-        // viewports (where --gridGapWidth collapses to 0.25rem).
+        // Mirror the parent #fav container exactly: flex-wrap grid with the
+        // same row/col gap (spaceSize3 / gridGapWidth) and per-link column
+        // width, so embedded links sit on the same visual grid as top-level
+        // links — same horizontal spacing between pills, same row rhythm.
         display: flex;
         flex-wrap: wrap;
-        gap: var(--spaceSize3);
+        gap: var(--spaceSize3) var(--gridGapWidth);
 
         > .link {
           width: var(--flexColumnWidth);
