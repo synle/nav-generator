@@ -194,16 +194,15 @@ body {
       }
 
       &.navBlock {
-        padding: var(--spaceSize2);
+        padding: var(--spaceSize4);
         // Flex-wrap grid with per-link column width so embedded schemas
-        // lay out like the top level. Use a fixed gap (--spaceSize4) for
-        // both axes so the horizontal margin between pills stays clearly
-        // visible at every viewport width — the parent uses
-        // --gridGapWidth which collapses to 0.25rem below 660px (e.g.
-        // when devtools is open), making nested links look mashed.
+        // lay out like the top level. Hardcode a comfortable gap (1rem
+        // row, 1.5rem col) instead of --gridGapWidth — the responsive
+        // variable collapses to 0.25rem below 660px (common with
+        // devtools open), which squashes embedded pills together.
         display: flex;
         flex-wrap: wrap;
-        gap: var(--spaceSize4);
+        gap: 1rem 1.5rem;
 
         > .link {
           width: var(--flexColumnWidth);
