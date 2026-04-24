@@ -25,6 +25,7 @@ You can deploy the nav to Github Pages. For a quick deployment, refer to this Gi
 - [x] Sections (use `#`)
 - [x] Code Blocks
 - [x] HTML Blocks (use `---`)
+- [x] Nav Blocks (use `:::` — embeds a nested schema)
 - [x] Tabs
 
 ### Other features
@@ -102,6 +103,27 @@ Wrap html block inside `---`
 ---blockId2
 <u><b>sample html</b></u> blockId2
 ---
+```
+
+### Nav Block
+
+Wrap a nested schema inside `:::`. The block's contents are parsed and rendered through the same schema engine, so you can embed sub-navigations (links, headers, tabs, even another nav block) anywhere.
+
+```
+:::
+# Embedded Section
+github | github.com
+hacker news | news.ycombinator.com
+:::
+```
+
+Attach an id (e.g. for use as a tab target) the same way as code/html blocks:
+
+```
+:::nested-block-id
+# Embedded Section
+google | google.com
+:::
 ```
 
 ### Tabs
