@@ -110,6 +110,10 @@ Implements stale-while-revalidate caching strategy:
 - Caches: HTML, JS, CSS, images, and specific file types
 - Auto-updates and cleans expired cache entries
 
+### Keyboard Shortcuts
+
+- **`Alt+\`** / **`Cmd+\`** — toggle collapse/expand on every code block on the page. Flips a shared flag `_codeBlocksAllCollapsed` and dispatches the `NavGenCodeBlockCollapseAll` custom event; every mounted `CodeBlockWrapper` subscribes and updates its local collapsed state. Newly-mounted wrappers inherit the current flag (so a re-render after the shortcut still starts collapsed).
+
 ### NavBeforeLoad Event + Schema Cache
 
 When `index.js` is loaded from a consumer page with `?hasCustomNavBeforeLoad=1` (see `index.template.html`), nav-generator does NOT render its own default. Instead it fires a custom DOM event `NavBeforeLoad` on `document` and waits for the consumer to supply the schema.

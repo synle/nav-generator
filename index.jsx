@@ -1587,6 +1587,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
     return <span>📙</span>;
   }
 
+  // Broadcast bus for the global "collapse/expand all code blocks" shortcut.
+  // Alt+\ / Cmd+\ flips _codeBlocksAllCollapsed and dispatches the event;
+  // every mounted CodeBlockWrapper listens and snaps to the new state.
+  // Newly-mounted wrappers inherit the current flag so a re-render after
+  // the shortcut was pressed still starts collapsed.
+  const CODE_BLOCK_COLLAPSE_EVENT = "NavGenCodeBlockCollapseAll";
+  let _codeBlocksAllCollapsed = false;
+
   /**
    * Reusable collapsible code block wrapper with copy, fullscreen, and collapse toggle.
    * @param {Object} props
@@ -1600,8 +1608,16 @@ window.prompt = (message, initialValue = "", callback = null) => {
    */
   function CodeBlockWrapper(props) {
     const { id, title, content = "", extraButtons, defaultCollapsed = false, children } = props;
-    const [collapsed, setCollapsed] = useState(defaultCollapsed);
+    const [collapsed, setCollapsed] = useState(defaultCollapsed || _codeBlocksAllCollapsed);
     const [fullscreen, setFullscreen] = useState(false);
+
+    // Subscribe to the global collapse/expand broadcast so Alt+\ / Cmd+\
+    // flips every visible code block in lockstep.
+    useEffect(() => {
+      const handler = (e) => setCollapsed(!!e.detail?.collapsed);
+      document.addEventListener(CODE_BLOCK_COLLAPSE_EVENT, handler);
+      return () => document.removeEventListener(CODE_BLOCK_COLLAPSE_EVENT, handler);
+    }, []);
 
     useLayoutEffect(() => {
       if (!fullscreen) return;
@@ -2941,6 +2957,17 @@ window.prompt = (message, initialValue = "", callback = null) => {
       const { key } = e;
       const target = e.target;
       const focusedElement = document.activeElement;
+
+      // Global collapse/expand all code blocks: Alt+\ (any platform) or
+      // Cmd+\ (macOS). Flips the shared flag and broadcasts to every
+      // mounted CodeBlockWrapper. Works regardless of where focus is.
+      if (key === "\\" && (e.altKey || e.metaKey) && !e.ctrlKey && !e.shiftKey) {
+        _codeBlocksAllCollapsed = !_codeBlocksAllCollapsed;
+        document.dispatchEvent(new CustomEvent(CODE_BLOCK_COLLAPSE_EVENT, { detail: { collapsed: _codeBlocksAllCollapsed } }));
+        _log(`keyboard: ${_codeBlocksAllCollapsed ? "collapse" : "expand"} all code blocks`);
+        e.preventDefault();
+        return;
+      }
 
       if (e.target.id === "search") {
         if (e.ctrlKey || e.metaKey || e.shiftKey) {
