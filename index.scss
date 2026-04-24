@@ -203,6 +203,7 @@ body {
         flex-shrink: 0;
         font-size: var(--fontSize3);
         background: transparent;
+        border-bottom: var(--borderSize2) solid var(--colorBorderSecondary);
         padding: var(--spaceSize2) var(--spaceSize4);
         user-select: none;
         cursor: pointer;
@@ -216,6 +217,7 @@ body {
         &.selected {
           background: var(--colorBorderMain);
           color: var(--colorBgMain);
+          border-bottom-color: var(--colorBorderMain);
           font-weight: var(--fontWeightSemiBold);
         }
       }
