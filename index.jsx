@@ -3050,9 +3050,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
           const contentEl = targetTabId ? document.getElementById(targetTabId) : null;
 
           if (tab === targetTab) {
-            // Show and select target tab
+            // Show and select target tab. Clear the inline display instead
+            // of hardcoding "block" so each content element uses its own
+            // CSS `display` — critical for .navBlock which needs
+            // `display: flex` to apply gap/layout. Hardcoding "block" broke
+            // the flex layout (and thus the gap between embedded pills)
+            // the moment a tab was shown.
             if (contentEl) {
-              contentEl.style.display = "block";
+              contentEl.style.display = "";
 
               // If already selected, toggle expansion
               if (tab.classList.contains("selected")) {
