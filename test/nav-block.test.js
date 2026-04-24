@@ -30,7 +30,15 @@ describe("nav_block (:::) schema feature", () => {
     expect(source).toMatch(/case\s+"nav_block":/);
     expect(source).toMatch(/function\s+NavBlock\s*\(\s*\{[^}]*schema[^}]*\}\s*\)/);
     // NavBlock must recursively render the enclosed schema with its own ref scope
-    expect(source).toMatch(/<SchemaRender\s+schema=\{schema\}\s+refContainer=\{refNestedContainer\}/);
+    // and pass isNested so the nested renderer suppresses page-level chrome.
+    expect(source).toMatch(/<SchemaRender\s+schema=\{schema\}\s+refContainer=\{refNestedContainer\}\s+isNested/);
+  });
+
+  it("suppresses the title chrome when rendered as a nested block", () => {
+    // SchemaRender must accept isNested
+    expect(source).toMatch(/function\s+SchemaRender\s*\([^)]*\)\s*\{[\s\S]*?const\s*\{\s*[^}]*isNested[^}]*\}\s*=\s*props/);
+    // The "title" render branch must early-return when isNested
+    expect(source).toMatch(/case\s+"title":[\s\S]*?if\s*\(\s*isNested\s*\)\s*\{[\s\S]*?return\s+null/);
   });
 
   it("ships a ::: sample in the default schema template", () => {
@@ -44,5 +52,23 @@ describe("nav_block (:::) schema feature", () => {
     // At least one open + one close nav_block fence
     const fenceCount = (defaultSchema.match(/^\s*:::\s*$/gm) || []).length;
     expect(fenceCount).toBeGreaterThanOrEqual(2);
+  });
+
+  it("ships an advanced 3-tab demo (code + html + nested nav) at the bottom", () => {
+    const defaultSchemaStart = source.indexOf("const DEFAULT_SCHEMA_TO_RENDER");
+    const defaultSchemaEnd = source.indexOf(".split(", defaultSchemaStart);
+    const defaultSchema = source.slice(defaultSchemaStart, defaultSchemaEnd);
+
+    // 3 tabs declared in a single >>> line, each with a matching block below
+    expect(defaultSchema).toMatch(/>>>\s*Code\|advCode>>>\s*HTML\|advHtml>>>\s*Nested Nav\|advNav/);
+    expect(defaultSchema).toMatch(/\\`\\`\\`advCode/);
+    expect(defaultSchema).toMatch(/---advHtml/);
+    expect(defaultSchema).toMatch(/:::advNav/);
+
+    // Tabs demo must be after the standalone Nested Nav Block demo (moved to bottom)
+    const standaloneIdx = defaultSchema.indexOf("# Nested Nav Block");
+    const advancedTabsIdx = defaultSchema.indexOf("# Advanced Tabs");
+    expect(standaloneIdx).toBeGreaterThan(-1);
+    expect(advancedTabsIdx).toBeGreaterThan(standaloneIdx);
   });
 });

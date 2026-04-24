@@ -384,22 +384,32 @@ window.prompt = (message, initialValue = "", callback = null) => {
     TODO 2
     \`\`\`
 
-    # Tabs
-    >>>tabName1|blockId1>>>tabName2|blockId2
-
-    \`\`\`blockId1
-    sample blockId1
-    \`\`\`
-
-    ---blockId2
-    <u><b>sample html</b></u> blockId2
-    ---
-
     # Nested Nav Block
     :::
     # Embedded Section
     github | github.com
     hacker news | news.ycombinator.com
+    :::
+
+    # Advanced Tabs (code + html + nested nav)
+    >>>Code|advCode>>>HTML|advHtml>>>Nested Nav|advNav
+
+    \`\`\`advCode
+    // sample code block inside a tab
+    const greet = (name) => "hello, " + name;
+    console.log(greet("world"));
+    \`\`\`
+
+    ---advHtml
+    <h3>HTML tab</h3>
+    <p>This tab renders raw HTML &mdash; <b>bold</b>, <i>italic</i>, <u>underline</u>.</p>
+    ---
+
+    :::advNav
+    # Embedded links inside a tab
+    google | google.com
+    github | github.com
+    hacker news ||| news.ycombinator.com
     :::
   `
     .split("\n")
@@ -1601,7 +1611,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const refNestedContainer = useRef(null);
     return (
       <div id={id} ref={refNestedContainer} className="block navBlock">
-        <SchemaRender schema={schema} refContainer={refNestedContainer} />
+        <SchemaRender schema={schema} refContainer={refNestedContainer} isNested />
       </div>
     );
   }
@@ -1612,10 +1622,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
    * @param {string} props.schema - The raw schema string to render.
    * @param {React.RefObject} props.refContainer - Ref to the container DOM element.
    * @param {Function} props.onSetViewMode - Callback to switch view modes.
+   * @param {boolean} [props.isNested] - True when rendered inside a NavBlock; suppresses
+   *   the top-level title chrome (action bar + document.title override) that only makes
+   *   sense at the outermost level.
    * @returns {JSX.Element}
    */
   function SchemaRender(props) {
-    const { schema, refContainer, onSetViewMode } = props;
+    const { schema, refContainer, onSetViewMode, isNested } = props;
     const [doms, setDoms] = useState(null);
 
     // handling tabs
@@ -1641,6 +1654,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
       const newDoms = serializedSchema.map((schemaComponent) => {
         switch (schemaComponent.type) {
           case "title":
+            // Nested nav blocks don't own the page chrome, so drop the title
+            // entirely (the parser auto-injects one when missing, which would
+            // otherwise render a phantom title + Settings dropdown inside the
+            // embedded block).
+            if (isNested) {
+              return null;
+            }
+
             // set the page title
             document.title = schemaComponent.value;
 

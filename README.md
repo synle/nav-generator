@@ -128,19 +128,28 @@ google | google.com
 
 ### Tabs
 
-Tabs are supported. Here are an example:
+Tabs are supported. Each tab points at a block id — which can be a code block (` ``` `), an HTML block (`---`), or a nav block (`:::`). Here is an advanced example mixing all three:
 
 ````
->>>tabName1|blockId1>>>tabName2|blockId2
+>>>Code|advCode>>>HTML|advHtml>>>Nested Nav|advNav
 
-```blockId1
-sample blockId1
+```advCode
+// sample code block inside a tab
+const greet = (name) => "hello, " + name;
+console.log(greet("world"));
 ```
 
----blockId2
-<u><b>sample html</b></u> blockId2
+---advHtml
+<h3>HTML tab</h3>
+<p>This tab renders raw HTML &mdash; <b>bold</b>, <i>italic</i>, <u>underline</u>.</p>
 ---
 
+:::advNav
+# Embedded links inside a tab
+google | google.com
+github | github.com
+hacker news ||| news.ycombinator.com
+:::
 ````
 
 ## Guide

@@ -195,7 +195,16 @@ body {
 
       &.navBlock {
         padding: var(--spaceSize2);
-        overflow: hidden;
+        // Mirror the parent #fav container: flex-wrap grid with the same gap
+        // and per-link column width so embedded schemas render like the top
+        // level (responsive, gapped, link pills fill a column).
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spaceSize3) var(--gridGapWidth);
+
+        > .link {
+          width: var(--flexColumnWidth);
+        }
       }
     }
 
