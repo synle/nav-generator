@@ -110,6 +110,27 @@ Implements stale-while-revalidate caching strategy:
 - Caches: HTML, JS, CSS, images, and specific file types
 - Auto-updates and cleans expired cache entries
 
+### NavBeforeLoad Event + Schema Cache
+
+When `index.js` is loaded from a consumer page with `?hasCustomNavBeforeLoad=1` (see `index.template.html`), nav-generator does NOT render its own default. Instead it fires a custom DOM event `NavBeforeLoad` on `document` and waits for the consumer to supply the schema.
+
+**Event payload:** a single property `renderSchema: (newSchema: string) => void`. The consumer listens and calls `renderSchema` with a schema string. No other fields.
+
+**Stale-while-revalidate cache** (localStorage, keyed by `navSchemaCache:${location.href}`):
+1. On DOMContentLoaded, read cache. If hit, render immediately — page paints with whatever was last successfully produced for this URL.
+2. Dispatch `NavBeforeLoad`. Consumer produces fresh content asynchronously (e.g. fetching from multiple upstreams).
+3. When consumer calls `renderSchema`, write-through to cache + re-render.
+4. Next visit: step 1 uses the updated cache.
+
+**Cache is disabled** (cacheKey = `null`, nothing read or written) when:
+- URL is not http(s) (data:, file:, etc.)
+- URL has `?newNav` (authoring mode — caching would poison new-nav state)
+- URL has `?loadNav` (postMessage-seeded mode)
+
+**Console logging** — every render entry point logs a `[nav-generator] render via …` line with length + cache-key context so the flow is debuggable end-to-end. Entry points: inline `<script type=schema>`, postMessage `onViewLinks`, `?newNav` default, sessionStorage continuation, NavBeforeLoad cache hit (stale), NavBeforeLoad consumer renderSchema (fresh). Cache misses and write/unchanged states log separately.
+
+Implementation lives in `index.jsx` — search `_getNavSchemaCacheKey`, `_readNavSchemaCache`, `_writeNavSchemaCache`, `_logRender`, and the `NavBeforeLoad` dispatcher.
+
 ### Build Configuration (`vite.config.js`)
 
 - Custom plugin `updateServiceWorker()` injects build timestamp into service worker

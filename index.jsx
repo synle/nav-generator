@@ -582,6 +582,23 @@ window.prompt = (message, initialValue = "", callback = null) => {
   }
 
   const NAV_SCHEMA_CACHE_PREFIX = "navSchemaCache:";
+  const NAV_LOG_PREFIX = "[nav-generator]";
+
+  /**
+   * Single prefixed logger for nav-generator lifecycle events — render
+   * triggers ("render via …"), cache reads/writes/skips, NavBeforeLoad
+   * dispatch. The shared `[nav-generator]` tag makes the full flow
+   * filterable in devtools.
+   * @param {string} message - Human-readable event description.
+   * @param {Object} [details] - Optional structured detail object.
+   */
+  function _log(message, details) {
+    if (details) {
+      console.log(`${NAV_LOG_PREFIX} ${message}`, details);
+    } else {
+      console.log(`${NAV_LOG_PREFIX} ${message}`);
+    }
+  }
 
   /**
    * Computes the NavBeforeLoad cache key for the current page, or returns null
@@ -592,14 +609,17 @@ window.prompt = (message, initialValue = "", callback = null) => {
   function _getNavSchemaCacheKey() {
     // Only cache real http(s) pages — skip data:, file:, etc.
     if (!/^https?:/i.test(location.href)) {
+      _log("cache disabled: non-http(s) url", { href: location.href });
       return null;
     }
     // Skip nav-generator's own authoring / postMessage flows. These aren't
     // stable "read" renders; caching them would poison the next visit.
     if (/(?:^|[?&])newNav(?:[=&]|$)/.test(location.search)) {
+      _log("cache disabled: ?newNav", { href: location.href });
       return null;
     }
     if (/(?:^|[?&])loadNav(?:[=&]|$)/.test(location.search)) {
+      _log("cache disabled: ?loadNav", { href: location.href });
       return null;
     }
     return `${NAV_SCHEMA_CACHE_PREFIX}${location.href}`;
@@ -622,8 +642,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
    */
   function _writeNavSchemaCache(key, value) {
     if (!value) return;
-    if (_getLocalValue(key) === value) return;
+    if (_getLocalValue(key) === value) {
+      _log("cache unchanged (skip write)", { key, length: value.length });
+      return;
+    }
     _setLocalValue(key, value);
+    _log("cache updated", { key, length: value.length });
   }
 
   /**
@@ -3053,12 +3077,14 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   if (document.querySelector("[type=schema]")) {
     // if schema tag is present let's render it as read
+    _log("render via inline <script type=schema>", { length: inputSchema.length });
     _render(); // rerender the dom
   } else if (!window.hasCustomNavBeforeLoad) {
     if (location.search.includes("loadNav")) {
       // will wait for postmessage to populate this
       window.history.pushState("", "", APP_INDEX_URL);
       _setSessionValue("loadNavFromSessionStorage", "1");
+      _log("waiting for postMessage (loadNav)");
 
       const _onHandlePostMessageEvent = (event) => {
         const { type } = event.data;
@@ -3067,6 +3093,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           try {
             _persistBufferSchema(newSchema);
             inputSchema = newSchema;
+            _log("render via postMessage onViewLinks", { length: newSchema?.length ?? 0 });
             _render(); // rerender the dom
           } catch (err) {}
         }
@@ -3081,10 +3108,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
       inputSchema = DEFAULT_SCHEMA_TO_RENDER;
       viewMode = "edit";
 
+      _log("render via ?newNav default schema (edit mode)", { length: inputSchema.length });
       _render(); // rerender the dom
     } else if (_getSessionValue("loadNavFromSessionStorage") === "1" && location.href.includes(APP_INDEX_URL)) {
       // if this flag is set, then continue
       // will proceed with loading from session storage
+      _log("render via sessionStorage continuation", { length: inputSchema.length });
       _render(); // rerender the dom
     }
   } else {
@@ -3103,16 +3132,26 @@ window.prompt = (message, initialValue = "", callback = null) => {
         const cachedSchema = _readNavSchemaCache(cacheKey);
         if (cachedSchema) {
           inputSchema = cachedSchema;
+          _log("render via NavBeforeLoad cache hit (stale)", { cacheKey, length: cachedSchema.length });
           _render();
+        } else {
+          _log("cache miss (first load for this url)", { cacheKey });
         }
       }
 
+      _log("dispatching NavBeforeLoad (awaiting consumer renderSchema...)");
       _dispatchCustomEvent(document, "NavBeforeLoad", {
         renderSchema: (newSchema) => {
+          const isFreshDifferentFromCache = cacheKey ? _getLocalValue(cacheKey) !== newSchema : true;
           if (cacheKey) {
             _writeNavSchemaCache(cacheKey, newSchema);
           }
           inputSchema = newSchema;
+          _log("render via NavBeforeLoad consumer renderSchema (fresh)", {
+            length: newSchema?.length ?? 0,
+            cacheKey: cacheKey || "<disabled>",
+            changed: isFreshDifferentFromCache,
+          });
           _render();
         },
       });
