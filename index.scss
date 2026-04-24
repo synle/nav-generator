@@ -195,12 +195,14 @@ body {
 
       &.navBlock {
         padding: var(--spaceSize2);
-        // Mirror the parent #fav container: flex-wrap grid with the same gap
-        // and per-link column width so embedded schemas render like the top
-        // level (responsive, gapped, link pills fill a column).
+        // Mirror the parent #fav container: flex-wrap grid, per-link column
+        // width so embedded schemas render like the top level (responsive,
+        // gapped, link pills fill a column). Use a fixed spaceSize3 gap for
+        // both axes so the horizontal margin stays visible even on narrow
+        // viewports (where --gridGapWidth collapses to 0.25rem).
         display: flex;
         flex-wrap: wrap;
-        gap: var(--spaceSize3) var(--gridGapWidth);
+        gap: var(--spaceSize3);
 
         > .link {
           width: var(--flexColumnWidth);
@@ -212,12 +214,17 @@ body {
       background: var(--colorBgSecondary);
       display: flex;
       flex-wrap: wrap;
+      // 1px gap lets the bar bg (--colorBgSecondary) peek between tabs,
+      // so each tab reads as its own button instead of a continuous strip.
+      gap: 1px;
 
       tab {
         flex-shrink: 0;
         font-size: var(--fontSize3);
-        background: transparent;
-        border-bottom: var(--borderSize2) solid var(--colorBorderSecondary);
+        // Distinct shade from the bar so unselected tabs clearly read as
+        // clickable buttons (lighter than the bar in light theme, darker
+        // in dark theme — either way they pop out).
+        background: var(--colorBgMain);
         padding: var(--spaceSize2) var(--spaceSize4);
         user-select: none;
         cursor: pointer;
@@ -225,13 +232,13 @@ body {
 
         &:hover,
         &:focus {
-          background: var(--colorBgMain);
+          // Theme-agnostic hover feedback; works with any bg/foreground pair.
+          opacity: 0.7;
         }
 
         &.selected {
           background: var(--colorBorderMain);
           color: var(--colorBgMain);
-          border-bottom-color: var(--colorBorderMain);
           font-weight: var(--fontWeightSemiBold);
         }
       }
