@@ -117,12 +117,14 @@ When `index.js` is loaded from a consumer page with `?hasCustomNavBeforeLoad=1` 
 **Event payload:** a single property `renderSchema: (newSchema: string) => void`. The consumer listens and calls `renderSchema` with a schema string. No other fields.
 
 **Stale-while-revalidate cache** (localStorage, keyed by `navSchemaCache:${location.href}`):
+
 1. On DOMContentLoaded, read cache. If hit, render immediately — page paints with whatever was last successfully produced for this URL.
 2. Dispatch `NavBeforeLoad`. Consumer produces fresh content asynchronously (e.g. fetching from multiple upstreams).
 3. When consumer calls `renderSchema`, write-through to cache + re-render.
 4. Next visit: step 1 uses the updated cache.
 
 **Cache is disabled** (cacheKey = `null`, nothing read or written) when:
+
 - URL is not http(s) (data:, file:, etc.)
 - URL has `?newNav` (authoring mode — caching would poison new-nav state)
 - URL has `?loadNav` (postMessage-seeded mode)
