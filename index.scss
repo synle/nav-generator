@@ -202,7 +202,7 @@ body {
       tab {
         flex-shrink: 0;
         font-size: var(--fontSize3);
-        border-bottom: var(--borderSize2) solid var(--colorBorderSecondary);
+        background: transparent;
         padding: var(--spaceSize2) var(--spaceSize4);
         user-select: none;
         cursor: pointer;
@@ -210,11 +210,12 @@ body {
 
         &:hover,
         &:focus {
-          border-bottom: var(--borderSize2) solid var(--colorBorderMain);
+          background: var(--colorBgMain);
         }
 
         &.selected {
-          border-bottom: var(--borderSize2) solid var(--colorBorderMain);
+          background: var(--colorBorderMain);
+          color: var(--colorBgMain);
           font-weight: var(--fontWeightSemiBold);
         }
       }
