@@ -959,7 +959,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
           .map((r) => r.trim())
           .filter((r) => !!r)
           .forEach((t) => {
-            const [tabName, tabId] = t.split(TAB_TITLE_SPLIT);
+            const [rawName, rawId] = t.split(TAB_TITLE_SPLIT);
+            const tabName = (rawName || "").trim();
+            // Short-form (`>>>Label`) falls back to using the label itself as
+            // the binding key, so `:::Label` / ` ```Label ` content blocks
+            // match without an explicit id. Long-form (`>>>Label|tabId`)
+            // still works for backward compatibility with older schemas.
+            const tabId = (rawId || "").trim() || tabName;
             if (tabName && tabId) {
               const resolvedTabId = _upsertBlockId(tabId);
               blockIdToTabNameMap[resolvedTabId] = tabName;

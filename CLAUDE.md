@@ -81,6 +81,7 @@ The main application is in `index.jsx` (~3,300 lines), structured as:
      - `:::` - Nav blocks (recursively renders the enclosed schema)
      - `>>>` - Tabs
      - `@` - Custom favicon URLs
+   - **Tab binding (short-form vs long-form)**: a tab definition `>>>Label` (no `|tabId`) binds to its content block (`:::Label` or ` ```Label `) by matching the trimmed label string. Long-form `>>>Label|tabId` is still supported for backward compatibility — explicit id wins, label is the fallback. Authors should prefer short-form for new schemas.
 
 3. **Core Components** (lines 750-2800)
    - `CodeBlockWrapper` - Reusable collapsible code block with Copy, Fullscreen, and Collapse toggle
