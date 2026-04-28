@@ -53,15 +53,7 @@ hacker news | news.ycombinator.com`;
       '{ "k": 1 }',
       "```",
     ].join("\n");
-    const expected = [
-      ">>>Download>>>MetaData",
-      "```Download",
-      "echo hello",
-      "```",
-      "```MetaData",
-      '{ "k": 1 }',
-      "```",
-    ].join("\n");
+    const expected = [">>>Download>>>MetaData", "```Download", "echo hello", "```", "```MetaData", '{ "k": 1 }', "```"].join("\n");
     expect(migrateSchemaToShortForm(input)).toBe(expected);
   });
 
@@ -72,39 +64,15 @@ hacker news | news.ycombinator.com`;
   });
 
   it("rewrites html-block fence ids that match a tab definition", () => {
-    const input = [
-      ">>>HTML|advHtml",
-      "---advHtml",
-      "<b>html</b>",
-      "---",
-    ].join("\n");
-    const expected = [
-      ">>>HTML",
-      "---HTML",
-      "<b>html</b>",
-      "---",
-    ].join("\n");
+    const input = [">>>HTML|advHtml", "---advHtml", "<b>html</b>", "---"].join("\n");
+    const expected = [">>>HTML", "---HTML", "<b>html</b>", "---"].join("\n");
     expect(migrateSchemaToShortForm(input)).toBe(expected);
   });
 
   it("does not touch user content inside code or html blocks", () => {
     // The string ">>>Code|fake" inside a code body must not be rewritten.
-    const input = [
-      ">>>Code|advCode",
-      "```advCode",
-      ">>>Code|fake",
-      ":::fake",
-      "---fake",
-      "```",
-    ].join("\n");
-    const expected = [
-      ">>>Code",
-      "```Code",
-      ">>>Code|fake",
-      ":::fake",
-      "---fake",
-      "```",
-    ].join("\n");
+    const input = [">>>Code|advCode", "```advCode", ">>>Code|fake", ":::fake", "---fake", "```"].join("\n");
+    const expected = [">>>Code", "```Code", ">>>Code|fake", ":::fake", "---fake", "```"].join("\n");
     expect(migrateSchemaToShortForm(input)).toBe(expected);
   });
 
@@ -147,24 +115,8 @@ hacker news | news.ycombinator.com`;
   it("inner-scope rewrite is independent of outer-scope ids", () => {
     // Inner uses an id name that's also the OUTER label — must still
     // rewrite from the inner `>>>` map, not bleed across scopes.
-    const input = [
-      ">>>A|x>>>B|y",
-      ":::x",
-      ">>>A|inner",
-      "```inner",
-      "body",
-      "```",
-      ":::",
-    ].join("\n");
-    const expected = [
-      ">>>A>>>B",
-      ":::A",
-      ">>>A",
-      "```A",
-      "body",
-      "```",
-      ":::",
-    ].join("\n");
+    const input = [">>>A|x>>>B|y", ":::x", ">>>A|inner", "```inner", "body", "```", ":::"].join("\n");
+    const expected = [">>>A>>>B", ":::A", ">>>A", "```A", "body", "```", ":::"].join("\n");
     expect(migrateSchemaToShortForm(input)).toBe(expected);
   });
 
@@ -176,12 +128,7 @@ hacker news | news.ycombinator.com`;
   });
 
   it("is idempotent — running twice equals running once", () => {
-    const input = [
-      ">>>URL Porter|tabUrlPorter>>>RVX|tabRvx",
-      ":::tabUrlPorter",
-      "x",
-      ":::",
-    ].join("\n");
+    const input = [">>>URL Porter|tabUrlPorter>>>RVX|tabRvx", ":::tabUrlPorter", "x", ":::"].join("\n");
     const once = migrateSchemaToShortForm(input);
     const twice = migrateSchemaToShortForm(once);
     expect(twice).toBe(once);

@@ -312,7 +312,10 @@ export function migrateSchemaToShortForm(schema) {
     if (t === ":::") continue; // stray close
 
     if (t.startsWith(TAB_SPLIT)) {
-      const segments = t.split(TAB_SPLIT).map((s) => s.trim()).filter((s) => s);
+      const segments = t
+        .split(TAB_SPLIT)
+        .map((s) => s.trim())
+        .filter((s) => s);
       for (const seg of segments) {
         const [rawName, rawId] = seg.split(TAB_TITLE_SPLIT);
         const name = (rawName || "").trim();
