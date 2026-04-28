@@ -504,6 +504,105 @@ window.prompt = (message, initialValue = "", callback = null) => {
     target.dispatchEvent(evObj);
   }
 
+  // ---------------------------------------------------------------------------
+  // Tab selection persistence (sessionStorage)
+  // ---------------------------------------------------------------------------
+  // Generated DOM ids look like `block_<cacheId>_<userId>` where `cacheId` is
+  // seeded from `Date.now()` per parse, so the prefix is unstable across page
+  // loads. The `<userId>` suffix (the id the schema author wrote) IS stable, so
+  // that's what we persist. A `<tabs>` element's "scope" is the joined list of
+  // its tab children's user ids — stable as long as the schema's tab ids
+  // haven't changed.
+  const TAB_SELECTION_STORAGE_KEY = "navTabSelection";
+
+  /**
+   * Strip the `block_<digits>_` prefix from a generated tab id to recover the
+   * user-supplied portion. Returns "" when no user id was supplied (the parser
+   * tags those as `block_<digits>_generated`), since "generated" is not a
+   * stable persistence key.
+   * @param {string} rawId
+   * @returns {string}
+   */
+  function _getUserTabIdPart(rawId) {
+    const m = String(rawId || "").match(/^block_\d+_(.+)$/);
+    if (!m) return "";
+    return m[1] === "generated" ? "" : m[1];
+  }
+
+  /**
+   * Build a stable scope key for a `<tabs>` element from its direct tab
+   * children's user ids. Returns "" if any child lacks a user-supplied id, in
+   * which case persistence is skipped (we have no stable handle for that tab).
+   * @param {Element} tabsEl
+   * @returns {string}
+   */
+  function _getTabsScopeKey(tabsEl) {
+    const childTabs = [...tabsEl.children].filter((c) => c.tagName && c.tagName.toLowerCase() === "tab");
+    const parts = childTabs.map((t) => _getUserTabIdPart(t.dataset?.tabId));
+    if (parts.length === 0 || parts.some((p) => !p)) return "";
+    return parts.join("|");
+  }
+
+  /**
+   * Read the per-tabs selection map from sessionStorage. Returns {} on any error.
+   * @returns {Object<string, string>}
+   */
+  function _readTabSelectionStore() {
+    try {
+      return JSON.parse(sessionStorage.getItem(TAB_SELECTION_STORAGE_KEY) || "{}") || {};
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Persist the selected tab for a `<tabs>` scope. No-op when either the scope
+   * or the tab lacks a stable user id.
+   * @param {Element} tabsEl
+   * @param {Element} tabEl
+   */
+  function _saveSelectedTab(tabsEl, tabEl) {
+    const scope = _getTabsScopeKey(tabsEl);
+    const userId = _getUserTabIdPart(tabEl.dataset?.tabId);
+    if (!scope || !userId) return;
+    const store = _readTabSelectionStore();
+    if (store[scope] === userId) return;
+    store[scope] = userId;
+    try {
+      sessionStorage.setItem(TAB_SELECTION_STORAGE_KEY, JSON.stringify(store));
+    } catch {}
+  }
+
+  /**
+   * Clear all persisted tab selections. Called when the schema is replaced
+   * (Apply from edit, Restore from version history, Chrome bookmark import,
+   * etc.) since the previously-saved scope keys may no longer match the new
+   * schema's tabs — and even when they do, the user's expectation after a
+   * save is to start fresh on the first tab of each tabs block.
+   */
+  function _clearTabSelectionStore() {
+    try {
+      sessionStorage.removeItem(TAB_SELECTION_STORAGE_KEY);
+    } catch {}
+  }
+
+  /**
+   * Look up the previously-selected tab inside a `<tabs>` element. Returns the
+   * matching `<tab>` child or null if there's no saved selection or the saved
+   * id is no longer present.
+   * @param {Element} tabsEl
+   * @returns {Element|null}
+   */
+  function _findRestoredTab(tabsEl) {
+    const scope = _getTabsScopeKey(tabsEl);
+    if (!scope) return null;
+    const store = _readTabSelectionStore();
+    const userId = store[scope];
+    if (!userId) return null;
+    const childTabs = [...tabsEl.children].filter((c) => c.tagName && c.tagName.toLowerCase() === "tab");
+    return childTabs.find((t) => _getUserTabIdPart(t.dataset?.tabId) === userId) || null;
+  }
+
   /**
    * Creates a data URL for downloading a schema as a plain text file.
    * @param {string} schema - The schema text to encode.
@@ -1725,9 +1824,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
         for (const tabs of tabsList) {
           const tabChildren = [...tabs.querySelectorAll("tab")];
+          if (tabChildren.length === 0) continue;
 
-          // trigger first tab selection
-          _dispatchEvent(tabChildren[0], "click");
+          // Restore previously-selected tab from sessionStorage if available;
+          // otherwise fall back to selecting the first tab.
+          const target = _findRestoredTab(tabs) || tabChildren[0];
+          _dispatchEvent(target, "click");
         }
       }
     }, [doms, refContainer.current]);
@@ -2359,7 +2461,19 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     // events
     const onSetViewMode = (newView) => setViewMode(newView);
-    const onSetSchema = (newSchema) => setSchema(newSchema);
+    // Schema replacement (Apply from edit, Restore from version history,
+    // Chrome bookmark import, etc.) invalidates any saved tab selection —
+    // tab ids and scope keys can shift, so we reset to first-tab defaults.
+    // Skip the reset when the new schema is identical to avoid disturbing
+    // the user's selection on a no-op Apply.
+    const onSetSchema = (newSchema) => {
+      setSchema((prev) => {
+        if (prev !== newSchema) {
+          _clearTabSelectionStore();
+        }
+        return newSchema;
+      });
+    };
 
     // effect
     useLayoutEffect(() => {
@@ -3043,7 +3157,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
       const target = e.target;
       if (target.classList.contains("tab")) {
         const tab = target;
-        const tabChildren = [...tab.parentElement.querySelectorAll("tab")];
+        const tabsEl = tab.parentElement;
+        const tabChildren = [...tabsEl.querySelectorAll("tab")];
 
         for (const targetTab of tabChildren) {
           const targetTabId = targetTab.dataset?.tabId;
@@ -3074,6 +3189,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
             targetTab.classList.remove("selected");
           }
         }
+        // Persist the selection so a refresh re-selects this tab.
+        _saveSelectedTab(tabsEl, tab);
         e.preventDefault();
         e.stopPropagation();
       }

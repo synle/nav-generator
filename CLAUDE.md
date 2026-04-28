@@ -110,6 +110,22 @@ Implements stale-while-revalidate caching strategy:
 - Caches: HTML, JS, CSS, images, and specific file types
 - Auto-updates and cleans expired cache entries
 
+### Tab Selection Persistence
+
+Selected tabs survive page refresh via `sessionStorage` under the key `navTabSelection`.
+
+**Why sessionStorage and not localStorage**: persistence is per-browsing-context — closes when the tab closes. Refresh keeps it; new windows / new sessions start clean.
+
+**Stable key derivation**: generated DOM tab ids look like `block_<cacheId>_<userIdSuffix>`. The `cacheId` is seeded from `Date.now()` per parse so it changes every load — only the `<userIdSuffix>` is stable. `_getUserTabIdPart()` strips the prefix; `_getTabsScopeKey()` joins the suffixes of a `<tabs>` element's children to form a per-tabs scope key. The store is `{ scopeKey: selectedSuffix }`.
+
+**Restore vs first-tab default**: the `useLayoutEffect` in `SchemaRender` calls `_findRestoredTab(tabs) || tabChildren[0]` per `<tabs>` element — saved selection wins, otherwise first tab. Click handler calls `_saveSelectedTab(tabsEl, tab)` after the show/hide work.
+
+**Reset on schema replacement**: `App.onSetSchema` calls `_clearTabSelectionStore()` whenever a new schema differs from the previous one. This catches every schema-change path through one funnel: Apply from `PageEdit`, Restore from `PageVersionHistory`, Chrome bookmark import, plus any future caller. No-op Apply (schema identical to previous) preserves the selection.
+
+**Limitations**:
+- Anonymous blocks (no user-supplied id, parser tags suffix as `generated`) are skipped — `_getUserTabIdPart` returns `""` for them, persistence treats that as "no stable handle."
+- Two `<tabs>` with an identical sibling-suffix list share storage. Not currently exercised by `synle/fav`'s schema; can be eliminated later by prefixing scope keys with the parent block's suffix path.
+
 ### Keyboard Shortcuts
 
 - **`Alt+\`** / **`Cmd+\`** — toggle collapse/expand on every code block on the page. Flips a shared flag `_codeBlocksAllCollapsed` and dispatches the `NavGenCodeBlockCollapseAll` custom event; every mounted `CodeBlockWrapper` subscribes and updates its local collapsed state. Newly-mounted wrappers inherit the current flag (so a re-render after the shortcut still starts collapsed).
