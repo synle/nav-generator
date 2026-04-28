@@ -124,6 +124,7 @@ Selected tabs survive page refresh via `sessionStorage` under the key `navTabSel
 **Reset on schema replacement**: `App.onSetSchema` calls `_clearTabSelectionStore()` whenever a new schema differs from the previous one. This catches every schema-change path through one funnel: Apply from `PageEdit`, Restore from `PageVersionHistory`, Chrome bookmark import, plus any future caller. No-op Apply (schema identical to previous) preserves the selection.
 
 **Limitations**:
+
 - Anonymous blocks (no user-supplied id, parser tags suffix as `generated`) are skipped — `_getUserTabIdPart` returns `""` for them, persistence treats that as "no stable handle."
 - Two `<tabs>` with an identical sibling-suffix list share storage. Not currently exercised by `synle/fav`'s schema; can be eliminated later by prefixing scope keys with the parent block's suffix path.
 
