@@ -167,6 +167,24 @@ body {
       width: 100%;
     }
 
+    // Unify the code-block wrapper background with the page background so
+    // the code reads as part of its containing tab/section instead of as a
+    // floating gray panel. The wrapper border still defines the boundary;
+    // the banner gets a border-bottom (from common.scss) for separation
+    // between header and content. Also pulls the inner Prism `<pre>` and
+    // the `.block.codeBlock` element onto the same surface so token
+    // highlights sit on a clean white background.
+    .codeBlockWrapper {
+      background: var(--colorBgMain);
+
+      .codeBlockBanner,
+      .codeBlockContent,
+      .codeBlockContent .block.codeBlock,
+      .codeBlockContent pre[class*="language-"] {
+        background: var(--colorBgMain);
+      }
+    }
+
     .block {
       background: var(--colorBgSecondary);
 

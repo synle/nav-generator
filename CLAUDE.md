@@ -177,6 +177,8 @@ Implementation lives in `index.jsx` — search `_getNavSchemaCacheKey`, `_readNa
 
 **CodeBlockWrapper:** A reusable component for displaying code blocks with a header banner and collapsible content. Props: `id`, `title`, `content` (raw text for copy/fullscreen), `extraButtons`, `defaultCollapsed`, `children`. The banner (`.codeBlockBanner`) shows: title on the left, action buttons on the right (extra buttons, Copy, Fullscreen, Collapse/Expand toggle ▼). The collapse toggle uses CSS `transform: rotate(-90deg)` on `.codeBlockToggle` when `.collapsed`. The fullscreen mode portals a modal with the same banner layout (Copy + Close buttons) and renders the code content. Styling for `.codeBlockWrapper` comes from `index.scss` (within the `#pageReadContent` scope), while `.fullscreenCodeViewer` comes from `common.scss`.
 
+**Code block background unification:** `index.scss` overrides `.codeBlockWrapper` (and its banner / content / inner Prism `<pre>` / `.block.codeBlock`) to share `var(--colorBgMain)` — the same surface as the page body. This is intentional: the wrapper otherwise inherits `colorBgSecondary` (gray), which made code blocks read as a floating panel inside their containing tab/nav-block. The wrapper border still defines the boundary; the banner's border-bottom (from `common.scss`) still separates header from content.
+
 ### Generated Output
 
 The build creates a data URL embedded in `index.html` that contains:
