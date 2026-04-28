@@ -81,7 +81,8 @@ The main application is in `index.jsx` (~3,300 lines), structured as:
      - `:::` - Nav blocks (recursively renders the enclosed schema)
      - `>>>` - Tabs
      - `@` - Custom favicon URLs
-   - **Tab binding (short-form vs long-form)**: a tab definition `>>>Label` (no `|tabId`) binds to its content block (`:::Label` or ` ```Label `) by matching the trimmed label string. Long-form `>>>Label|tabId` is still supported for backward compatibility — explicit id wins, label is the fallback. Authors should prefer short-form for new schemas.
+   - **Tab binding (short-form vs long-form)**: a tab definition `>>>Label` (no `|tabId`) binds to its content block (`:::Label` or ` ```Label `) by matching the trimmed label string. Long-form `>>>Label|tabId` is still accepted by the parser for backward compatibility — explicit id wins, label is the fallback.
+   - **Auto-migration to short-form**: `App` runs `migrateSchemaToShortForm()` (in `utils.js`) on its initial schema state and again inside `onSetSchema`, so every save (Apply / Restore / Chrome import) and every first render normalizes long-form to short-form. The parser compat layer means un-migrated schemas still render correctly; migration just normalizes the *authored text* over time. Migration is idempotent and scope-aware (each `:::` body is its own scope) — see `test/migrate-schema.test.js`.
 
 3. **Core Components** (lines 750-2800)
    - `CodeBlockWrapper` - Reusable collapsible code block with Copy, Fullscreen, and Collapse toggle

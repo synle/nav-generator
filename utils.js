@@ -245,6 +245,189 @@ export function sortSchemaLines(schema) {
 }
 
 /**
+ * Normalize a schema by rewriting long-form tab definitions
+ * (`>>>Label|tabId`) and their matching delimiter blocks
+ * (`:::tabId`, ` ```tabId `, `---tabId`) into short-form
+ * (`>>>Label`, `:::Label`, ` ```Label `, `---Label`).
+ *
+ * The parser accepts both forms, but short-form is the canonical
+ * authoring style going forward — this function is run on the
+ * schema when it first enters App state and again on every save
+ * so authored schemas converge to short-form without any manual
+ * editing required.
+ *
+ * Behavior:
+ *  - Per parse scope (top-level + each `:::` nav-block body),
+ *    builds a map of `tabId → label` from `>>>` lines in that scope.
+ *  - Rewrites delimiter lines whose suffix matches a known id;
+ *    leaves unrelated suffixes alone (e.g. ` ```bash ` stays a
+ *    syntax-highlight hint when "bash" isn't a tab id).
+ *  - Code-block bodies and HTML-block bodies are passed through
+ *    untouched (they're user content, not schema).
+ *  - Nav-block bodies recurse — each `:::` block has its own scope,
+ *    matching the existing NavBlock-recursion semantics.
+ *  - Idempotent: a schema already in short-form is returned unchanged.
+ *
+ * @param {string} schema - Raw schema text.
+ * @returns {string} The normalized schema text.
+ */
+export function migrateSchemaToShortForm(schema) {
+  if (!schema || typeof schema !== "string") return schema;
+
+  const lines = schema.split("\n");
+
+  // First pass: collect id→label map from `>>>` lines at this scope only.
+  // Skip lines inside code, html, and nav blocks (those have their own
+  // scope or are user content).
+  const idToLabel = {};
+  let blockKind = null;
+  for (const line of lines) {
+    const t = line.trim();
+
+    if (blockKind === "code") {
+      if (t === CODE_BLOCK_SPLIT) blockKind = null;
+      continue;
+    }
+    if (blockKind === "html") {
+      if (t === HTML_BLOCK_SPLIT) blockKind = null;
+      continue;
+    }
+    if (blockKind === "nav") {
+      if (t === ":::") blockKind = null;
+      continue;
+    }
+
+    if (t.startsWith(CODE_BLOCK_SPLIT)) {
+      blockKind = "code";
+      continue;
+    }
+    if (t.startsWith(HTML_BLOCK_SPLIT)) {
+      blockKind = "html";
+      continue;
+    }
+    if (t.startsWith(":::") && t.length > 3) {
+      blockKind = "nav";
+      continue;
+    }
+    if (t === ":::") continue; // stray close
+
+    if (t.startsWith(TAB_SPLIT)) {
+      const segments = t.split(TAB_SPLIT).map((s) => s.trim()).filter((s) => s);
+      for (const seg of segments) {
+        const [rawName, rawId] = seg.split(TAB_TITLE_SPLIT);
+        const name = (rawName || "").trim();
+        const id = (rawId || "").trim();
+        if (name && id && id !== name) idToLabel[id] = name;
+      }
+    }
+  }
+
+  // Second pass: rewrite. Recurse into nav-block bodies.
+  const result = [];
+  let inBlockKind = null;
+  let navBuffer = [];
+
+  for (const line of lines) {
+    const t = line.trim();
+
+    if (inBlockKind === "code") {
+      result.push(line);
+      if (t === CODE_BLOCK_SPLIT) inBlockKind = null;
+      continue;
+    }
+    if (inBlockKind === "html") {
+      result.push(line);
+      if (t === HTML_BLOCK_SPLIT) inBlockKind = null;
+      continue;
+    }
+    if (inBlockKind === "nav") {
+      if (t === ":::") {
+        // Recurse on the buffered body (separate scope).
+        const recursed = migrateSchemaToShortForm(navBuffer.join("\n"));
+        recursed.split("\n").forEach((l) => result.push(l));
+        result.push(line);
+        navBuffer = [];
+        inBlockKind = null;
+      } else {
+        navBuffer.push(line);
+      }
+      continue;
+    }
+
+    // Code-block open: rewrite suffix only if it matches a known id.
+    if (t.startsWith(CODE_BLOCK_SPLIT) && t.length > CODE_BLOCK_SPLIT.length) {
+      const id = t.substr(CODE_BLOCK_SPLIT.length).trim();
+      if (idToLabel[id]) {
+        result.push(line.replace(/```.*/, CODE_BLOCK_SPLIT + idToLabel[id]));
+      } else {
+        result.push(line);
+      }
+      inBlockKind = "code";
+      continue;
+    }
+    if (t === CODE_BLOCK_SPLIT) {
+      result.push(line);
+      inBlockKind = "code";
+      continue;
+    }
+
+    // HTML-block open: same rule.
+    if (t.startsWith(HTML_BLOCK_SPLIT) && t.length > HTML_BLOCK_SPLIT.length) {
+      const id = t.substr(HTML_BLOCK_SPLIT.length).trim();
+      if (idToLabel[id]) {
+        result.push(line.replace(/---.*/, HTML_BLOCK_SPLIT + idToLabel[id]));
+      } else {
+        result.push(line);
+      }
+      inBlockKind = "html";
+      continue;
+    }
+    if (t === HTML_BLOCK_SPLIT) {
+      result.push(line);
+      inBlockKind = "html";
+      continue;
+    }
+
+    // Nav-block open: rewrite suffix, then start buffering body for recursion.
+    if (t.startsWith(":::") && t.length > 3) {
+      const id = t.substr(3).trim();
+      if (idToLabel[id]) {
+        result.push(line.replace(/:::.*/, ":::" + idToLabel[id]));
+      } else {
+        result.push(line);
+      }
+      inBlockKind = "nav";
+      continue;
+    }
+
+    // Tab definition: drop `|tabId` from each segment whose id maps to a label.
+    if (t.startsWith(TAB_SPLIT)) {
+      const leadingWs = line.match(/^\s*/)[0];
+      const segments = t.split(TAB_SPLIT).filter((s) => s.trim());
+      const rewritten =
+        TAB_SPLIT +
+        segments
+          .map((seg) => {
+            const [rawName, rawId] = seg.split(TAB_TITLE_SPLIT);
+            const name = (rawName || "").trim();
+            const id = (rawId || "").trim();
+            if (name && id && idToLabel[id] === name) {
+              return name; // drop |tabId
+            }
+            return seg.trim();
+          })
+          .join(TAB_SPLIT);
+      result.push(leadingWs + rewritten);
+      continue;
+    }
+
+    result.push(line);
+  }
+
+  return result.join("\n");
+}
+
+/**
  * Generate data URL from schema
  */
 export function generateDataUrl(schema, baseUrl = "https://synle.github.io/nav-generator") {

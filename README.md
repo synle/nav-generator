@@ -128,29 +128,31 @@ google | google.com
 
 ### Tabs
 
-Tabs are supported. Each tab points at a block id — which can be a code block (` ``` `), an HTML block (`---`), or a nav block (`:::`). Here is an advanced example mixing all three:
+Tabs are supported. A tab definition (`>>>Label`) binds to its content block by matching label — the content block can be a code block (` ``` `), an HTML block (`---`), or a nav block (`:::`). Here is an advanced example mixing all three:
 
 ````
->>>Code|advCode>>>HTML|advHtml>>>Nested Nav|advNav
+>>>Code>>>HTML>>>Nested Nav
 
-```advCode
+```Code
 // sample code block inside a tab
 const greet = (name) => "hello, " + name;
 console.log(greet("world"));
 ```
 
----advHtml
+---HTML
 <h3>HTML tab</h3>
 <p>This tab renders raw HTML &mdash; <b>bold</b>, <i>italic</i>, <u>underline</u>.</p>
 ---
 
-:::advNav
+:::Nested Nav
 # Embedded links inside a tab
 google | google.com
 github | github.com
 hacker news ||| news.ycombinator.com
 :::
 ````
+
+**Long-form (legacy) is still accepted** — `>>>Label|tabId` with matching `:::tabId` / ` ```tabId ` / `---tabId` blocks works for backward compatibility. Schemas are auto-migrated to short-form on first render and on every save, so authored text converges to short-form over time without any manual editing.
 
 ## Guide
 
@@ -178,14 +180,14 @@ TODO 2
 
 # Tabs
 
->>> tabName1|blockId1>>>tabName2|blockId2
+>>>tabName1>>>tabName2
 
-```blockId1
-sample blockId1
+```tabName1
+sample tabName1
 ```
 
----blockId2
-<u><b>sample html</b></u> blockId2
+---tabName2
+<u><b>sample html</b></u> tabName2
 ---
 
 ````

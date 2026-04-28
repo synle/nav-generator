@@ -7,6 +7,7 @@ import "prismjs/components/prism-json";
 import "prismjs/components/prism-bash";
 import prismStyles from "prismjs/themes/prism-tomorrow.min.css?inline";
 import styles from "./index.scss?inline";
+import { migrateSchemaToShortForm } from "./utils.js";
 
 // Inject styles inline into the document head
 const styleEl = document.createElement("style");
@@ -392,20 +393,20 @@ window.prompt = (message, initialValue = "", callback = null) => {
     :::
 
     # Advanced Tabs (code + html + nested nav)
-    >>>Code|advCode>>>HTML|advHtml>>>Nested Nav|advNav
+    >>>Code>>>HTML>>>Nested Nav
 
-    \`\`\`advCode
+    \`\`\`Code
     // sample code block inside a tab
     const greet = (name) => "hello, " + name;
     console.log(greet("world"));
     \`\`\`
 
-    ---advHtml
+    ---HTML
     <h3>HTML tab</h3>
     <p>This tab renders raw HTML &mdash; <b>bold</b>, <i>italic</i>, <u>underline</u>.</p>
     ---
 
-    :::advNav
+    :::Nested Nav
     # Embedded links inside a tab
     google | google.com
     github | github.com
@@ -2463,7 +2464,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
    */
   function App(props) {
     const [viewMode, setViewMode] = useState(props.viewMode); // read, edit, create
-    const [schema, setSchema] = useState(props.schema);
+    // Normalize incoming schema to short-form on first render so authored
+    // schemas converge to the canonical syntax. The parser still accepts
+    // both forms, but every save round-trips through the same migration.
+    const [schema, setSchema] = useState(() => migrateSchemaToShortForm(props.schema));
 
     // events
     const onSetViewMode = (newView) => setViewMode(newView);
@@ -2473,11 +2477,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     // Skip the reset when the new schema is identical to avoid disturbing
     // the user's selection on a no-op Apply.
     const onSetSchema = (newSchema) => {
+      const migrated = migrateSchemaToShortForm(newSchema);
       setSchema((prev) => {
-        if (prev !== newSchema) {
+        if (prev !== migrated) {
           _clearTabSelectionStore();
         }
-        return newSchema;
+        return migrated;
       });
     };
 

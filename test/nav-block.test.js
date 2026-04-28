@@ -59,11 +59,12 @@ describe("nav_block (:::) schema feature", () => {
     const defaultSchemaEnd = source.indexOf(".split(", defaultSchemaStart);
     const defaultSchema = source.slice(defaultSchemaStart, defaultSchemaEnd);
 
-    // 3 tabs declared in a single >>> line, each with a matching block below
-    expect(defaultSchema).toMatch(/>>>\s*Code\|advCode>>>\s*HTML\|advHtml>>>\s*Nested Nav\|advNav/);
-    expect(defaultSchema).toMatch(/\\`\\`\\`advCode/);
-    expect(defaultSchema).toMatch(/---advHtml/);
-    expect(defaultSchema).toMatch(/:::advNav/);
+    // 3 tabs declared in a single >>> line, each with a matching block below.
+    // Default schema uses short-form (label-only) — see migrateSchemaToShortForm.
+    expect(defaultSchema).toMatch(/>>>\s*Code>>>\s*HTML>>>\s*Nested Nav/);
+    expect(defaultSchema).toMatch(/\\`\\`\\`Code/);
+    expect(defaultSchema).toMatch(/---HTML/);
+    expect(defaultSchema).toMatch(/:::Nested Nav/);
 
     // Tabs demo must be after the standalone Nested Nav Block demo (moved to bottom)
     const standaloneIdx = defaultSchema.indexOf("# Nested Nav Block");
