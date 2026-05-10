@@ -1344,15 +1344,46 @@ window.prompt = (message, initialValue = "", callback = null) => {
       // Clear previous highlights before applying new ones
       clearHighlights();
 
+      // Map nav-block / code-block id -> tab label(s) that reference it. Lets a
+      // search for the tab name (e.g. "tde") match links inside the tab-bound
+      // block, even though the links themselves don't carry the tab text.
+      const blockIdToTabLabels = new Map();
+      doc.querySelectorAll("tab[data-tab-id]").forEach((tab) => {
+        const id = tab.dataset.tabId;
+        if (!id) return;
+        const label = (tab.textContent || "").trim();
+        if (!label) return;
+        if (!blockIdToTabLabels.has(id)) blockIdToTabLabels.set(id, []);
+        blockIdToTabLabels.get(id).push(label);
+      });
+
+      /**
+       * Collect ancestor context for matching: any tab labels whose content
+       * blocks contain this element. Walks up to the search container.
+       */
+      function getAncestorContext(elem) {
+        const labels = [];
+        let parent = elem.parentElement;
+        while (parent && parent !== doc) {
+          if (parent.id && blockIdToTabLabels.has(parent.id)) {
+            labels.push(...blockIdToTabLabels.get(parent.id));
+          }
+          parent = parent.parentElement;
+        }
+        return labels.join(" ");
+      }
+
       // Only consider links for matching. ALL match regexes must pass against
-      // either the link text or its section header (so "deploy commits" can
-      // match a "commits fe" link in the "Deploy" section, even though the
-      // tokens straddle the two fields).
+      // the link text, its section header, or any ancestor tab label (so
+      // searching "tde" surfaces every link inside the :::tde nav-block, and
+      // "deploy commits" matches a "commits fe" link in the "Deploy" section
+      // even though the tokens straddle multiple fields).
       links.forEach((elem) => {
         const text = elem.innerText || "";
         const section = elem.dataset.section || "";
+        const context = getAncestorContext(elem);
 
-        const isMatch = matchRegexes.every((r) => r.test(text) || r.test(section));
+        const isMatch = matchRegexes.every((r) => r.test(text) || r.test(section) || r.test(context));
 
         elem.classList.toggle("hidden", !isMatch);
 
