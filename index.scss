@@ -214,13 +214,13 @@ body {
       &.navBlock {
         padding: var(--spaceSize4);
         // Flex-wrap grid with per-link column width so embedded schemas
-        // lay out like the top level. Hardcode a comfortable gap (1rem
-        // row, 1.5rem col) instead of --gridGapWidth — the responsive
-        // variable collapses to 0.25rem below 660px (common with
-        // devtools open), which squashes embedded pills together.
+        // lay out like the top level. Match the top-level #fav gap
+        // (--spaceSize3 row, --gridGapWidth col) so --flexColumnWidth
+        // math stays consistent — otherwise hardcoded gaps overflow the
+        // 6-column row and only 5 items fit.
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem 1.5rem;
+        gap: var(--spaceSize3) var(--gridGapWidth);
 
         > .link {
           width: var(--flexColumnWidth);
