@@ -50,5 +50,32 @@ download_with_validation \
   "common.scss"
 
 npm install
-npm run test:coverage
+
+# Run tests with coverage; tee output so we can both display it live and
+# scrape the summary for the GitHub Actions step summary.
+coverage_log="$(mktemp -t nav-coverage-XXXXXX.log)"
+trap 'rm -f "$coverage_log"' EXIT
+set -o pipefail
+npm run test:coverage 2>&1 | tee "$coverage_log"
+set +o pipefail
+
+# Publish the coverage output to the GitHub Actions job summary so the
+# percentages are visible without digging into raw logs. We extract from
+# the "% Coverage report" header through the trailing "====" line of the
+# v8 reporter's summary block (state machine: copy lines after the header,
+# stop once we've seen the second band of '=' delimiters).
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+  {
+    echo "## Test coverage"
+    echo ""
+    echo '```'
+    awk '
+      /% Coverage report/ { copy = 1 }
+      copy { print }
+      copy && /^=+$/ { eq_seen++; if (eq_seen == 2) exit }
+    ' "$coverage_log"
+    echo '```'
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
+
 npm run build
