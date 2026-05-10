@@ -25,10 +25,12 @@ export default defineConfig({
         "test-runner.js",
       ],
       all: false,
-      lines: 80,
-      functions: 80,
-      branches: 80,
-      statements: 80,
+      // Baselines captured from current test suite — do not lower without justification.
+      // Raise these whenever coverage improves so regressions are caught in CI.
+      lines: 95.87,
+      functions: 100,
+      branches: 92.46,
+      statements: 95.37,
     },
   },
 });
