@@ -1224,8 +1224,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       const isFuzzy = trimmedSearchText.startsWith("/");
 
-      // Build regex ONCE
-      let matchRegex;
+      // Match logic:
+      //  - Fuzzy (/term): single regex, scattered-letter match.
+      //  - Non-fuzzy: whitespace-tokenized, AND across tokens. e.g. "commit fe"
+      //    matches "commits fe" because both "commit" and "fe" appear — the
+      //    user shouldn't have to type a contiguous substring.
+      let matchRegexes; // array of RegExp; ALL must match (text or section)
+      let highlightRegex; // single RegExp used to highlight matched portions
 
       if (isFuzzy) {
         const cleaned = trimmedSearchText
@@ -1234,33 +1239,22 @@ window.prompt = (message, initialValue = "", callback = null) => {
           .replace(/\s+/g, " ")
           .trim();
 
-        const pattern = cleaned
+        const matchPattern = cleaned
           .split("")
           .map((c) => escapeRegex(c))
           .join(".*?");
+        matchRegexes = [new RegExp(matchPattern, "i")];
 
-        matchRegex = new RegExp(pattern, "i");
-      } else {
-        matchRegex = new RegExp(escapeRegex(trimmedSearchText), "i");
-      }
-
-      // Build a highlight regex that captures the matched portion
-      let highlightRegex;
-      if (isFuzzy) {
-        const cleaned = trimmedSearchText
-          .slice(1)
-          .replace(/[\W_]+/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
-
-        const pattern = cleaned
+        const highlightPattern = cleaned
           .split("")
           .map((c) => "(" + escapeRegex(c) + ")")
           .join("(.*?)");
-
-        highlightRegex = new RegExp(pattern, "i");
+        highlightRegex = new RegExp(highlightPattern, "i");
       } else {
-        highlightRegex = new RegExp("(" + escapeRegex(trimmedSearchText) + ")", "gi");
+        const tokens = trimmedSearchText.split(/\s+/).filter(Boolean);
+        matchRegexes = tokens.map((tok) => new RegExp(escapeRegex(tok), "i"));
+        // Alternation regex highlights any token's occurrences.
+        highlightRegex = new RegExp("(" + tokens.map(escapeRegex).join("|") + ")", "gi");
       }
 
       // Apply highlight markup to a text node
@@ -1305,9 +1299,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
             frag.appendChild(document.createTextNode(text.substring(fullMatchEnd)));
           }
         } else {
-          // Simple substring highlight - highlight all occurrences
+          // Simple substring highlight - highlight all occurrences of any token.
+          // The supplied regex is an alternation of all tokens with /gi.
           let lastIndex = 0;
-          const globalRegex = new RegExp("(" + escapeRegex(trimmedSearchText) + ")", "gi");
+          const globalRegex = new RegExp(regex.source, "gi");
           let m;
           while ((m = globalRegex.exec(text)) !== null) {
             if (m.index > lastIndex) {
@@ -1349,12 +1344,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
       // Clear previous highlights before applying new ones
       clearHighlights();
 
-      // Only consider links for matching
+      // Only consider links for matching. ALL match regexes must pass against
+      // either the link text or its section header (so "deploy commits" can
+      // match a "commits fe" link in the "Deploy" section, even though the
+      // tokens straddle the two fields).
       links.forEach((elem) => {
         const text = elem.innerText || "";
         const section = elem.dataset.section || "";
 
-        const isMatch = matchRegex.test(text) || matchRegex.test(section);
+        const isMatch = matchRegexes.every((r) => r.test(text) || r.test(section));
 
         elem.classList.toggle("hidden", !isMatch);
 
