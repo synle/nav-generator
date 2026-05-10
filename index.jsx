@@ -1359,6 +1359,16 @@ window.prompt = (message, initialValue = "", callback = null) => {
         if (isMatch) {
           visibleCount++;
           highlightLink(elem);
+          // The mass-hide above hides every direct child of the search
+          // container — including ancestor wrappers like .block.navBlock
+          // that contain the matched link. Walk up and un-hide ancestors
+          // so the matched link is actually rendered. Stop at the
+          // container so the wrapper itself isn't touched.
+          let parent = elem.parentElement;
+          while (parent && parent !== doc) {
+            parent.classList.remove("hidden");
+            parent = parent.parentElement;
+          }
         }
       });
 
