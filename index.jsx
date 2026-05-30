@@ -1740,6 +1740,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
   const CODE_BLOCK_COLLAPSE_EVENT = "NavGenCodeBlockCollapseAll";
   let _codeBlocksAllCollapsed = false;
 
+  /** Number of leading content lines shown when a code block is collapsed. */
+  const COLLAPSED_PREVIEW_LINES = 10;
+
   /**
    * Reusable collapsible code block wrapper with copy, fullscreen, and collapse toggle.
    * @param {Object} props
@@ -1792,6 +1795,41 @@ window.prompt = (message, initialValue = "", callback = null) => {
       </div>
     );
 
+    // When collapsed, render only the first COLLAPSED_PREVIEW_LINES of `content`
+    // so users can glance at the start of the block. The "Show More" link below
+    // expands to the full caller-provided children. Re-uses _highlightCode so the
+    // truncated preview keeps Prism syntax highlighting.
+    const contentLines = content.split("\n");
+    const isTruncatable = contentLines.length > COLLAPSED_PREVIEW_LINES;
+    const hiddenLineCount = isTruncatable ? contentLines.length - COLLAPSED_PREVIEW_LINES : 0;
+    let bodyDom = null;
+    if (collapsed && isTruncatable) {
+      const previewText = contentLines.slice(0, COLLAPSED_PREVIEW_LINES).join("\n");
+      bodyDom = (
+        <>
+          <div className="codeBlockContent">
+            <pre
+              className={`block codeBlock language-${codeBlockLang}`}
+              dangerouslySetInnerHTML={{ __html: _highlightCode(previewText) }}
+            />
+          </div>
+          <a
+            className="codeBlockShowMore"
+            data-testid="show-more-toggle"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setCollapsed(false);
+            }}
+          >
+            Show More ({hiddenLineCount} more {hiddenLineCount === 1 ? "line" : "lines"})
+          </a>
+        </>
+      );
+    } else if (!collapsed) {
+      bodyDom = <div className="codeBlockContent">{children}</div>;
+    }
+
     return (
       <>
         <div id={id} className={`codeBlockWrapper${collapsed ? " collapsed" : ""}`}>
@@ -1799,7 +1837,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             {titleDom}
             {actionsDom}
           </div>
-          {!collapsed && <div className="codeBlockContent">{children}</div>}
+          {bodyDom}
         </div>
         {fullscreen &&
           createPortal(
