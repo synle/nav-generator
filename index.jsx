@@ -1750,12 +1750,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
    * @param {string} props.title - Title displayed in the banner.
    * @param {string} [props.content=""] - Raw text content for copy/fullscreen.
    * @param {React.ReactNode} [props.extraButtons] - Additional action buttons.
-   * @param {boolean} [props.defaultCollapsed=false] - Whether to start collapsed.
+   * @param {boolean} [props.defaultCollapsed=true] - Whether to start collapsed.
    * @param {React.ReactNode} props.children - The code block content to render.
    * @returns {JSX.Element}
    */
   function CodeBlockWrapper(props) {
-    const { id, title, content = "", extraButtons, defaultCollapsed = false, children } = props;
+    const { id, title, content = "", extraButtons, defaultCollapsed = true, children } = props;
     const [collapsed, setCollapsed] = useState(defaultCollapsed || _codeBlocksAllCollapsed);
     const [fullscreen, setFullscreen] = useState(false);
 
