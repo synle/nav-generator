@@ -1778,23 +1778,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     const codeBlockLang = _detectCodeLanguage(content);
 
-    const titleDom = title ? (
-      <span className="codeBlockTitle" onClick={() => _onCopyToClipboard(content)} style={{ cursor: "pointer" }}>
-        {title}
-      </span>
-    ) : null;
-
-    const actionsDom = (
-      <div className="codeBlockActions">
-        {extraButtons}
-        <button onClick={() => _onCopyToClipboard(content)}>Copy</button>
-        <button onClick={() => setFullscreen(true)}>Fullscreen</button>
-        <button className="codeBlockToggle" onClick={() => setCollapsed(!collapsed)}>
-          ▼
-        </button>
-      </div>
-    );
-
     // When collapsed, render only the first COLLAPSED_PREVIEW_LINES of `content`
     // so users can glance at the start of the block. The "Show More" link below
     // expands to the full caller-provided children. Re-uses _highlightCode so the
@@ -1802,6 +1785,24 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const contentLines = content.split("\n");
     const isTruncatable = contentLines.length > COLLAPSED_PREVIEW_LINES;
     const hiddenLineCount = isTruncatable ? contentLines.length - COLLAPSED_PREVIEW_LINES : 0;
+
+    const titleDom = title ? (
+      <span className="codeBlockTitle" onClick={() => _onCopyToClipboard(content)} style={{ cursor: "pointer" }}>
+        {title}
+      </span>
+    ) : null;
+
+    // No per-block collapse toggle: the inline "Show More" link below handles
+    // expansion when the block is collapsed, and the global Alt+\ / Cmd+\
+    // shortcut handles bulk collapse/expand.
+    const actionsDom = (
+      <div className="codeBlockActions">
+        {extraButtons}
+        <button onClick={() => _onCopyToClipboard(content)}>Copy</button>
+        <button onClick={() => setFullscreen(true)}>Fullscreen</button>
+      </div>
+    );
+
     let bodyDom = null;
     if (collapsed && isTruncatable) {
       const previewText = contentLines.slice(0, COLLAPSED_PREVIEW_LINES).join("\n");
@@ -1826,7 +1827,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
           </a>
         </>
       );
-    } else if (!collapsed) {
+    } else {
+      // !collapsed, OR collapsed-but-not-truncatable — always show full content
+      // for short blocks so a global "collapse all" doesn't blank them out.
       bodyDom = <div className="codeBlockContent">{children}</div>;
     }
 
