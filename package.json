@@ -2,9 +2,26 @@
   "name": "synle-nav-generator",
   "version": "1.2.0",
   "private": true,
-  "type": "module",
   "description": "Application to organize and generate bookmarks",
+  "keywords": [
+    "Le",
+    "Sy"
+  ],
+  "license": "ISC",
+  "author": "Sy Le",
+  "type": "module",
   "main": "index.html",
+  "scripts": {
+    "clean": "rm -rf import-map.json .oxfmt-cache",
+    "build": "NODE_ENV=production vite build",
+    "format": "oxfmt --write .",
+    "start": "npx http-server --cors -a 127.0.0.1 .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "format:check": "oxfmt --check ."
+  },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "monaco-editor": "^0.55.1",
@@ -12,22 +29,6 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
-  "scripts": {
-    "clean": "rm -rf import-map.json .prettier-cache",
-    "build": "NODE_ENV=production vite build",
-    "format": "npx --yes prettier --write --cache --ignore-unknown --no-error-on-unmatched-pattern --print-width 140 .",
-    "start": "npx http-server --cors -a 127.0.0.1 .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
-  },
-  "keywords": [
-    "Sy",
-    "Le"
-  ],
-  "author": "Sy Le",
-  "license": "ISC",
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -38,7 +39,7 @@
     "c8": "^11.0.0",
     "happy-dom": "^20.8.9",
     "jsdom": "^29.0.2",
-    "prettier": "^3.8.2",
+    "oxfmt": "^0.61.0",
     "sass": "^1.99.0",
     "vite": "^8.0.8",
     "vitest": "^4.1.4"

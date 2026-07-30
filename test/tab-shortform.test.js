@@ -30,7 +30,9 @@ describe("short-form tab syntax", () => {
   });
 
   it("imports migrateSchemaToShortForm from utils.js", () => {
-    expect(source).toMatch(/import\s*\{\s*migrateSchemaToShortForm\s*\}\s*from\s*["']\.\/utils\.js["']/);
+    expect(source).toMatch(
+      /import\s*\{\s*migrateSchemaToShortForm\s*\}\s*from\s*["']\.\/utils\.js["']/,
+    );
   });
 
   it("App seeds initial schema state via the migration", () => {

@@ -58,7 +58,12 @@ function shouldCacheUrl(url) {
   const pathname = urlObj.pathname;
 
   // Cache root paths
-  if (pathname === "/" || pathname === "./" || pathname === "/index.html" || pathname === "./index.html") {
+  if (
+    pathname === "/" ||
+    pathname === "./" ||
+    pathname === "/index.html" ||
+    pathname === "./index.html"
+  ) {
     return true;
   }
 
@@ -148,7 +153,10 @@ self.addEventListener("fetch", (event) => {
       // If we have a cached response (even if expired), return it immediately
       // while the network request updates the cache in the background
       if (cachedResponse) {
-        console.log("Service Worker: Serving from cache (revalidating in background):", event.request.url);
+        console.log(
+          "Service Worker: Serving from cache (revalidating in background):",
+          event.request.url,
+        );
 
         // If cache is still valid, refresh the TTL in background
         if (!isCacheExpired(cachedResponse)) {

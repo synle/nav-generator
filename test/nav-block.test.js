@@ -31,14 +31,20 @@ describe("nav_block (:::) schema feature", () => {
     expect(source).toMatch(/function\s+NavBlock\s*\(\s*\{[^}]*schema[^}]*\}\s*\)/);
     // NavBlock must recursively render the enclosed schema with its own ref scope
     // and pass isNested so the nested renderer suppresses page-level chrome.
-    expect(source).toMatch(/<SchemaRender\s+schema=\{schema\}\s+refContainer=\{refNestedContainer\}\s+isNested/);
+    expect(source).toMatch(
+      /<SchemaRender\s+schema=\{schema\}\s+refContainer=\{refNestedContainer\}\s+isNested/,
+    );
   });
 
   it("suppresses the title chrome when rendered as a nested block", () => {
     // SchemaRender must accept isNested
-    expect(source).toMatch(/function\s+SchemaRender\s*\([^)]*\)\s*\{[\s\S]*?const\s*\{\s*[^}]*isNested[^}]*\}\s*=\s*props/);
+    expect(source).toMatch(
+      /function\s+SchemaRender\s*\([^)]*\)\s*\{[\s\S]*?const\s*\{\s*[^}]*isNested[^}]*\}\s*=\s*props/,
+    );
     // The "title" render branch must early-return when isNested
-    expect(source).toMatch(/case\s+"title":[\s\S]*?if\s*\(\s*isNested\s*\)\s*\{[\s\S]*?return\s+null/);
+    expect(source).toMatch(
+      /case\s+"title":[\s\S]*?if\s*\(\s*isNested\s*\)\s*\{[\s\S]*?return\s+null/,
+    );
   });
 
   it("ships a ::: sample in the default schema template", () => {

@@ -62,7 +62,11 @@ describe("tab selection persistence", () => {
     // Schema replacement (Apply / Restore / Import) routes through the
     // onSetSchema funnel. The clear must guard on `prev !== migrated` so a
     // no-op Apply doesn't disturb the user's selection.
-    expect(source).toMatch(/const\s+onSetSchema\s*=\s*\(newSchema\)\s*=>\s*\{[\s\S]*?_clearTabSelectionStore\(\)/);
-    expect(source).toMatch(/if\s*\(\s*prev\s*!==\s*migrated\s*\)\s*\{\s*_clearTabSelectionStore\(\)/);
+    expect(source).toMatch(
+      /const\s+onSetSchema\s*=\s*\(newSchema\)\s*=>\s*\{[\s\S]*?_clearTabSelectionStore\(\)/,
+    );
+    expect(source).toMatch(
+      /if\s*\(\s*prev\s*!==\s*migrated\s*\)\s*\{\s*_clearTabSelectionStore\(\)/,
+    );
   });
 });

@@ -40,7 +40,12 @@ describe("shouldCacheUrl", () => {
     const pathname = urlObj.pathname;
 
     // Cache root paths
-    if (pathname === "/" || pathname === "./" || pathname === "/index.html" || pathname === "./index.html") {
+    if (
+      pathname === "/" ||
+      pathname === "./" ||
+      pathname === "/index.html" ||
+      pathname === "./index.html"
+    ) {
       return true;
     }
 

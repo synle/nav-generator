@@ -56,7 +56,15 @@ describe("Search Functionality", () => {
   });
 
   describe("Suggestion Filtering", () => {
-    const suggestions = ["Google Search", "Google Finance", "GitHub", "GitLab", "Facebook", "Twitter", "LinkedIn"];
+    const suggestions = [
+      "Google Search",
+      "Google Finance",
+      "GitHub",
+      "GitLab",
+      "Facebook",
+      "Twitter",
+      "LinkedIn",
+    ];
 
     it("should filter suggestions with normal search", () => {
       const results = filterFuzzySuggestions("google", suggestions);
@@ -137,10 +145,12 @@ describe("Search Functionality", () => {
       const filteredSuggestions = ["a", "b", "c"];
 
       // Simulate ArrowDown
-      selectedIndex = selectedIndex < filteredSuggestions.length - 1 ? selectedIndex + 1 : selectedIndex;
+      selectedIndex =
+        selectedIndex < filteredSuggestions.length - 1 ? selectedIndex + 1 : selectedIndex;
       expect(selectedIndex).toBe(0);
 
-      selectedIndex = selectedIndex < filteredSuggestions.length - 1 ? selectedIndex + 1 : selectedIndex;
+      selectedIndex =
+        selectedIndex < filteredSuggestions.length - 1 ? selectedIndex + 1 : selectedIndex;
       expect(selectedIndex).toBe(1);
     });
 
@@ -163,7 +173,8 @@ describe("Search Functionality", () => {
       const filteredSuggestions = ["a", "b", "c"];
 
       // At end, should not go further
-      selectedIndex = selectedIndex < filteredSuggestions.length - 1 ? selectedIndex + 1 : selectedIndex;
+      selectedIndex =
+        selectedIndex < filteredSuggestions.length - 1 ? selectedIndex + 1 : selectedIndex;
       expect(selectedIndex).toBe(2);
     });
   });

@@ -41,6 +41,8 @@ describe("NavBeforeLoad schema cache", () => {
   });
 
   it("writes through to cache when the consumer calls renderSchema", () => {
-    expect(source).toMatch(/renderSchema:\s*\(newSchema\)\s*=>\s*\{[\s\S]*?_writeNavSchemaCache\(cacheKey,\s*newSchema\)/);
+    expect(source).toMatch(
+      /renderSchema:\s*\(newSchema\)\s*=>\s*\{[\s\S]*?_writeNavSchemaCache\(cacheKey,\s*newSchema\)/,
+    );
   });
 });
