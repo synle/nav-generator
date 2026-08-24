@@ -8,7 +8,7 @@
 .env
 .npmrc
 .nyc_output
-.prettier-cache
+.oxfmt-cache
 .vs-code
 DEBUG
 Error
