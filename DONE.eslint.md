@@ -10,12 +10,12 @@ behavior-safe refactor.
 
 ## Status: DONE (2026-08-23)
 
-| Original TODO | Outcome |
-| ------------- | ------- |
+| Original TODO                        | Outcome                                                                                                                                                           |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Revisit the single `no-eval` disable | **Fixed** — `eval(schemaComponent.linkUrl)` at `index.jsx` jsLink onClick replaced with `new Function(schemaComponent.linkUrl)()`; inline disable comment removed |
-| Add explicit `.oxlintrc.json` | **Done** — config committed; plugins, categories, rule overrides and ignore list now explicit and reviewable |
-| Stricter categories incrementally | **Partially done** — `suspicious` enabled (errors); React plugin enabled; `pedantic`, `perf`, `style`, `restriction` deliberately left off |
-| ESLint migration port-over note | **Moot** — no inline suppression remains to port |
+| Add explicit `.oxlintrc.json`        | **Done** — config committed; plugins, categories, rule overrides and ignore list now explicit and reviewable                                                      |
+| Stricter categories incrementally    | **Partially done** — `suspicious` enabled (errors); React plugin enabled; `pedantic`, `perf`, `style`, `restriction` deliberately left off                        |
+| ESLint migration port-over note      | **Moot** — no inline suppression remains to port                                                                                                                  |
 
 ## Current lint setup
 
@@ -31,11 +31,11 @@ behavior-safe refactor.
 
 ## Rules disabled (with reason)
 
-| Rule | Reason it stays off |
-| ---- | ------------------- |
-| `no-underscore-dangle` | `_`-prefixed module-level helpers (`_log`, `_render`, `_onLinkNavigate`, …) are the codebase's deliberate private-naming convention — 42 sites |
-| `unicorn/prefer-add-event-listener` | `window.onmessage = …` style assignments are intentional single-handler wiring; converting to `addEventListener()` risks duplicate-handler behavior changes |
-| `unicorn/consistent-function-scoping` | Hoisting nested functions out would change closures over component state |
+| Rule                                  | Reason it stays off                                                                                                                                         |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no-underscore-dangle`                | `_`-prefixed module-level helpers (`_log`, `_render`, `_onLinkNavigate`, …) are the codebase's deliberate private-naming convention — 42 sites              |
+| `unicorn/prefer-add-event-listener`   | `window.onmessage = …` style assignments are intentional single-handler wiring; converting to `addEventListener()` risks duplicate-handler behavior changes |
+| `unicorn/consistent-function-scoping` | Hoisting nested functions out would change closures over component state                                                                                    |
 
 ## Code fixes made this pass (instead of disabling rules)
 
