@@ -18,8 +18,8 @@ lint setup.
 
 ## Rules disabled / excluded
 
-| Rule | Where | Why | TODO for future agent |
-| ---- | ----- | --- | --------------------- |
+| Rule      | Where                                                           | Why                                                                                             | TODO for future agent                                                                                                        |
+| --------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `no-eval` | `index.jsx:2204` (inline `// oxlint-disable-next-line no-eval`) | `javascript://` links are a documented schema feature; link URLs execute via `eval()` by design | Consider a safer execution path (e.g. `new Function`, sandboxed iframe, or explicit allowlist) so the disable can be removed |
 
 That is the entire list. No rules were turned off globally, no files were
