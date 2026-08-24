@@ -35,9 +35,9 @@ describe("code block collapse/expand shortcut", () => {
     expect(source).toMatch(
       /key\s*===\s*"\\\\"\s*&&\s*\(e\.altKey\s*\|\|\s*e\.metaKey\)\s*&&\s*!e\.ctrlKey\s*&&\s*!e\.shiftKey/,
     );
-    // Dispatches the shared event name
+    // Dispatches the shared event name (format-tolerant: single- or multi-line)
     expect(source).toMatch(
-      /new\s+CustomEvent\(\s*CODE_BLOCK_COLLAPSE_EVENT\s*,\s*\{\s*detail:\s*\{\s*collapsed:\s*_codeBlocksAllCollapsed\s*\}\s*\}\s*\)/,
+      /new\s+CustomEvent\(\s*CODE_BLOCK_COLLAPSE_EVENT\s*,\s*\{\s*detail:\s*\{\s*collapsed:\s*_codeBlocksAllCollapsed\s*\}\s*,?\s*\}\s*,?\s*\)/,
     );
   });
 });
