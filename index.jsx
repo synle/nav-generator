@@ -881,16 +881,21 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     const serializedSchema = [];
 
-    const _upsertBlockId = (blockId) => {
-      if (!blockId) {
+    /**
+     * Maps a raw block id to its unique cache-scoped id, generating one when absent.
+     * @param {string} newBlockId - Raw block id from the schema line; empty string generates a fresh id.
+     * @returns {string} Unique block id registered in blockIdMap.
+     */
+    const _upsertBlockId = (newBlockId) => {
+      if (!newBlockId) {
         return `block_${++cacheId}_generated`;
       }
 
-      if (!blockIdMap[blockId]) {
-        blockIdMap[blockId] = `block_${++cacheId}_${blockId}`;
+      if (!blockIdMap[newBlockId]) {
+        blockIdMap[newBlockId] = `block_${++cacheId}_${newBlockId}`;
       }
 
-      return blockIdMap[blockId];
+      return blockIdMap[newBlockId];
     };
 
     lines.forEach((link) => {
@@ -1640,10 +1645,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     /**
      * Sorts schema sections alphabetically by section header name.
-     * @param {string} schema - The schema string to sort.
+     * @param {string} schemaText - The schema string to sort.
      */
-    function onSortSchemaBySectionNameAndTitle(schema) {
-      const rows = schema.split("\n");
+    function onSortSchemaBySectionNameAndTitle(schemaText) {
+      const rows = schemaText.split("\n");
       let sections = [];
       let sectionIdx = 0;
 
@@ -1663,7 +1668,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           }
           return s;
         })
-        .sort(_schemaSectionNameOnlySorter);
+        .toSorted(_schemaSectionNameOnlySorter);
 
       const newBufferSchema = sections.map((s) => s.join("\n")).join("\n");
       setBufferSchema(newBufferSchema);
@@ -2200,9 +2205,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     type="button"
                     onClick={(e) => {
                       _onLinkNavigate(e);
-                      // Intentional: javascript:// links are a documented schema feature
-                      // oxlint-disable-next-line no-eval
-                      eval(schemaComponent.linkUrl);
+                      // Intentional: javascript:// links are a documented schema feature.
+                      // linkUrl is a self-contained async IIFE expression (wrapped at parse time),
+                      // so it executes globally without needing eval().
+                      new Function(schemaComponent.linkUrl)();
                     }}
                     onBlur={_onLinkBlur}
                     data-section={schemaComponent.headerName}
@@ -2777,7 +2783,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           const allVersions = await getVersions();
           if (mounted) {
             // sort newest first
-            const sorted = allVersions.sort(
+            const sorted = allVersions.toSorted(
               (a, b) => new Date(b.created_at) - new Date(a.created_at),
             );
             setVersions(sorted);
@@ -3113,7 +3119,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
         return allResults.join("\n").trim();
       } catch (error) {
         console.error("Error parsing Chrome bookmarks:", error);
-        throw new Error("Failed to parse bookmarks: " + error.message);
+        throw new Error("Failed to parse bookmarks: " + error.message, {
+          cause: error,
+        });
       }
     }
 

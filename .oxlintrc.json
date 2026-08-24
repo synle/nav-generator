@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    "no-underscore-dangle": "off",
+    "unicorn/prefer-add-event-listener": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/exhaustive-effect-dependencies": "warn",
+    "react/memo-dependencies": "warn",
+    "react/refs": "warn",
+    "react/set-state-in-effect": "warn"
+  },
+  "ignorePatterns": ["coverage/", "node_modules/", "index.js", "index.js.map"],
+  "env": {
+    "builtin": true
+  }
+}

@@ -232,7 +232,7 @@ export function sortSchemaLines(schema) {
       .join("\n")
       .split("\n")
       .filter((line) => line.trim())
-      .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+      .toSorted((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
       .join("\n");
 
     if (header) {
