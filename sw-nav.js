@@ -11,7 +11,7 @@ self.addEventListener("message", (event) => {
 });
 
 // Install event
-self.addEventListener("install", (event) => {
+self.addEventListener("install", () => {
   console.log("Service Worker: Installed");
   // Don't auto skip waiting - let the page control it
 });

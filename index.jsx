@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
-import Editor, { loader } from "@monaco-editor/react";
+import Editor from "@monaco-editor/react";
 import Prism from "prismjs";
 import "prismjs/components/prism-json";
 import "prismjs/components/prism-bash";
@@ -31,7 +31,7 @@ Prism.manual = true;
 function _detectCodeLanguage(code) {
   const trimmed = code.trim();
   // Try JSON
-  if (/^\s*[\[{]/.test(trimmed)) {
+  if (/^\s*[{[]/.test(trimmed)) {
     try {
       JSON.parse(trimmed);
       return "json";
@@ -72,7 +72,7 @@ window.copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
       await alert("Copied to clipboard!");
-    } catch (err) {
+    } catch {
       await prompt("Clipboard", text);
     }
   }
@@ -454,11 +454,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
   /**
    * Opens a data URL by extracting its schema and posting it to a new window.
    * Falls back to displaying the URL in a prompt if parsing fails.
+   * Always posts the schema into a new child window.
    * @param {string} base64URL - The data URL to navigate to.
-   * @param {boolean} forceOpenWindow - Whether to force opening a new window.
    * @returns {Promise<void>}
    */
-  async function _navigateToDataUrl(base64URL, forceOpenWindow) {
+  async function _navigateToDataUrl(base64URL) {
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(
@@ -475,7 +475,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       function _doPostMessage() {
         childWindow.postMessage({ type: "onViewLinks", schema }, "*");
       }
-    } catch (err) {
+    } catch {
       // show it in the prompt
       await prompt("Data URL (Copy to clipboard):", base64URL);
     }
@@ -662,7 +662,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   function _setSessionValue(key, value) {
     try {
       sessionStorage[key] = value;
-    } catch (err) {
+    } catch {
       // Session storage not available
     }
   }
@@ -675,7 +675,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   function _getSessionValue(key) {
     try {
       return sessionStorage[key] || "";
-    } catch (err) {
+    } catch {
       return "";
     }
   }
@@ -688,7 +688,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   function _setLocalValue(key, value) {
     try {
       localStorage[key] = value;
-    } catch (err) {
+    } catch {
       // Local storage not available
     }
   }
@@ -701,7 +701,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   function _getLocalValue(key) {
     try {
       return localStorage[key] || "";
-    } catch (err) {
+    } catch {
       return "";
     }
   }
@@ -902,7 +902,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
         valueToUse = blockBuffer.join("\n");
         try {
           valueToUse = JSON.stringify(JSON.parse(valueToUse), null, 2);
-        } catch (err) {}
+        } catch {}
 
         if (blockType === "code" && link.trim() === CODE_BLOCK_SPLIT) {
           const resolvedBlockId = _upsertBlockId(blockId);
@@ -1039,7 +1039,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               .trim();
             linkType = "newTabLink";
           }
-        } catch (err) {}
+        } catch {}
 
         if (!linkType) {
           try {
@@ -1050,7 +1050,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                 .trim();
               linkType = "sameTabLink";
             }
-          } catch (err) {}
+          } catch {}
         }
         if (linkType) {
           if (linkUrl.indexOf("/") === 0) {
@@ -1087,7 +1087,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                 // Get root domain name (second-to-last part before TLD)
                 linkText = parts.length >= 2 ? parts[parts.length - 2] : hostname;
               }
-            } catch (e) {
+            } catch {
               // If URL parsing fails, use the raw linkUrl
               linkText = linkUrl.substr(0, 20) + "...";
             }
@@ -1199,7 +1199,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
    * @returns {JSX.Element}
    */
   function PageRead(props) {
-    const { schema, onSetViewMode, onSetSchema } = props;
+    const { schema, onSetViewMode } = props;
     const [searchText, setSearchText] = useState("");
     const [resultCount, setResultCount] = useState(0);
 
@@ -1325,7 +1325,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
         if (fuzzy) {
           // For fuzzy matches, each odd-indexed capture group is a matched char
-          let pos = 0;
           const fullMatchStart = match.index;
           const fullMatchEnd = match.index + match[0].length;
 
@@ -1338,7 +1337,6 @@ window.prompt = (message, initialValue = "", callback = null) => {
           let innerPos = fullMatchStart;
           for (let g = 1; g < match.length; g++) {
             if (match[g] === undefined) continue;
-            const groupStart = text.indexOf(match[g], innerPos);
             // For odd groups (the actual matched chars), highlight them
             if (g % 2 === 1) {
               const mark = document.createElement("mark");
@@ -1621,7 +1619,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       if (hasPendingChanges) {
         try {
           await confirm("You have unsaved changes. Discard unsaved changes?");
-        } catch (err) {
+        } catch {
           // user cancel, then stop...
           return;
         }
@@ -1632,7 +1630,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     const onTest = useCallback(() => {
       const base64URL = _getNavBookmarkletFromSchema(bufferSchema);
-      _navigateToDataUrl(base64URL, true);
+      _navigateToDataUrl(base64URL);
     }, [bufferSchema]);
 
     const onSetBufferSchema = useCallback((newBufferSchema) => {
@@ -1775,7 +1773,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
    */
   function _getFaviconUrl(url) {
     // Extract domain from URL
-    let domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/im)[1];
+    let domain = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n]+)/im)[1];
 
     // Use Google's favicon service to avoid direct local network access
     return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
@@ -1801,7 +1799,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
               <img
                 src={favIconUrl}
                 alt="Fav"
-                onError={(e) => {
+                onError={() => {
                   setError(true);
                 }}
               />
@@ -2086,8 +2084,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
           case "favIcon":
             // insert the fav icon
             const pageFavIcon = schemaComponent.value;
-            document.querySelector("#pageFavIcon") &&
-              document.querySelector("#pageFavIcon").remove();
+            const existingFavIcon = document.querySelector("#pageFavIcon");
+            if (existingFavIcon) {
+              existingFavIcon.remove();
+            }
             const favIconEncoded =
               encodeURIComponent(
                 `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='0' y='14'>`,
@@ -2200,6 +2200,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     type="button"
                     onClick={(e) => {
                       _onLinkNavigate(e);
+                      // Intentional: javascript:// links are a documented schema feature
+                      // oxlint-disable-next-line no-eval
                       eval(schemaComponent.linkUrl);
                     }}
                     onBlur={_onLinkBlur}
@@ -2330,7 +2332,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       ...restProps
     } = props;
     const editorRef = useRef(null);
-    const [useFallback, setUseFallback] = useState(false);
+    const [useFallback] = useState(false);
 
     const currentTheme = document.documentElement.getAttribute("data-theme");
     const language = type === "html" ? "html" : "nav-generator";
@@ -2366,7 +2368,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
       registerNavGeneratorLanguage(monaco);
     }
 
-    function handleEditorDidMount(editor, monaco) {
+    function handleEditorDidMount(editor) {
       editorRef.current = editor;
 
       editor.onDidBlurEditorText(() => {
@@ -2455,7 +2457,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
    * @returns {JSX.Element}
    */
   function BasicTextarea(props) {
-    const { value, onInput, onBlur, type, readOnly = false, ...restProps } = props;
+    const { value, onInput, onBlur, readOnly = false, ...restProps } = props;
 
     const onInputKeyDown = useCallback(
       (e) => {
@@ -2494,7 +2496,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
             myField.value = res;
             myField.setSelectionRange(newStartPos, newEndPos);
           }
-          onInput && onInput({ target: myField });
+          if (onInput) {
+            onInput({ target: myField });
+          }
         }
 
         function _deleteIndentAtCursor(myField, length) {
@@ -2523,7 +2527,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
             myField.value = res;
             myField.setSelectionRange(newStartPos, newEndPos);
           }
-          onInput && onInput({ target: myField });
+          if (onInput) {
+            onInput({ target: myField });
+          }
         }
 
         function _persistTabIndent(myField) {
@@ -2532,7 +2538,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             const lastRow = rows[rows.length - 1];
             const lastRowIndent = lastRow.match(/^[ ]+/)[0];
             _insertIndentAtCursor(e.target, "\n" + lastRowIndent);
-          } catch (err) {
+          } catch {
             _insertIndentAtCursor(e.target, "\n");
           }
         }
@@ -2559,10 +2565,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
             lineEnd = 0;
           try {
             lineStart = myField.value.substr(0, startPos).match(/\n/g).length;
-          } catch (err) {}
+          } catch {}
           try {
             lineEnd = myField.value.substr(0, endPos).match(/\n/g).length;
-          } catch (err) {}
+          } catch {}
           return [lineStart, lineEnd];
         }
       },
@@ -2756,7 +2762,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
    * @returns {JSX.Element}
    */
   function PageVersionHistory(props) {
-    const { schema, onSetViewMode, onSetSchema } = props;
+    const { onSetViewMode, onSetSchema } = props;
 
     const [versions, setVersions] = useState([]);
     const [selectedDate, setSelectedDate] = useState("");
@@ -2776,7 +2782,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             );
             setVersions(sorted);
           }
-        } catch (err) {
+        } catch {
           console.error("Failed to load versions:", err);
         }
       }
@@ -2942,7 +2948,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
    * @returns {JSX.Element}
    */
   function PageChromeBookmarkImport(props) {
-    const { schema, onSetViewMode, onSetSchema } = props;
+    const { onSetViewMode, onSetSchema } = props;
 
     const [htmlInput, setHtmlInput] = useState("");
 
@@ -3519,7 +3525,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             inputSchema = newSchema;
             _log("render via postMessage onViewLinks", { length: newSchema?.length ?? 0 });
             _render(); // rerender the dom
-          } catch (err) {}
+          } catch {}
         }
       };
       window.addEventListener("message", _onHandlePostMessageEvent);
@@ -3626,7 +3632,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   function getInitialTheme() {
     try {
       return _getLocalValue(THEME_KEY);
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -3679,7 +3685,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           if (mounted) {
             setHasVersions(versions.length > 0);
           }
-        } catch (err) {
+        } catch {
           console.error("Failed to check versions:", err);
         }
       }
@@ -3728,7 +3734,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           console.error("IndexedDB error:", event.target.error);
           reject(event.target.error);
         };
-      } catch (err) {
+      } catch {
         console.error("Init DB failed:", err);
         reject(err);
       }
@@ -3776,7 +3782,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           reject(e.target.error);
         };
       });
-    } catch (err) {
+    } catch {
       console.error("createVersion failed:", err);
       throw err;
     }
@@ -3801,7 +3807,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           reject(e.target.error);
         };
       });
-    } catch (err) {
+    } catch {
       console.error("getVersions failed:", err);
       throw err;
     }

@@ -7,10 +7,6 @@ import {
   filterFuzzySuggestions,
   sortSchemaLines,
   generateDataUrl,
-  SAME_TAB_LINK_SPLIT,
-  NEW_TAB_LINK_SPLIT,
-  HEADER_SPLIT,
-  TITLE_SPLIT,
 } from "../utils.js";
 
 describe("escapeRegex", () => {

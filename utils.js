@@ -434,7 +434,6 @@ export function migrateSchemaToShortForm(schema) {
  * Generate data URL from schema
  */
 export function generateDataUrl(schema, baseUrl = "https://synle.github.io/nav-generator") {
-  const encodedSchema = encodeURIComponent(schema);
   const html = `<!doctype html>
 <html lang="en">
   <head>

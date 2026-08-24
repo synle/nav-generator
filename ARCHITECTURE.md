@@ -62,8 +62,9 @@ browser bundle.
   v8 coverage via `@vitest/coverage-v8`).
 - `build.sh` — CI build script. Downloads `common.scss` from the shared
   `synle/bashrc` repo with size-sanity validation (rejects empty or
-  <50%-of-current files), `npm install`s, runs `test:coverage` and tees the
-  coverage report into `$GITHUB_STEP_SUMMARY`, then `npm run build`.
+  <50%-of-current files), `npm install`s, runs oxlint, runs `test:coverage`
+  and tees the coverage report into `$GITHUB_STEP_SUMMARY`, then
+  `npm run build`.
 - `dev.sh` — thin shim around the shared `synle/workflows` dev watcher;
   reloads on `*.json *.scss *.jsx *.js` and runs `npm run start`.
 - `package.json` — declares the Vite-driven build and the Vitest scripts.

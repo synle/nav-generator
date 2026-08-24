@@ -10,9 +10,10 @@ Client-side React application that converts bookmark lists into self-contained d
 
 ```bash
 npm test               # Run all tests
+npm run lint           # oxlint static analysis
 npm run test:watch     # Watch mode
 npm run test:coverage  # Coverage report (80% minimum on all metrics)
-./build.sh             # Full build: install, tests with coverage, build
+./build.sh             # Full build: install, lint, tests with coverage, build
 npm run build          # Production build -> index.js / index.css / source maps at repo root
 npm start              # HTTP server with CORS on port 8080
 ./dev.sh               # Watch mode, rebuilds every 3 seconds
@@ -60,7 +61,7 @@ Tabs bind by label: short-form `>>>Label` matches its content block (`:::Label`,
 
 ## CI/CD
 
-`.github/workflows/build-main.yml` runs on push to main/master: delegates to the reusable workflow `synle/workflows/build-and-commit-sh.yml@main`, which executes `build.sh` (refresh `common.scss` from `synle/bashrc` with size validation, install, coverage-gated tests, build), commits the build output back, and deploys to GitHub Pages.
+`.github/workflows/build-main.yml` runs on push to main/master: delegates to the reusable workflow `synle/workflows/build-and-commit-sh.yml@main`, which executes `build.sh` (refresh `common.scss` from `synle/bashrc` with size validation, install, oxlint, coverage-gated tests, build), commits the build output back, and deploys to GitHub Pages.
 
 ## Notes
 
