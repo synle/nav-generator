@@ -10,7 +10,12 @@ const updateServiceWorker = () => ({
     if (fs.existsSync(swPath)) {
       let content = fs.readFileSync(swPath, "utf-8");
       const timestamp = Date.now();
-      content = content.replace(/__BUILD_TIMESTAMP__/g, timestamp);
+      // Always restamp the CACHE_VERSION line regardless of its current value
+      // (a previously stamped timestamp or a fresh __BUILD_TIMESTAMP__ placeholder)
+      content = content.replace(
+        /const CACHE_VERSION = "[^"]*";/,
+        `const CACHE_VERSION = "${timestamp}";`,
+      );
       fs.writeFileSync(swPath, content);
       console.log(`Service Worker updated with build timestamp: ${timestamp}`);
     }

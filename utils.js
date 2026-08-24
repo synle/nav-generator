@@ -153,7 +153,7 @@ export function parseSchemaLineType(line) {
 }
 
 /**
- * Filter fuzzy search suggestions
+ * Filter autocomplete suggestions: fuzzy match with `/` prefix, plain substring otherwise
  */
 export function filterFuzzySuggestions(searchText, suggestions, limit = 10) {
   if (!searchText || searchText.startsWith("?")) {

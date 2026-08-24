@@ -1,5 +1,5 @@
-// 1770399909232 will be replaced during build
-const CACHE_VERSION = "1770399909232";
+// Cache version is stamped by the updateServiceWorker plugin in vite.config.js on every build
+const CACHE_VERSION = "__BUILD_TIMESTAMP__";
 const CACHE_NAME = `nav-generator-cache-${CACHE_VERSION}`;
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
 
