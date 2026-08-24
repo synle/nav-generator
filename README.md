@@ -19,7 +19,7 @@ You can deploy the nav to Github Pages. For a quick deployment, refer to this Gi
 ### Supported Components
 
 - [x] Page Title (use `!`)
-- [x] Link Button (use `|` pr `|||`)
+- [x] Link Button (use `|` or `|||`)
 - [x] Javascript Buttons
 - [x] Link to other data url
 - [x] Sections (use `#`)
@@ -196,7 +196,3 @@ sample tabName1
 
 This is the generated view of the above schema
 ![image](https://user-images.githubusercontent.com/3792401/132922042-76a8b14d-270c-415c-8a0e-00d0f5f252f6.png)
-
-```
-
-```

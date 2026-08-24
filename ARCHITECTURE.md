@@ -33,7 +33,7 @@ browser bundle.
 - `/` — flat repo: source (`index.jsx`, `utils.js`, `sw-nav.js`), styles
   (`index.scss`, `common.scss`), build config (`vite.config.js`,
   `vitest.config.js`), and HTML entry points all live at the root.
-- `test/` — Vitest test suite (`*.test.js`), `setup.js` for jsdom/happy-dom
+- `test/` — Vitest test suite (`*.test.js`), `setup.js` for Happy DOM
   bootstrap, and a `README.md` describing the test conventions.
 - `.github/workflows/` — CI pipelines: `build-main.yml` (build + Pages deploy),
   `cleanup-artifacts.yml`, `cleanup-pr-artifacts.yml`.
@@ -58,7 +58,7 @@ browser bundle.
 - `vite.config.js` — `lib` build, `formats: ["iife"]`, `entry: "index.jsx"`,
   `outDir: "."`, `emptyOutDir: false`, sourcemaps on, minified. Includes the
   custom `updateServiceWorker` plugin that stamps the SW build timestamp.
-- `vitest.config.js` + `test/setup.js` — Vitest config (jsdom/happy-dom env,
+- `vitest.config.js` + `test/setup.js` — Vitest config (Happy DOM env,
   v8 coverage via `@vitest/coverage-v8`).
 - `build.sh` — CI build script. Downloads `common.scss` from the shared
   `synle/bashrc` repo with size-sanity validation (rejects empty or
