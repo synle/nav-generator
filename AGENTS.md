@@ -67,7 +67,7 @@ Tabs bind by label: short-form `>>>Label` matches its content block (`:::Label`,
 
 ## CI/CD
 
-`.github/workflows/build-main.yml` runs on pushes and PRs to main/master. The local pipeline runs `build.sh` (refresh `common.scss` with size validation, install, lint, coverage tests, build), formats, then explicitly checks lint and coverage before committing. On pushes only, generated changes amend the triggering commit while preserving its author and message, then push with an explicit `--force-with-lease` against the triggering SHA. Full-history checkout preserves ancestry; a newer remote commit rejects the push. PRs validate without committing or persisting checkout credentials. Push builds upload the root as a Pages artifact; a separate deployment job uses the `github-pages` environment.
+`.github/workflows/build-main.yml` runs on pushes and PRs to main/master. It calls the shared `build-and-commit-sh.yml` workflow with `amend-triggering-commit: true` and `deploy-to-pages: true`. The shared pipeline runs `build.sh` (refresh `common.scss` with size validation, install, lint, coverage tests, build), formats, then explicitly checks npm lint and coverage before amendment. On branch pushes only, generated changes amend the triggering commit while preserving its author and message, then push with an explicit `--force-with-lease` against the triggering SHA. Full-history checkout preserves ancestry; a newer remote commit rejects the push. PRs validate without committing or persisting checkout credentials. The shared workflow uploads the root as a Pages artifact and deploys only on pushes.
 
 ## Notes
 

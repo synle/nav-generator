@@ -81,7 +81,9 @@ browser bundle.
   the local entry; service-worker registration is skipped on
   `localhost:8080`.
 - **CI** — `.github/workflows/build-main.yml` triggers on `push` and
-  `pull_request` against `main` / `master`. The repository-local pipeline:
+  `pull_request` against `main` / `master`. It calls the shared
+  `build-and-commit-sh.yml` workflow with `amend-triggering-commit: true`
+  and `deploy-to-pages: true`. The shared pipeline:
   1. Checks out full history and installs dependencies with `npm ci`.
   2. Runs `build.sh`: refresh `common.scss` (size-validated), install, lint,
      coverage tests with a GitHub Actions summary, then Vite build. Output
@@ -93,10 +95,9 @@ browser bundle.
      lease against the triggering SHA. A newer remote commit rejects the
      push; full history preserves ancestry. PRs do not commit or persist
      checkout credentials.
-  5. Push builds upload the root as the Pages artifact. A separate job,
-     dependent on build success, deploys through the `github-pages`
-     environment with Pages/OIDC permissions; the build job has only
-     `contents: write`.
+  5. Push builds upload the root as the Pages artifact and deploy through
+     the shared workflow's existing Pages steps. The caller declares the
+     shared workflow's contents/Pages/OIDC permissions; PRs do not deploy.
 - **Agent layout** — `AGENTS.md` holds context and migration guidance;
   skills belong in `.agents/skills/<name>/SKILL.md`.
 - **Release** — there is no semver/tag release pipeline; the deployed product
