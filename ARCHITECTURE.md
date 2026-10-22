@@ -81,17 +81,24 @@ browser bundle.
   the local entry; service-worker registration is skipped on
   `localhost:8080`.
 - **CI** — `.github/workflows/build-main.yml` triggers on `push` and
-  `pull_request` against `main` / `master`. It delegates to the reusable
-  workflow `synle/workflows/.github/workflows/build-and-commit-sh.yml@main`
-  with `deploy-to-pages: true`, which executes `build.sh`:
-  1. Refresh `common.scss` from `synle/bashrc` (size-validated).
-  2. `npm install`.
-  3. `npm run test:coverage` — Vitest + v8 coverage; report appended to the
-     GitHub Actions step summary.
-  4. `npm run build` — Vite produces `index.js` (+ sourcemap) at the repo
-     root; the Vite plugin rewrites `__BUILD_TIMESTAMP__` in `sw-nav.js`.
-  5. The reusable workflow commits the build output back to the branch and
-     publishes the root as the Pages artifact.
+  `pull_request` against `main` / `master`. The repository-local pipeline:
+  1. Checks out full history and installs dependencies with `npm ci`.
+  2. Runs `build.sh`: refresh `common.scss` (size-validated), install, lint,
+     coverage tests with a GitHub Actions summary, then Vite build. Output
+     remains at the repo root; the Vite plugin stamps `sw-nav.js`.
+  3. Formats and explicitly checks lint and coverage before amendment,
+     since `build.sh` alone does not stop on every intermediate failure.
+  4. On pushes only, amends generated changes into the triggering commit,
+     preserving its author and message, then force-pushes with an explicit
+     lease against the triggering SHA. A newer remote commit rejects the
+     push; full history preserves ancestry. PRs do not commit or persist
+     checkout credentials.
+  5. Push builds upload the root as the Pages artifact. A separate job,
+     dependent on build success, deploys through the `github-pages`
+     environment with Pages/OIDC permissions; the build job has only
+     `contents: write`.
+- **Agent layout** — `AGENTS.md` holds context and migration guidance;
+  skills belong in `.agents/skills/<name>/SKILL.md`.
 - **Release** — there is no semver/tag release pipeline; the deployed product
   is the latest commit on `main` published to GitHub Pages by the build
   workflow. Artifact cleanup is handled by `cleanup-artifacts.yml` and

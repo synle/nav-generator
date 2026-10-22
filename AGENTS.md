@@ -2,6 +2,12 @@
 
 Guidance for AI coding agents working in this repository.
 
+## Cross-Agent File Layout
+
+- Store skills in `.agents/skills/<name>/SKILL.md`, not `.claude/skills/`.
+- Use `AGENTS.md` for agent context. When `CLAUDE.md` exists without an `AGENTS.md` in the same directory, rename it to `AGENTS.md`. If both exist, merge their instructions into `AGENTS.md` without losing distinct guidance before removing `CLAUDE.md`.
+- Update references to migrated skill paths and renamed context files.
+
 ## Project Overview
 
 Client-side React application that converts bookmark lists into self-contained data URLs that can be bookmarked in browsers. No backend; everything runs in the browser. Build artifacts are committed to the repo root for GitHub Pages deployment.
@@ -61,7 +67,7 @@ Tabs bind by label: short-form `>>>Label` matches its content block (`:::Label`,
 
 ## CI/CD
 
-`.github/workflows/build-main.yml` runs on push to main/master: delegates to the reusable workflow `synle/workflows/build-and-commit-sh.yml@main`, which executes `build.sh` (refresh `common.scss` from `synle/bashrc` with size validation, install, oxlint, coverage-gated tests, build), commits the build output back, and deploys to GitHub Pages.
+`.github/workflows/build-main.yml` runs on pushes and PRs to main/master. The local pipeline runs `build.sh` (refresh `common.scss` with size validation, install, lint, coverage tests, build), formats, then explicitly checks lint and coverage before committing. On pushes only, generated changes amend the triggering commit while preserving its author and message, then push with an explicit `--force-with-lease` against the triggering SHA. Full-history checkout preserves ancestry; a newer remote commit rejects the push. PRs validate without committing or persisting checkout credentials. Push builds upload the root as a Pages artifact; a separate deployment job uses the `github-pages` environment.
 
 ## Notes
 
