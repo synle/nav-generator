@@ -9,7 +9,7 @@ export default defineConfig({
     setupFiles: "./test/setup.js",
     coverage: {
       reporter: ["text", "json", "html", "lcov"],
-      include: ["utils.js"],
+      include: ["utils.js", "tv-mode.js", "tv-mode-toggle.jsx"],
       exclude: [
         "node_modules/",
         "test/",

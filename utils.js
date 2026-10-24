@@ -1,6 +1,10 @@
 // Schema parsing constants
 export const SAME_TAB_LINK_SPLIT = "|";
 export const NEW_TAB_LINK_SPLIT = "|||";
+/** Same-tab link delimiter for dedicated TV navigation. */
+export const TV_LINK_SPLIT = "|tv|";
+/** Exact standalone schema directive; it never activates the display preference itself. */
+export const TV_SCHEMA_MARKER = "?tv";
 export const HEADER_SPLIT = "#";
 export const TITLE_SPLIT = "!";
 export const CODE_BLOCK_SPLIT = "```";
@@ -43,14 +47,34 @@ export function buildSearchRegex(searchText) {
 }
 
 /**
- * Parse a link line from schema
+ * Extracts a TV link only when its first pipe begins the exact TV delimiter.
+ * Delimiter-like text later in a normal URL or label never changes the link kind.
+ * @param {string} line - Raw schema link line.
+ * @returns {{linkText: string, linkUrl: string}|null} Raw fields, including an empty URL for caller validation.
+ */
+export function parseTvLinkLine(line) {
+  const separatorIndex = line.indexOf(TV_LINK_SPLIT);
+  if (separatorIndex === -1 || separatorIndex !== line.indexOf(SAME_TAB_LINK_SPLIT)) return null;
+  return {
+    linkText: line.slice(0, separatorIndex).trim(),
+    linkUrl: line.slice(separatorIndex + TV_LINK_SPLIT.length).trim(),
+  };
+}
+
+/**
+ * Parses ordinary and TV links without changing navigation or storage.
+ * TV links retain same-tab, JavaScript, and data-link semantics with additive TV metadata.
+ * @param {string} line - Schema link line.
+ * @returns {Object|null} Parsed link fields, or null for a missing URL or unsupported text.
  */
 export function parseLinkLine(line) {
   const trimmedLine = line.trim();
   if (!trimmedLine) return null;
 
-  // Check for new tab link (|||)
-  if (trimmedLine.includes(NEW_TAB_LINK_SPLIT)) {
+  const tvLink = parseTvLinkLine(trimmedLine);
+
+  // The first TV delimiter wins even if its URL contains a new-tab delimiter.
+  if (!tvLink && trimmedLine.includes(NEW_TAB_LINK_SPLIT)) {
     const [linkText, ...rest] = trimmedLine.split(NEW_TAB_LINK_SPLIT);
     const linkUrl = rest.join(NEW_TAB_LINK_SPLIT).trim();
 
@@ -65,15 +89,18 @@ export function parseLinkLine(line) {
 
   // Check for same tab link (|)
   if (trimmedLine.includes(SAME_TAB_LINK_SPLIT)) {
-    const [linkText, ...rest] = trimmedLine.split(SAME_TAB_LINK_SPLIT);
-    const linkUrl = rest.join(SAME_TAB_LINK_SPLIT).trim();
+    const separator = tvLink ? TV_LINK_SPLIT : SAME_TAB_LINK_SPLIT;
+    const [linkText, ...rest] = trimmedLine.split(separator);
+    const linkUrl = rest.join(separator).trim();
 
     if (!linkUrl) return null;
+    const tvAttributes = tvLink ? { isTvLink: true } : {};
 
     // Check if it's a javascript link
     if (linkUrl.startsWith("javascript:")) {
       return {
         type: "jsLink",
+        ...tvAttributes,
         linkText: linkText.trim(),
         linkUrl: linkUrl,
       };
@@ -83,6 +110,7 @@ export function parseLinkLine(line) {
     if (linkUrl.startsWith("data:")) {
       return {
         type: "dataLink",
+        ...tvAttributes,
         linkText: linkText.trim(),
         linkUrl: linkUrl,
       };
@@ -90,6 +118,7 @@ export function parseLinkLine(line) {
 
     return {
       type: "sameTabLink",
+      ...tvAttributes,
       linkText: linkText.trim(),
       linkUrl: linkUrl.startsWith("http") ? linkUrl : `https://${linkUrl}`,
     };
@@ -109,12 +138,16 @@ export function parseLinkLine(line) {
 }
 
 /**
- * Parse schema line type
+ * Classifies one schema line, recognizing only an exact standalone TV directive.
+ * Block-aware callers must classify block bodies separately so literal text stays content.
+ * @param {string} line - One raw schema line.
+ * @returns {Object} The parsed directive, link, text, or empty-line shape.
  */
 export function parseSchemaLineType(line) {
   const trimmedLine = line.trim();
 
   if (!trimmedLine) return { type: "empty" };
+  if (trimmedLine === TV_SCHEMA_MARKER) return { type: "tv_mode" };
 
   // Title
   if (trimmedLine.startsWith(TITLE_SPLIT + " ")) {
@@ -140,7 +173,7 @@ export function parseSchemaLineType(line) {
     };
   }
 
-  // Link (with | or |||)
+  // Link (with |, |||, or |tv|)
   const linkResult = parseLinkLine(trimmedLine);
   if (linkResult) {
     return {

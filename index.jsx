@@ -7,12 +7,17 @@ import "prismjs/components/prism-json";
 import "prismjs/components/prism-bash";
 import prismStyles from "prismjs/themes/prism-tomorrow.min.css?inline";
 import styles from "./index.scss?inline";
-import { migrateSchemaToShortForm } from "./utils.js";
+import { migrateSchemaToShortForm, parseTvLinkLine, TV_SCHEMA_MARKER } from "./utils.js";
+import { getFocusableNavLinks, initTvMode } from "./tv-mode.js";
+import { TvModeToggle, useTvMode } from "./tv-mode-toggle.jsx";
 
 // Inject styles inline into the document head
 const styleEl = document.createElement("style");
 styleEl.textContent = prismStyles + "\n" + styles;
 document.head.appendChild(styleEl);
+
+// Apply the host page preference before any route or async schema can render.
+initTvMode();
 
 // Set global flag if script URL has ?hasCustomNavBeforeLoad=1
 const params = new URLSearchParams(document.currentScript?.src.split("?")[1]);
@@ -853,6 +858,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   /**
    * Parses a raw schema string into a serialized array of schema components.
    * Handles titles, headers, links, code blocks, HTML blocks, nav blocks, tabs, and favicons.
+   * Recognizes the exact TV directive only outside blocks and preserves TV link metadata.
    * @param {string} schema - The raw schema text.
    * @returns {Array<Object>} Array of serialized schema objects with type, key, value, etc.
    */
@@ -955,7 +961,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
         return;
       }
 
-      if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
+      if (link.trim() === TV_SCHEMA_MARKER) {
+        serializedSchema.push({ key: newCacheId, type: "tv_mode" });
+      } else if (link.trim().indexOf(FAV_ICON_SPLIT) === 0) {
         pageFavIcon = link.replace(/^[@]+/, "").trim();
         serializedSchema.push({
           key: newCacheId,
@@ -1031,10 +1039,17 @@ window.prompt = (message, initialValue = "", callback = null) => {
       } else if (link.trim().length > 0) {
         let linkType;
         let linkText, linkUrl;
+        const tvLink = parseTvLinkLine(link);
+        if (tvLink) {
+          if (!tvLink.linkUrl) return;
+          ({ linkText, linkUrl } = tvLink);
+          linkType = "sameTabLink";
+        }
 
         try {
           // try parse as new tab link
           if (
+            !linkType &&
             link.indexOf(NEW_TAB_LINK_SPLIT) !== -1 &&
             link.indexOf(NEW_TAB_LINK_SPLIT) <= link.indexOf(SAME_TAB_LINK_SPLIT)
           ) {
@@ -1104,6 +1119,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             linkUrl,
             linkText,
             linkType,
+            isTvLink: !!tvLink,
             headerName: currentHeaderName,
           });
         }
@@ -1196,7 +1212,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   /**
    * Read-only view page component. Renders the navigation schema with search,
-   * keyboard navigation, and search highlighting.
+   * keyboard navigation, and search highlighting. Arrow navigation skips hidden and disabled links.
+   * Search and submission respect the dedicated TV subset when both display mode and schema directive are enabled.
    * @param {Object} props
    * @param {string} props.schema - The navigation schema string.
    * @param {Function} props.onSetViewMode - Callback to switch view modes.
@@ -1207,6 +1224,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
     const { schema, onSetViewMode } = props;
     const [searchText, setSearchText] = useState("");
     const [resultCount, setResultCount] = useState(0);
+    const tvMode = useTvMode();
 
     const refContainer = useRef();
 
@@ -1233,7 +1251,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
             location.href = `https://www.google.com/search?q=${searchWord.join("")}`;
           }
 
-          const links = [...doc.querySelectorAll(".link:not(.hidden)")];
+          const links = getFocusableNavLinks(doc);
 
           // focus on the first link
           if (links.length > 0) {
@@ -1258,7 +1276,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
       if (!refContainer?.current) return;
 
       const doc = refContainer.current;
-      const links = doc.querySelectorAll(".link");
+      let linkSelector = ".link:not([data-tv-link])";
+      if (tvMode) {
+        linkSelector = doc.hasAttribute("data-tv-schema")
+          ? ":scope > .link[data-tv-link]"
+          : ".link";
+      }
+      const links = doc.querySelectorAll(linkSelector);
       const otherNonLinks = doc.querySelectorAll(".schema-render-wrapper > *");
       const allElems = [...links, ...otherNonLinks];
 
@@ -1470,19 +1494,24 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       // Scroll to top to show search results
       window.scrollTo(0, 0);
-    }, [searchText, refContainer.current]);
+    }, [searchText, tvMode]);
 
     // Arrow key navigation for links in the grid
     useEffect(() => {
       const container = refContainer.current;
       if (!container) return;
 
+      /**
+       * Moves focus between visible links, using grid geometry for vertical arrows.
+       * @param {KeyboardEvent} e - Keyboard event from the navigation container.
+       * @returns {void} Prevents scrolling only when focus moves to another link.
+       */
       function handleKeyDown(e) {
         const focused = document.activeElement;
         if (!focused || !focused.classList.contains("link")) return;
         if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
 
-        const allLinks = Array.from(container.querySelectorAll(".link:not(.hidden)"));
+        const allLinks = getFocusableNavLinks(container);
         const currentIndex = allLinks.indexOf(focused);
         if (currentIndex === -1) return;
 
@@ -1531,7 +1560,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
       container.addEventListener("keydown", handleKeyDown);
       return () => container.removeEventListener("keydown", handleKeyDown);
-    }, [refContainer.current]);
+    }, []);
 
     // Force full reload when user navigates back (bfcache)
     useEffect(() => {
@@ -1981,6 +2010,8 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   /**
    * Renders a parsed schema into React elements (titles, headers, links, code blocks, tabs, etc.).
+   * Top-level Settings controls theme and the persistent TV/touch display preference.
+   * Parsed TV metadata drives scoped visibility without removing schema content or replacing focused links.
    * @param {Object} props
    * @param {string} props.schema - The raw schema string to render.
    * @param {React.RefObject} props.refContainer - Ref to the container DOM element.
@@ -1993,11 +2024,13 @@ window.prompt = (message, initialValue = "", callback = null) => {
   function SchemaRender(props) {
     const { schema, refContainer, onSetViewMode, isNested } = props;
     const [doms, setDoms] = useState(null);
+    const hasTvSchema = useRef(false);
 
-    // handling tabs
+    // Apply scope metadata after the parent ref exists, then restore tab selection.
     useLayoutEffect(() => {
       if (refContainer && refContainer.current) {
         const doc = refContainer.current;
+        doc.toggleAttribute("data-tv-schema", hasTvSchema.current);
 
         const tabsList = [...doc.querySelectorAll("tabs")];
 
@@ -2016,9 +2049,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
     // generate the view dom
     useLayoutEffect(() => {
       const serializedSchema = _getSerializedSchema(schema);
+      hasTvSchema.current = serializedSchema.some((component) => component.type === "tv_mode");
 
       const newDoms = serializedSchema.map((schemaComponent) => {
         switch (schemaComponent.type) {
+          case "tv_mode":
+            return null;
           case "title":
             // Nested nav blocks don't own the page chrome, so drop the title
             // entirely (the parser auto-injects one when missing, which would
@@ -2082,6 +2118,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                   <DropdownButtons>
                     <button className="dropdown-trigger">Settings</button>
                     <ThemeToggle />
+                    <TvModeToggle />
                   </DropdownButtons>
                 </div>
               </div>
@@ -2171,6 +2208,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link newTabLink"
+                    data-tv-link={schemaComponent.isTvLink || undefined}
                     role="button"
                     target="_blank"
                     href={schemaComponent.linkUrl}
@@ -2187,6 +2225,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link sameTabLink"
+                    data-tv-link={schemaComponent.isTvLink || undefined}
                     role="button"
                     href={schemaComponent.linkUrl}
                     data-section={schemaComponent.headerName}
@@ -2202,6 +2241,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link jsLink"
+                    data-tv-link={schemaComponent.isTvLink || undefined}
                     type="button"
                     onClick={(e) => {
                       _onLinkNavigate(e);
@@ -2222,6 +2262,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
                     id={schemaComponent.id}
                     key={schemaComponent.key}
                     className="link dataLink"
+                    data-tv-link={schemaComponent.isTvLink || undefined}
                     type="button"
                     onClick={(e) => {
                       _onLinkNavigate(e);
@@ -2250,8 +2291,9 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
   /**
    * Registers the custom nav-generator language with Monaco editor,
-   * including syntax tokenization and light/dark themes.
+   * including exact TV directives, TV link delimiters, and light/dark themes.
    * @param {Object} monaco - The Monaco editor instance.
+   * @returns {void} Registers language tokens and editor themes once.
    */
   function registerNavGeneratorLanguage(monaco) {
     if (navGeneratorLanguageRegistered) return;
@@ -2263,10 +2305,12 @@ window.prompt = (message, initialValue = "", callback = null) => {
       tokenizer: {
         root: [
           [/^!\s+.*$/, "page-title"],
+          [/^\s*\?tv\s*$/, "section-header"],
           [/^#+\s+.*$/, "section-header"],
           [/^>>>.*$/, "tab-definition"],
           [/^(---)([\w]*)$/, ["html-delimiter", "block-id"]],
           [/^(```)([\w]*)$/, ["code-fence", "block-id"]],
+          [/^([^|]+?)(\s*\|tv\|\s*)(.+)$/, ["link-label", "separator-same-tab", "url"]],
           [/^(.+?)(\s*\|\|\|\s*)(.+)$/, ["link-label", "separator-new-tab", "url"]],
           [/^(.+?)(\s*\|\s*)(.+)$/, ["link-label", "separator-same-tab", "url"]],
           [/^https?:\/\/[^\s]+$/, "url"],

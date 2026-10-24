@@ -38,6 +38,50 @@ You can deploy the nav to Github Pages. For a quick deployment, refer to this Gi
 - [x] Support offline mode to cache the resources
 - [x] Ability to import and extract links as bookmark for Chrome / Brave / Edge
 
+### TV / Touch Mode
+
+TV/touch mode enlarges bookmark tiles, favicons, headings, tabs, search, and controls for TVs, tablets, and phones. Tile and button padding becomes `2rem 1.5rem`; text scales with the screen, and tile columns adapt to smaller viewports.
+
+- Add `?tv` or `?touch` to the navigation page URL, not the renderer script URL. Use `&tv` or `&touch` if the URL already has query parameters.
+- Enter **TV / Touch Mode** through **Settings** in the normal desktop layout. TV/touch mode hides the top-right Edit, Actions, and Settings buttons, leaving the navigation title visible.
+- Press Escape **10 times** consecutively, with no more than **2 seconds between presses**, to toggle on or off globally. Other keys, modifiers, or leaving the window reset the sequence. Holding Escape does not count as multiple presses.
+
+The preference uses localStorage key `navTvMode`, with the string `"true"` for on and `"false"` for off. An absent or unrecognized value means off. Preferences belong to the current page origin; unrelated sites do not share them. If storage is unavailable, toggles still work for the current page.
+
+Mode entry focuses the first visible, enabled navigation link, including pages that load their schema asynchronously. Arrow keys move between visible links without selecting hidden tab content.
+
+Both URL flags enable and save the mode on every load, even when the saved preference is off. Remove the flag before reloading if you want a saved off preference to remain off. Existing Escape actions, such as clearing search and closing dialogs, still run.
+
+Tune `TV_MODE_ESCAPE_PRESS_COUNT` and `TV_MODE_ESCAPE_MAX_GAP_MS` together at the top of `tv-mode.js`.
+
+#### Dedicated TV navigation
+
+Use `|tv|` for links that appear **only while TV/touch mode is on**. They open in the same tab, like `|` links.
+
+To show a dedicated TV-only layout, add an exact standalone `?tv` line to the top-level schema:
+
+```text
+! Favorites
+@ 📺
+?tv
+# Stock
+CNBC | cnbc.com
+Finance for TV |tv| google.com/finance/portfolio/watchlist
+News for TV |tv| example.com/news
+```
+
+| Display mode | Standalone schema `?tv` | Visible content                                                          |
+| ------------ | ----------------------- | ------------------------------------------------------------------------ |
+| Off          | Either                  | Ordinary content; all `\|tv\|` links stay hidden                         |
+| On           | Absent                  | Enlarged ordinary content plus `\|tv\|` links                            |
+| On           | Present                 | Only top-level `\|tv\|` links, navigation title (`!`), and favicon (`@`) |
+
+The directive must be exactly `?tv` after trimming surrounding whitespace. It is case-sensitive; `?tv=1`, `?tv extra`, URL query parameters, and `?tv => explanation` are not schema directives. Literal `?tv` lines inside code, HTML, or nested nav blocks do not opt the outer schema in.
+
+The schema directive does not enable TV/touch mode by itself. Enter the mode through the page URL, Settings, or the Escape shortcut described above. A page URL containing `?tv` enables the display preference; a standalone schema line containing `?tv` selects the dedicated layout.
+
+Declare dedicated TV links at the top level. Dedicated mode hides sections, tabs, code blocks, HTML blocks, and nested nav blocks. A dedicated schema with no TV links shows only its title and favicon. Search and keyboard navigation exclude links hidden by the current mode.
+
 ## Syntax
 
 ### Page Title

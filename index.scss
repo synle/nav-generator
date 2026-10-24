@@ -35,35 +35,35 @@
 
 // Flexbox column layout (nav-generator specific)
 // 2 columns
-@media only screen and (min-width: $gridColumnWidth * 2) {
+@media only screen and (min-width: #{$gridColumnWidth * 2}) {
   :root {
     --flexColumnWidth: calc(50% - var(--gridGapWidth) / 2);
   }
 }
 
 // 3 columns
-@media only screen and (min-width: $gridColumnWidth * 3) {
+@media only screen and (min-width: #{$gridColumnWidth * 3}) {
   :root {
     --flexColumnWidth: calc(33.333% - var(--gridGapWidth) * 2 / 3);
   }
 }
 
 // 4 columns
-@media only screen and (min-width: $gridColumnWidth * 4) {
+@media only screen and (min-width: #{$gridColumnWidth * 4}) {
   :root {
     --flexColumnWidth: calc(25% - var(--gridGapWidth) * 3 / 4);
   }
 }
 
 // 5 columns
-@media only screen and (min-width: $gridColumnWidth * 5) {
+@media only screen and (min-width: #{$gridColumnWidth * 5}) {
   :root {
     --flexColumnWidth: calc(20% - var(--gridGapWidth) * 4 / 5);
   }
 }
 
 // 6 columns
-@media only screen and (min-width: $gridColumnWidth * 6) {
+@media only screen and (min-width: #{$gridColumnWidth * 6}) {
   :root {
     --flexColumnWidth: calc(16.666% - var(--gridGapWidth) * 5 / 6);
   }
@@ -495,14 +495,14 @@ load {
 // Modal styles are in common.scss
 
 // nav-generator specific responsive styles
-@media only screen and (max-width: $gridColumnWidth * 3) {
+@media only screen and (max-width: #{$gridColumnWidth * 3}) {
   :root {
     --gridGapHeight: 0.4rem;
     --gridGapWidth: 0.5rem;
   }
 }
 
-@media only screen and (max-width: $gridColumnWidth * 2) {
+@media only screen and (max-width: #{$gridColumnWidth * 2}) {
   #fav .title,
   #fav .header,
   #fav .block {
@@ -524,6 +524,171 @@ load {
 
   .commands > * {
     max-width: none !important;
+  }
+}
+
+// TV links never appear in the normal navigation view, even without a schema directive.
+:root:not([data-tv-mode]) #fav [data-tv-link] {
+  display: none !important;
+}
+
+// All large-display overrides stay local; shared styles and ordinary links are unchanged.
+:root[data-tv-mode] {
+  --fontSize1: clamp(1.75rem, 1.5rem + 1vw, 4rem);
+  --fontSize2: clamp(1.5rem, 1.25rem + 0.75vw, 3rem);
+  --fontSize3: clamp(1.25rem, 1rem + 0.65vw, 2.5rem);
+  --fontSize4: clamp(1.125rem, 1rem + 0.4vw, 2rem);
+  --fontSize5: clamp(1rem, 0.9rem + 0.3vw, 1.5rem);
+  --gridGapWidth: 1.5rem;
+  --flexColumnWidth: 100%;
+
+  // Keep tiles readable rather than inheriting the compact six-column layout.
+  @media (min-width: 48rem) {
+    --flexColumnWidth: calc(50% - var(--gridGapWidth) / 2);
+  }
+  @media (min-width: 80rem) {
+    --flexColumnWidth: calc(33.333% - var(--gridGapWidth) * 2 / 3);
+  }
+  @media (min-width: 120rem) {
+    --flexColumnWidth: calc(25% - var(--gridGapWidth) * 3 / 4);
+  }
+
+  body {
+    font-size: var(--fontSize3);
+    line-height: 1.5;
+    // Reserve space for the enlarged, fixed search bar.
+    padding-bottom: 12rem;
+  }
+
+  button,
+  a[role="button"] {
+    padding: 2rem 1.5rem;
+    min-height: 3rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: var(--fontSize3);
+    min-height: 3rem;
+    padding: 1rem;
+  }
+
+  button,
+  a[role="button"],
+  tab,
+  input,
+  select,
+  textarea {
+    &:focus-visible {
+      outline: 4px solid var(--colorFocusRing);
+      outline-offset: 4px;
+    }
+  }
+
+  #fav,
+  #command {
+    .title,
+    .header {
+      padding: 1rem;
+      overflow-wrap: anywhere;
+    }
+
+    .title {
+      flex-wrap: wrap;
+    }
+
+    .commands > * {
+      max-width: none;
+    }
+  }
+
+  #fav {
+    row-gap: 1.5rem;
+
+    .title .action-bar {
+      display: none;
+    }
+
+    // The standalone schema directive opts into a link-only TV view.
+    &[data-tv-schema] {
+      > :not(.title):not([data-tv-link]) {
+        display: none !important;
+      }
+
+      > .title {
+        display: flex !important;
+      }
+    }
+
+    .link {
+      min-width: 0;
+      word-break: normal;
+      overflow-wrap: anywhere;
+
+      img {
+        width: 1.5em;
+        height: 1.5em;
+        flex-shrink: 0;
+        object-fit: contain;
+      }
+    }
+
+    .tabs {
+      gap: 0.5rem;
+
+      tab {
+        padding: 1.5rem;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+      }
+    }
+  }
+
+  .dropdown {
+    max-width: 100%;
+
+    .dropdown-content {
+      max-width: calc(100vw - 4rem);
+
+      button,
+      a[role="button"] {
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+    }
+  }
+
+  .codeBlockBanner,
+  .codeBlockActions {
+    flex-wrap: wrap;
+  }
+
+  #searchForm {
+    #search {
+      min-width: 0;
+      padding: 1rem 0;
+    }
+
+    .search-clear-btn,
+    .search-help-btn,
+    .search-help-close {
+      width: max(3rem, 1.5em);
+      height: max(3rem, 1.5em);
+      min-width: 3rem;
+      padding: 0;
+    }
+
+    .search-help-popup {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .search-help-item {
+      flex-wrap: wrap;
+    }
   }
 }
 
