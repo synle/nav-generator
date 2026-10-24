@@ -1213,7 +1213,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
   /**
    * Read-only view page component. Renders the navigation schema with search,
    * keyboard navigation, and search highlighting. Arrow navigation skips hidden and disabled links.
-   * Search and submission respect the dedicated TV subset when both display mode and schema directive are enabled.
+   * TV mode hides and suspends search, and arrows recover focus at the first eligible link.
    * @param {Object} props
    * @param {string} props.schema - The navigation schema string.
    * @param {Function} props.onSetViewMode - Callback to switch view modes.
@@ -1271,7 +1271,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     // handling search
     useLayoutEffect(() => {
-      const trimmedSearchText = (searchText || "").trim();
+      const trimmedSearchText = tvMode ? "" : (searchText || "").trim();
 
       if (!refContainer?.current) return;
 
@@ -1502,18 +1502,33 @@ window.prompt = (message, initialValue = "", callback = null) => {
       if (!container) return;
 
       /**
-       * Moves focus between visible links, using grid geometry for vertical arrows.
-       * @param {KeyboardEvent} e - Keyboard event from the navigation container.
-       * @returns {void} Prevents scrolling only when focus moves to another link.
+       * Moves between visible links or starts TV navigation without taking over editing or dialogs.
+       * @param {KeyboardEvent} e - Keyboard event from the navigation root or TV document.
+       * @returns {void} Prevents scrolling only when focusing an eligible link.
        */
       function handleKeyDown(e) {
-        const focused = document.activeElement;
-        if (!focused || !focused.classList.contains("link")) return;
+        if (e.defaultPrevented) return;
         if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
+
+        const focused = document.activeElement;
+        if (
+          tvMode &&
+          (focused?.closest(
+            "input, textarea, select, [contenteditable]:not([contenteditable='false'])",
+          ) ||
+            document.querySelector(".modal, [role='dialog']"))
+        )
+          return;
 
         const allLinks = getFocusableNavLinks(container);
         const currentIndex = allLinks.indexOf(focused);
-        if (currentIndex === -1) return;
+        if (currentIndex === -1) {
+          if (tvMode && allLinks.length > 0) {
+            e.preventDefault();
+            allLinks[0].focus();
+          }
+          return;
+        }
 
         let targetIndex = -1;
 
@@ -1558,9 +1573,10 @@ window.prompt = (message, initialValue = "", callback = null) => {
         }
       }
 
-      container.addEventListener("keydown", handleKeyDown);
-      return () => container.removeEventListener("keydown", handleKeyDown);
-    }, []);
+      const keyboardRoot = tvMode ? document : container;
+      keyboardRoot.addEventListener("keydown", handleKeyDown);
+      return () => keyboardRoot.removeEventListener("keydown", handleKeyDown);
+    }, [tvMode]);
 
     // Force full reload when user navigates back (bfcache)
     useEffect(() => {
@@ -1576,7 +1592,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
 
     return (
       <>
-        {searchText && (
+        {!tvMode && searchText && (
           <div className="search-result-count">
             {resultCount === 0 ? (
               <>
@@ -1613,13 +1629,15 @@ window.prompt = (message, initialValue = "", callback = null) => {
           <SchemaRender schema={schema} refContainer={refContainer} onSetViewMode={onSetViewMode} />
         </div>
 
-        <form
-          id="searchForm"
-          className="form-search-excluded"
-          onSubmit={(e) => onSubmitNavigationSearch(e)}
-        >
-          <SearchBox onSearch={onSearch} searchText={searchText} onClear={onClearSearch} />
-        </form>
+        {!tvMode && (
+          <form
+            id="searchForm"
+            className="form-search-excluded"
+            onSubmit={(e) => onSubmitNavigationSearch(e)}
+          >
+            <SearchBox onSearch={onSearch} searchText={searchText} onClear={onClearSearch} />
+          </form>
+        )}
       </>
     );
   }
@@ -3389,6 +3407,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
   // app level events
   document.addEventListener(
     "keydown",
+    /**
+     * Dispatches activation, read-view commands, and search shortcuts when search is available.
+     * @param {KeyboardEvent} e - Captured document keyboard event.
+     * @returns {void} May trigger navigation, editing, dialogs, or code-block expansion.
+     */
     (e) => {
       // handling enter and spacebar on focusable div
       const { key } = e;
@@ -3448,11 +3471,11 @@ window.prompt = (message, initialValue = "", callback = null) => {
           }
         }
       } else if (
-        document.querySelector("#search") &&
+        document.querySelector("#fav") &&
         document.querySelector("#search") !== focusedElement &&
         document.querySelectorAll(".modal").length === 0
       ) {
-        // special handling to focus on searchbox
+        // Read-view commands remain available when TV mode removes the search box.
         const searchBox = document.querySelector("#search");
 
         switch (key) {
@@ -3460,7 +3483,7 @@ window.prompt = (message, initialValue = "", callback = null) => {
           case "?":
           case "/":
           case "t":
-            if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+            if (searchBox && !e.ctrlKey && !e.altKey && !e.metaKey) {
               searchBox.focus();
               e.preventDefault();
             }

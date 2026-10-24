@@ -556,8 +556,6 @@ load {
   body {
     font-size: var(--fontSize3);
     line-height: 1.5;
-    // Reserve space for the enlarged, fixed search bar.
-    padding-bottom: 12rem;
   }
 
   button,
@@ -664,31 +662,6 @@ load {
   .codeBlockBanner,
   .codeBlockActions {
     flex-wrap: wrap;
-  }
-
-  #searchForm {
-    #search {
-      min-width: 0;
-      padding: 1rem 0;
-    }
-
-    .search-clear-btn,
-    .search-help-btn,
-    .search-help-close {
-      width: max(3rem, 1.5em);
-      height: max(3rem, 1.5em);
-      min-width: 3rem;
-      padding: 0;
-    }
-
-    .search-help-popup {
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-
-    .search-help-item {
-      flex-wrap: wrap;
-    }
   }
 }
 
