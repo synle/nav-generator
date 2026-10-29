@@ -20,8 +20,13 @@ Vitest with Happy DOM. Tests cover the pure helpers in `utils.js`, the service w
 npm test               # all tests
 npm run test:watch     # watch mode
 npm run test:coverage  # coverage (80% minimum on all metrics)
+npm run test:update-snapshots # update snapshots once; append -- test/utils.test.js to scope
 npm run test:ui        # Vitest UI
 ```
+
+## Assertions and Snapshots
+
+Follow the snapshot selection and review rules in [AGENTS.md](../AGENTS.md#test-assertions). Inline snapshots keep stable expected output beside the assertion; focused matchers remain appropriate for scalar, identity, and DOM behavior.
 
 ## Setup
 

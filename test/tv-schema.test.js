@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+/** @file Snapshots fixed TV parser output while preserving table, fuzz, and visibility contracts. */
 // Real stylesheet invalidation is required; Happy DOM caches stale ancestor-attribute matches.
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { compile } from "sass";
@@ -28,7 +29,11 @@ describe("dedicated TV schema grammar", () => {
   it.each(["?tv", "  ?tv  ", "\t?tv\r"])(
     "recognizes only the exact trimmed directive (%s)",
     (line) => {
-      expect(parseSchemaLineType(line)).toEqual({ type: "tv_mode" });
+      expect(parseSchemaLineType(line)).toMatchInlineSnapshot(`
+        {
+          "type": "tv_mode",
+        }
+      `);
     },
   );
 
@@ -46,11 +51,13 @@ describe("dedicated TV schema grammar", () => {
   });
 
   it("does not mistake a URL query parameter for a schema directive", () => {
-    expect(parseSchemaLineType("https://example.com/?tv")).toEqual({
-      type: "newTabLink",
-      linkText: "https://example.com/?tv",
-      linkUrl: "https://example.com/?tv",
-    });
+    expect(parseSchemaLineType("https://example.com/?tv")).toMatchInlineSnapshot(`
+      {
+        "linkText": "https://example.com/?tv",
+        "linkUrl": "https://example.com/?tv",
+        "type": "newTabLink",
+      }
+    `);
   });
 
   it.each([
@@ -117,16 +124,20 @@ describe("dedicated TV schema grammar", () => {
   });
 
   it("does not change ordinary link behavior when a URL contains the TV delimiter", () => {
-    expect(parseLinkLine("Normal | https://example.com/?literal=|tv|")).toEqual({
-      type: "sameTabLink",
-      linkText: "Normal",
-      linkUrl: "https://example.com/?literal=|tv|",
-    });
-    expect(parseLinkLine("New ||| https://example.com/?literal=|tv|")).toEqual({
-      type: "newTabLink",
-      linkText: "New",
-      linkUrl: "https://example.com/?literal=|tv|",
-    });
+    expect(parseLinkLine("Normal | https://example.com/?literal=|tv|")).toMatchInlineSnapshot(`
+      {
+        "linkText": "Normal",
+        "linkUrl": "https://example.com/?literal=|tv|",
+        "type": "sameTabLink",
+      }
+    `);
+    expect(parseLinkLine("New ||| https://example.com/?literal=|tv|")).toMatchInlineSnapshot(`
+      {
+        "linkText": "New",
+        "linkUrl": "https://example.com/?literal=|tv|",
+        "type": "newTabLink",
+      }
+    `);
   });
 
   it.each(tvLinkFuzzCases())(

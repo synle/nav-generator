@@ -86,12 +86,17 @@ describe("TV/touch preference initialization", () => {
     },
   );
 
+  /** Verifies the emitted preference payload alongside its applied and persisted state. */
   it("notifies controls with the applied and saved state", async () => {
     const change = new Promise((resolve) =>
       document.addEventListener(TV_MODE_CHANGE_EVENT, resolve, { once: true }),
     );
     setTvMode(true);
-    expect((await change).detail).toEqual({ enabled: true });
+    expect((await change).detail).toMatchInlineSnapshot(`
+      {
+        "enabled": true,
+      }
+    `);
     expect(document.documentElement).toHaveAttribute("data-tv-mode");
     expect(localStorage.getItem("navTvMode")).toBe("true");
   });

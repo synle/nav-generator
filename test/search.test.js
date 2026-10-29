@@ -1,3 +1,4 @@
+/** @file Verifies search behavior and snapshots complete, deterministic suggestion lists. */
 import { describe, it, expect } from "vitest";
 import { buildSearchRegex, filterFuzzySuggestions } from "../utils.js";
 
@@ -68,14 +69,22 @@ describe("Search Functionality", () => {
 
     it("should filter suggestions with normal search", () => {
       const results = filterFuzzySuggestions("google", suggestions);
-      expect(results).toHaveLength(2);
-      expect(results).toContain("Google Search");
-      expect(results).toContain("Google Finance");
+      expect(results).toMatchInlineSnapshot(`
+        [
+          "Google Search",
+          "Google Finance",
+        ]
+      `);
     });
 
     it("should filter suggestions with fuzzy search", () => {
       const results = filterFuzzySuggestions("/ggl", suggestions);
-      expect(results.some((r) => r.toLowerCase().includes("google"))).toBe(true);
+      expect(results).toMatchInlineSnapshot(`
+        [
+          "Google Search",
+          "Google Finance",
+        ]
+      `);
     });
 
     it("should limit results", () => {
@@ -101,7 +110,12 @@ describe("Search Functionality", () => {
 
     it("should be case insensitive", () => {
       const results = filterFuzzySuggestions("GOOGLE", suggestions);
-      expect(results).toHaveLength(2);
+      expect(results).toMatchInlineSnapshot(`
+        [
+          "Google Search",
+          "Google Finance",
+        ]
+      `);
     });
   });
 

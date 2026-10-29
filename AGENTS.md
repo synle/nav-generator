@@ -19,6 +19,7 @@ npm test               # Run all tests
 npm run lint           # oxlint static analysis
 npm run test:watch     # Watch mode
 npm run test:coverage  # Coverage report (80% minimum on all metrics)
+npm run test:update-snapshots # Update inline snapshots once (optional test-file filters after --)
 ./build.sh             # Full build: install, lint, tests with coverage, build
 npm run build          # Production build -> index.js / index.css / source maps at repo root
 npm start              # HTTP server with CORS on port 8080
@@ -28,6 +29,14 @@ npm run format:check   # oxfmt --check .
 ```
 
 Tests live in `test/` and run on Vitest with Happy DOM (Node 16+).
+
+## Test Assertions
+
+- Prefer `toMatchInlineSnapshot` over `toEqual` or `toMatchObject` for concise, deterministic objects, arrays, and multiline output when the complete value is the contract.
+- Keep focused scalar, emptiness, identity, relational, error, and DOM/accessibility matchers when they communicate behavior more clearly. Retain explicit input-dependent expectations in table-driven and property tests.
+- Snapshot only stable public output, not copied implementation logic, large source files, or incidental DOM structure. Match genuinely nondeterministic fields explicitly rather than weakening deterministic fields.
+- Update snapshots with `npm run test:update-snapshots`; restrict updates with a test-file filter, for example `npm run test:update-snapshots -- test/utils.test.js`.
+- Review every generated snapshot diff against the intended behavior before committing. Never accept updates merely to make a failing test pass; rerun tests without update mode afterward.
 
 ## Architecture
 

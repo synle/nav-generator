@@ -31,16 +31,15 @@ hacker news | news.ycombinator.com`;
       "hacker news | news.ycombinator.com",
       ":::",
     ].join("\n");
-    const expected = [
-      ">>>URL Porter>>>RVX",
-      ":::URL Porter",
-      "google | google.com",
-      ":::",
-      ":::RVX",
-      "hacker news | news.ycombinator.com",
-      ":::",
-    ].join("\n");
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`
+      ">>>URL Porter>>>RVX
+      :::URL Porter
+      google | google.com
+      :::
+      :::RVX
+      hacker news | news.ycombinator.com
+      :::"
+    `);
   });
 
   it("rewrites code-block fence ids that match a tab definition", () => {
@@ -53,16 +52,15 @@ hacker news | news.ycombinator.com`;
       '{ "k": 1 }',
       "```",
     ].join("\n");
-    const expected = [
-      ">>>Download>>>MetaData",
-      "```Download",
-      "echo hello",
-      "```",
-      "```MetaData",
-      '{ "k": 1 }',
-      "```",
-    ].join("\n");
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`
+      ">>>Download>>>MetaData
+      \`\`\`Download
+      echo hello
+      \`\`\`
+      \`\`\`MetaData
+      { "k": 1 }
+      \`\`\`"
+    `);
   });
 
   it("preserves code-block language hints that don't match a tab id", () => {
@@ -73,8 +71,12 @@ hacker news | news.ycombinator.com`;
 
   it("rewrites html-block fence ids that match a tab definition", () => {
     const input = [">>>HTML|advHtml", "---advHtml", "<b>html</b>", "---"].join("\n");
-    const expected = [">>>HTML", "---HTML", "<b>html</b>", "---"].join("\n");
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`
+      ">>>HTML
+      ---HTML
+      <b>html</b>
+      ---"
+    `);
   });
 
   it("does not touch user content inside code or html blocks", () => {
@@ -87,8 +89,14 @@ hacker news | news.ycombinator.com`;
       "---fake",
       "```",
     ].join("\n");
-    const expected = [">>>Code", "```Code", ">>>Code|fake", ":::fake", "---fake", "```"].join("\n");
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`
+      ">>>Code
+      \`\`\`Code
+      >>>Code|fake
+      :::fake
+      ---fake
+      \`\`\`"
+    `);
   });
 
   it("recurses into nested nav-block bodies as a separate scope", () => {
@@ -109,22 +117,21 @@ hacker news | news.ycombinator.com`;
       "rvx content",
       ":::",
     ].join("\n");
-    const expected = [
-      ">>>URL Porter>>>RVX",
-      ":::URL Porter",
-      ">>>Download>>>MetaData",
-      "```Download",
-      "code",
-      "```",
-      "```MetaData",
-      "meta",
-      "```",
-      ":::",
-      ":::RVX",
-      "rvx content",
-      ":::",
-    ].join("\n");
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`
+      ">>>URL Porter>>>RVX
+      :::URL Porter
+      >>>Download>>>MetaData
+      \`\`\`Download
+      code
+      \`\`\`
+      \`\`\`MetaData
+      meta
+      \`\`\`
+      :::
+      :::RVX
+      rvx content
+      :::"
+    `);
   });
 
   it("inner-scope rewrite is independent of outer-scope ids", () => {
@@ -133,15 +140,26 @@ hacker news | news.ycombinator.com`;
     const input = [">>>A|x>>>B|y", ":::x", ">>>A|inner", "```inner", "body", "```", ":::"].join(
       "\n",
     );
-    const expected = [">>>A>>>B", ":::A", ">>>A", "```A", "body", "```", ":::"].join("\n");
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`
+      ">>>A>>>B
+      :::A
+      >>>A
+      \`\`\`A
+      body
+      \`\`\`
+      :::"
+    `);
   });
 
   it("handles mixed segments where only some have explicit ids", () => {
     // First segment is short-form already; second is long-form.
     const input = [">>>Already|already>>>Long|tabLong", ":::tabLong", "x", ":::"].join("\n");
-    const expected = [">>>Already>>>Long", ":::Long", "x", ":::"].join("\n");
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`
+      ">>>Already>>>Long
+      :::Long
+      x
+      :::"
+    `);
   });
 
   it("is idempotent — running twice equals running once", () => {
@@ -155,8 +173,7 @@ hacker news | news.ycombinator.com`;
 
   it("preserves leading whitespace on `>>>` lines", () => {
     const input = "    >>>Foo|f>>>Bar|b";
-    const expected = "    >>>Foo>>>Bar";
-    expect(migrateSchemaToShortForm(input)).toBe(expected);
+    expect(migrateSchemaToShortForm(input)).toMatchInlineSnapshot(`"    >>>Foo>>>Bar"`);
   });
 
   it("leaves orphan delimiter ids alone (no matching `>>>` definition)", () => {

@@ -1,3 +1,4 @@
+/** @file Verifies helper contracts with inline snapshots for stable parser and schema output. */
 import { describe, it, expect } from "vitest";
 import {
   escapeRegex,
@@ -60,56 +61,68 @@ describe("buildSearchRegex", () => {
 describe("parseLinkLine", () => {
   it("should parse new tab link with |||", () => {
     const result = parseLinkLine("Google ||| google.com");
-    expect(result).toEqual({
-      type: "newTabLink",
-      linkText: "Google",
-      linkUrl: "https://google.com",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "Google",
+        "linkUrl": "https://google.com",
+        "type": "newTabLink",
+      }
+    `);
   });
 
   it("should parse same tab link with |", () => {
     const result = parseLinkLine("Google | google.com");
-    expect(result).toEqual({
-      type: "sameTabLink",
-      linkText: "Google",
-      linkUrl: "https://google.com",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "Google",
+        "linkUrl": "https://google.com",
+        "type": "sameTabLink",
+      }
+    `);
   });
 
   it("should parse javascript link", () => {
     const result = parseLinkLine("Alert | javascript://alert('hello')");
-    expect(result).toEqual({
-      type: "jsLink",
-      linkText: "Alert",
-      linkUrl: "javascript://alert('hello')",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "Alert",
+        "linkUrl": "javascript://alert('hello')",
+        "type": "jsLink",
+      }
+    `);
   });
 
   it("should parse data URL link", () => {
     const result = parseLinkLine("Data | data:text/html,<html></html>");
-    expect(result).toEqual({
-      type: "dataLink",
-      linkText: "Data",
-      linkUrl: "data:text/html,<html></html>",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "Data",
+        "linkUrl": "data:text/html,<html></html>",
+        "type": "dataLink",
+      }
+    `);
   });
 
   it("should parse plain URL without separator", () => {
     const result = parseLinkLine("google.com");
-    expect(result).toEqual({
-      type: "newTabLink",
-      linkText: "google.com",
-      linkUrl: "https://google.com",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "google.com",
+        "linkUrl": "https://google.com",
+        "type": "newTabLink",
+      }
+    `);
   });
 
   it("should parse URL with http protocol", () => {
     const result = parseLinkLine("Google ||| http://google.com");
-    expect(result).toEqual({
-      type: "newTabLink",
-      linkText: "Google",
-      linkUrl: "http://google.com",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "Google",
+        "linkUrl": "http://google.com",
+        "type": "newTabLink",
+      }
+    `);
   });
 
   it("should return null for empty line", () => {
@@ -123,56 +136,75 @@ describe("parseLinkLine", () => {
 
   it("should handle multiple pipes in URL", () => {
     const result = parseLinkLine("Test ||| https://example.com?a=b|c=d");
-    expect(result).toEqual({
-      type: "newTabLink",
-      linkText: "Test",
-      linkUrl: "https://example.com?a=b|c=d",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "Test",
+        "linkUrl": "https://example.com?a=b|c=d",
+        "type": "newTabLink",
+      }
+    `);
   });
 });
 
 describe("parseSchemaLineType", () => {
   it("should parse title line", () => {
     const result = parseSchemaLineType("! My Navigation");
-    expect(result).toEqual({
-      type: "title",
-      value: "My Navigation",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "type": "title",
+        "value": "My Navigation",
+      }
+    `);
   });
 
   it("should parse header line", () => {
     const result = parseSchemaLineType("# Main Section");
-    expect(result).toEqual({
-      type: "header",
-      value: "Main Section",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "type": "header",
+        "value": "Main Section",
+      }
+    `);
   });
 
   it("should parse tabs line", () => {
     const result = parseSchemaLineType(">>>tab1|id1>>>tab2|id2");
-    expect(result).toEqual({
-      type: "tabs",
-      value: ">>>tab1|id1>>>tab2|id2",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "type": "tabs",
+        "value": ">>>tab1|id1>>>tab2|id2",
+      }
+    `);
   });
 
   it("should parse link line", () => {
     const result = parseSchemaLineType("Google | google.com");
-    expect(result.type).toBe("sameTabLink");
-    expect(result.linkText).toBe("Google");
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "linkText": "Google",
+        "linkUrl": "https://google.com",
+        "type": "sameTabLink",
+      }
+    `);
   });
 
   it("should parse empty line", () => {
     const result = parseSchemaLineType("");
-    expect(result).toEqual({ type: "empty" });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "type": "empty",
+      }
+    `);
   });
 
   it("should parse text line", () => {
     const result = parseSchemaLineType("Some random text");
-    expect(result).toEqual({
-      type: "text",
-      value: "Some random text",
-    });
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "type": "text",
+        "value": "Some random text",
+      }
+    `);
   });
 });
 
@@ -181,15 +213,22 @@ describe("filterFuzzySuggestions", () => {
 
   it("should filter with fuzzy search", () => {
     const results = filterFuzzySuggestions("/ggl", suggestions);
-    expect(results).toContain("google");
-    expect(results).not.toContain("facebook");
+    expect(results).toMatchInlineSnapshot(`
+      [
+        "google",
+        "google finance",
+      ]
+    `);
   });
 
   it("should filter with normal search", () => {
     const results = filterFuzzySuggestions("google", suggestions);
-    expect(results).toContain("google");
-    expect(results).toContain("google finance");
-    expect(results).not.toContain("facebook");
+    expect(results).toMatchInlineSnapshot(`
+      [
+        "google",
+        "google finance",
+      ]
+    `);
   });
 
   it("should return empty for ? search", () => {
@@ -210,8 +249,12 @@ describe("filterFuzzySuggestions", () => {
 
   it("should be case insensitive", () => {
     const results = filterFuzzySuggestions("GOOGLE", suggestions);
-    expect(results).toContain("google");
-    expect(results).toContain("google finance");
+    expect(results).toMatchInlineSnapshot(`
+      [
+        "google",
+        "google finance",
+      ]
+    `);
   });
 });
 
@@ -229,18 +272,16 @@ dog | dog.com
 cat | cat.com`;
 
     const result = sortSchemaLines(schema);
-    const lines = result.split("\n").filter((l) => l.trim());
-
-    // Find indices
-    const section1Idx = lines.findIndex((l) => l.includes("Section 1"));
-    const section2Idx = lines.findIndex((l) => l.includes("Section 2"));
-
-    // Get links in section 1 (after header, before next section)
-    const section1Links = lines.slice(section1Idx + 1, section2Idx);
-
-    expect(section1Links[0]).toContain("apple");
-    expect(section1Links[1]).toContain("banana");
-    expect(section1Links[2]).toContain("zebra");
+    expect(result).toMatchInlineSnapshot(`
+      "! My Nav
+      # Section 1
+      apple | apple.com
+      banana | banana.com
+      zebra | zebra.com
+      # Section 2
+      cat | cat.com
+      dog | dog.com"
+    `);
   });
 
   it("should preserve title at the top", () => {
@@ -250,7 +291,11 @@ cat | cat.com`;
 link | url.com`;
 
     const result = sortSchemaLines(schema);
-    expect(result.startsWith("! My Navigation")).toBe(true);
+    expect(result).toMatchInlineSnapshot(`
+      "! My Navigation
+      # Section
+      link | url.com"
+    `);
   });
 
   it("should handle schema without title", () => {
@@ -258,8 +303,10 @@ link | url.com`;
 link | url.com`;
 
     const result = sortSchemaLines(schema);
-    expect(result).toContain("# Section");
-    expect(result).toContain("link | url.com");
+    expect(result).toMatchInlineSnapshot(`
+      "# Section
+      link | url.com"
+    `);
   });
 
   it("should handle empty schema", () => {
